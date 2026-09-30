@@ -78,3 +78,18 @@ describe("self-hosted Stable Diffusion portraits", () => {
     delete process.env.IMAGE_ENDPOINT;
   });
 });
+
+describe("admin upload", () => {
+  it("accepts PNG/JPEG/WebP by signature and rejects others", async () => {
+    const { uploadPortrait } = await import("./portraits");
+    const c = { ...base, id: "up1", ownerId: "system", createdAt: 0 };
+    const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(20)]);
+    uploadPortrait("admin", c, png);
+    expect(readPortrait("up1")?.type).toBe("image/png");
+    const jpg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(20)]);
+    uploadPortrait("admin", c, jpg);
+    expect(readPortrait("up1")?.type).toBe("image/jpeg");
+    expect(() => uploadPortrait("admin", c, Buffer.from("<svg onload=alert(1)>"))).toThrow("PNG, JPEG or WebP");
+    expect(() => uploadPortrait("admin", c, Buffer.alloc(6 * 1024 * 1024, 0x89))).toThrow("5 MB");
+  });
+});

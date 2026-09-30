@@ -103,6 +103,20 @@ export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch, s
   return savePortrait(c, Buffer.from(b64, "base64"), gpt ? "webp" : "png");
 }
 
+/** Admin upload of a picture made elsewhere. Only PNG/JPEG/WebP up to 5 MB, checked by file signature. */
+export function uploadPortrait(adminId: string, c: Character, data: Buffer): string {
+  if (data.length > 5 * 1024 * 1024) throw new Error("Picture must be under 5 MB");
+  const ext =
+    data.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ? "png"
+    : data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff ? "jpg"
+    : data.subarray(0, 4).toString() === "RIFF" && data.subarray(8, 12).toString() === "WEBP" ? "webp"
+    : null;
+  if (!ext) throw new Error("Upload a PNG, JPEG or WebP picture");
+  const file = savePortrait(c, data, ext);
+  audit({ userId: adminId, kind: "portrait_uploaded", detail: `${c.id} ${file}` });
+  return file;
+}
+
 function savePortrait(c: Character, data: Buffer, ext: string): string {
   const file = `${c.id}-${Date.now()}.${ext}`;
   fs.mkdirSync(portraitDir(), { recursive: true });
@@ -118,7 +132,7 @@ export function readPortrait(id: string): { data: Buffer; type: string } | null 
   if (!p) return null;
   const f = path.join(portraitDir(), path.basename(p.file));
   if (!fs.existsSync(f)) return null;
-  return { data: fs.readFileSync(f), type: f.endsWith(".webp") ? "image/webp" : "image/png" };
+  return { data: fs.readFileSync(f), type: f.endsWith(".webp") ? "image/webp" : f.endsWith(".jpg") ? "image/jpeg" : "image/png" };
 }
 
 export const portraitsEnabled = () => (useSD() ? !!process.env.IMAGE_ENDPOINT : !!process.env.OPENAI_API_KEY);

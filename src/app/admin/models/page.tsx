@@ -70,6 +70,19 @@ export default function Models() {
     await load();
   }
 
+  async function upload(id: string, file: File | undefined) {
+    if (!file) return;
+    if (!confirm("Confirm: this picture shows a FICTIONAL ADULT (AI-generated), not a real person, and you have the right to use it.")) return;
+    setBusy(id);
+    const fd = new FormData();
+    fd.append("id", id);
+    fd.append("file", file);
+    const r = await fetch("/api/admin/characters/upload", { method: "POST", body: fd });
+    setBusy(null);
+    if (!r.ok) alert((await r.json()).error);
+    await load();
+  }
+
   async function post(id: string, name: string) {
     const text = prompt(`New Discover post from ${name}:`);
     if (!text) return;
@@ -125,6 +138,10 @@ export default function Models() {
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
               <button style={small} onClick={() => { setEditId(m.id); setForm(toForm(m)); window.scrollTo(0, 0); }}>Edit</button>
               <button style={{ ...small, background: "#7a3cff" }} disabled={busy === m.id} onClick={() => void picture(m.id)}>{busy === m.id ? "Creating…" : m.portraitV ? "New picture" : "Picture"}</button>
+              <label style={{ ...small, background: "#0a7", display: "inline-block", cursor: "pointer" }}>
+                ⬆ Upload
+                <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => void upload(m.id, e.target.files?.[0])} />
+              </label>
               <button style={{ ...small, background: "#333" }} onClick={() => void post(m.id, m.name)}>Post</button>
               <button style={{ ...small, background: m.hidden ? "#2a7" : "#a33" }} onClick={async () => { await act({ action: m.hidden ? "show" : "hide", id: m.id }); void load(); }}>{m.hidden ? "Show" : "Hide"}</button>
             </div>
