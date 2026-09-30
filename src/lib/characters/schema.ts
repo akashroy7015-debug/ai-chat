@@ -3,10 +3,13 @@ import { moderateText } from "../moderation";
 
 export const MIN_CHARACTER_AGE = 18;
 
-export const HAIR = ["black", "brown", "blonde", "red", "auburn", "silver", "pink", "blue"] as const;
-export const EYES = ["brown", "blue", "green", "hazel", "gray"] as const;
-export const BUILD = ["slim", "athletic", "curvy", "average", "tall", "petite"] as const;
+export const GENDER = ["female", "male"] as const;
 export const STYLE = ["photoreal", "anime"] as const;
+export const ETHNICITY = ["caucasian", "latina", "asian", "arab", "african", "south_asian", "mixed"] as const;
+export const HAIR = ["black", "brown", "blonde", "red", "auburn", "silver", "pink", "blue"] as const;
+export const HAIR_STYLE = ["straight", "wavy", "curly", "bangs", "ponytail", "bun", "short", "braids"] as const;
+export const EYES = ["brown", "blue", "green", "hazel", "gray"] as const;
+export const BUILD = ["slim", "athletic", "curvy", "average", "muscular", "tall"] as const;
 export const PERSONALITY = [
   "bubbly",
   "calm",
@@ -15,6 +18,24 @@ export const PERSONALITY = [
   "intellectual",
   "adventurous",
   "shy",
+  "confident",
+  "mysterious",
+] as const;
+export const VOICE = ["soft", "warm", "playful", "deep", "confident", "husky"] as const;
+export const RELATIONSHIP = ["girlfriend", "boyfriend", "friend", "crush", "partner", "flirty_stranger"] as const;
+export const OCCUPATION = [
+  "nurse",
+  "artist",
+  "musician",
+  "chef",
+  "photographer",
+  "fitness_coach",
+  "barista",
+  "architect",
+  "pilot",
+  "lawyer",
+  "writer",
+  "firefighter",
 ] as const;
 
 const safeText = (max: number) =>
@@ -33,15 +54,34 @@ const safeText = (max: number) =>
  */
 export const CharacterInput = z.object({
   name: safeText(40).pipe(z.string().min(1)),
+  gender: z.enum(GENDER).default("female"),
+  style: z.enum(STYLE),
   age: z.number().int().min(MIN_CHARACTER_AGE, "Characters must be 18 or older").max(99),
+  ethnicity: z.enum(ETHNICITY).default("mixed"),
   hair: z.enum(HAIR),
+  hairStyle: z.enum(HAIR_STYLE).default("straight"),
   eyes: z.enum(EYES),
   build: z.enum(BUILD),
-  style: z.enum(STYLE),
   personality: z.enum(PERSONALITY),
+  voice: z.enum(VOICE).default("warm"),
+  relationship: z.enum(RELATIONSHIP).default("partner"),
+  occupation: z.enum(OCCUPATION).default("artist"),
   hobbies: z.array(safeText(30)).max(6).default([]),
+  tagline: safeText(80).default(""),
   backstory: safeText(500).default(""),
 });
 
 export type CharacterInput = z.infer<typeof CharacterInput>;
-export type Character = CharacterInput & { id: string; ownerId: string; createdAt: number };
+export type Character = CharacterInput & {
+  id: string;
+  ownerId: string;
+  createdAt: number;
+  /** Featured catalog characters are public; user-built ones are private to the owner. */
+  featured?: boolean;
+};
+
+export const SYSTEM_OWNER = "system";
+
+export function canChatWith(character: Character, userId: string): boolean {
+  return character.featured === true || character.ownerId === userId;
+}

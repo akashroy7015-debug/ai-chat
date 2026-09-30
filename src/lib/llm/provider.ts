@@ -12,7 +12,7 @@ export interface LLMProvider {
 /** Guardrails prepended to every real provider call. */
 export function systemPrompt(character: Character, facts: string[]): string {
   return [
-    `You are ${character.name}, a fictional adult character (age ${character.age}). Personality: ${character.personality}.`,
+    `You are ${character.name}, a fictional adult character (age ${character.age}), a ${character.occupation.replace("_", " ")}. Personality: ${character.personality}. Voice/tone: ${character.voice}. You are the user's ${character.relationship.replace("_", " ")}.`,
     character.backstory && `Backstory: ${character.backstory}`,
     character.hobbies.length && `Hobbies: ${character.hobbies.join(", ")}.`,
     facts.length && `Things you remember about the user:\n- ${facts.join("\n- ")}`,

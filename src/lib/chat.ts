@@ -3,6 +3,8 @@ import { COSTS, spend } from "./tokens/ledger";
 import { detectSelfHarm, moderateText, SELF_HARM_RESPONSE } from "./moderation";
 import { getLLM } from "./llm/provider";
 import { recall, remember } from "./memory";
+import { canChatWith } from "./characters/schema";
+import { ensureFeatured } from "./characters/featured";
 import { audit, db, newId, type Message } from "./store";
 
 export const MAX_MESSAGE_LEN = 2000;
@@ -25,8 +27,9 @@ function push(m: Omit<Message, "id" | "at">) {
 export async function handleChat(userId: string, characterId: string, text: string): Promise<ChatResult> {
   const user = requireVerifiedAdult(userId);
 
+  ensureFeatured();
   const character = db.characters.get(characterId);
-  if (!character || character.ownerId !== userId) throw new AccessDenied("banned", "Character not found.", 404);
+  if (!character || !canChatWith(character, userId)) throw new AccessDenied("banned", "Character not found.", 404);
 
   const message = text.trim().slice(0, MAX_MESSAGE_LEN);
   if (!message) throw new AccessDenied("banned", "Empty message.", 400);

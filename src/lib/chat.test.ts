@@ -3,24 +3,17 @@ import { BAN_AT_STRIKES, handleChat } from "./chat";
 import { AccessDenied, beginVerification, completeVerification } from "./age/verification";
 import { balance, credit } from "./tokens/ledger";
 import { db, getUser } from "./store";
+import { CharacterInput } from "./characters/schema";
 
 async function setup(id: string, tokens = 10) {
   await beginVerification(id);
   await completeVerification(id);
   if (tokens > 0) credit(id, tokens, "test");
   db.characters.set(`c-${id}`, {
+    ...CharacterInput.parse({ name: "Aria", age: 26, hair: "brown", eyes: "green", build: "slim", style: "photoreal", personality: "calm" }),
     id: `c-${id}`,
     ownerId: id,
     createdAt: 0,
-    name: "Aria",
-    age: 26,
-    hair: "brown",
-    eyes: "green",
-    build: "slim",
-    style: "photoreal",
-    personality: "calm",
-    hobbies: [],
-    backstory: "",
   });
   return `c-${id}`;
 }
@@ -62,6 +55,12 @@ describe("handleChat", () => {
     const r = await handleChat("h5", c, "I want to die");
     expect(r.kind).toBe("support");
     expect(balance("h5")).toBe(10);
+  });
+
+  it("allows chatting with featured characters", async () => {
+    await setup("h9");
+    const r = await handleChat("h9", "featured-1", "hello");
+    expect(r.kind).toBe("reply");
   });
 
   it("errors when out of tokens", async () => {
