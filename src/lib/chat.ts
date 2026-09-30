@@ -15,12 +15,14 @@ export const BAN_AT_STRIKES = 3;
 const REFUSAL = "I can't go there, but I'm happy to keep talking about something else.";
 
 export type ChatResult =
-  | { kind: "reply"; message: string; tokensSpent: number }
+  | { kind: "reply"; message: string; tokensSpent: number; messageId: string }
   | { kind: "refused"; message: string; category: string }
   | { kind: "support"; message: string };
 
-function push(m: Omit<Message, "id" | "at">) {
-  db.messages.push({ id: newId(), at: Date.now(), ...m });
+function push(m: Omit<Message, "id" | "at">): string {
+  const id = newId();
+  db.messages.push({ id, at: Date.now(), ...m });
+  return id;
 }
 
 function supportReply(userId: string, characterId: string, message: string): ChatResult {
@@ -100,6 +102,6 @@ export async function handleChat(userId: string, characterId: string, text: stri
 
   remember(userId, characterId, message);
   push({ userId, characterId, role: "user", content: message });
-  push({ userId, characterId, role: "assistant", content: reply });
-  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat };
+  const messageId = push({ userId, characterId, role: "assistant", content: reply });
+  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId };
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { btn, field, pretty, Portrait, theme, type CharacterCard } from "../ui";
 
-interface Line { who: "you" | "them"; text: string }
+interface Line { who: "you" | "them"; text: string; id?: string }
 interface Media { id: string; kind: string; scene: string; status: string; url?: string }
 
 function Chat() {
@@ -18,6 +18,18 @@ function Chat() {
   const [costs, setCosts] = useState<Record<string, number>>({});
   const [scene, setScene] = useState("selfie");
   const [mediaOn, setMediaOn] = useState(false);
+  const [voice, setVoice] = useState<{ enabled: boolean; cost: number }>({ enabled: false, cost: 5 });
+  const [playing, setPlaying] = useState<string | null>(null);
+  useEffect(() => { void fetch("/api/voice").then((r) => (r.ok ? r.json() : null)).then((b) => b && setVoice(b)); }, []);
+
+  async function play(id: string) {
+    setPlaying(id);
+    const r = await fetch(`/api/voice?messageId=${id}`);
+    if (!r.ok) { setPlaying(null); return alert((await r.json()).error); }
+    const audio = new Audio(URL.createObjectURL(await r.blob()));
+    audio.onended = () => setPlaying(null);
+    void audio.play();
+  }
 
   async function loadMedia() {
     if (!cid) return;
@@ -55,7 +67,7 @@ function Chat() {
     void fetch(`/api/chat?characterId=${cid}`).then(async (r) => {
       if (!r.ok) return;
       const b = await r.json();
-      setLines(b.messages.map((m: { role: string; content: string }) => ({ who: m.role === "user" ? "you" : "them", text: m.content })));
+      setLines(b.messages.map((m: { id: string; role: string; content: string }) => ({ who: m.role === "user" ? "you" : "them", text: m.content, id: m.id })));
     });
   }, [cid]);
 
@@ -66,7 +78,7 @@ function Chat() {
     setLines((l) => [...l, { who: "you", text }]);
     const r = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ characterId: c.id, message: text }) });
     const b = await r.json();
-    setLines((l) => [...l, { who: "them", text: b.message ?? b.error }]);
+    setLines((l) => [...l, { who: "them", text: b.message ?? b.error, id: b.messageId }]);
   }
 
   if (err || !cid) return <main><p style={{ color: "#ff8a8a" }}>{err || "No character selected."}</p><Link href="/">Back to characters</Link></main>;
@@ -108,6 +120,9 @@ function Chat() {
           {lines.map((l, i) => (
             <p key={i} style={{ textAlign: l.who === "you" ? "right" : "left" }}>
               <span style={{ display: "inline-block", padding: "8px 12px", borderRadius: 14, background: l.who === "you" ? theme.accent : theme.card, maxWidth: "80%" }}>{l.text}</span>
+              {voice.enabled && l.who === "them" && l.id && (
+                <button title={`Play voice (${voice.cost} tokens, replays free)`} onClick={() => void play(l.id!)} style={{ marginLeft: 6, background: "none", border: "none", cursor: "pointer", fontSize: 16 }}>{playing === l.id ? "⏳" : "🔊"}</button>
+              )}
             </p>
           ))}
         </div>
