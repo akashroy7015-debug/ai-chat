@@ -94,3 +94,27 @@ describe("admin upload", () => {
     expect(() => uploadPortrait("admin", c, Buffer.alloc(6 * 1024 * 1024, 0x89))).toThrow("5 MB");
   });
 });
+
+describe("manual review queue", () => {
+  it("SD pictures wait for admin approval; approve publishes, reject discards", async () => {
+    process.env.IMAGE_PROVIDER = "sd";
+    process.env.IMAGE_ENDPOINT = "http://gpu:7860";
+    process.env.SAFETY_SCANNER = "manual";
+    const { generatePortrait, listPending, readPending, reviewPending } = await import("./portraits");
+    const sdFetch = vi.fn(async () => new Response(JSON.stringify({ images: [img] }), { status: 200 })) as unknown as typeof fetch;
+    const never = () => ({ scan: async () => { throw new Error("scanner must not be called in manual mode"); } });
+    db.characters.set("mr1", { ...base, id: "mr1", ownerId: "system", createdAt: 0, featured: true });
+    db.characters.set("mr2", { ...base, id: "mr2", ownerId: "system", createdAt: 0, featured: true });
+    await generatePortrait(db.characters.get("mr1")!, sdFetch, never);
+    await generatePortrait(db.characters.get("mr2")!, sdFetch, never);
+    expect(readPortrait("mr1")).toBeNull();
+    expect(listPending().map((p) => p.id)).toEqual(expect.arrayContaining(["mr1", "mr2"]));
+    expect(readPending("mr1")).not.toBeNull();
+    reviewPending("admin", "mr1", true);
+    reviewPending("admin", "mr2", false);
+    expect(readPortrait("mr1")?.type).toBe("image/png");
+    expect(readPortrait("mr2")).toBeNull();
+    expect(listPending().some((p) => p.id === "mr1" || p.id === "mr2")).toBe(false);
+    delete process.env.IMAGE_PROVIDER; delete process.env.IMAGE_ENDPOINT; delete process.env.SAFETY_SCANNER;
+  });
+});

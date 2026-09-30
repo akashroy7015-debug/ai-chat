@@ -35,6 +35,14 @@ export default function Models() {
   const [form, setForm] = useState<Form | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [pending, setPending] = useState<{ id: string; name: string; at: number }[]>([]);
+  const loadPending = async () => { const r = await fetch("/api/admin/pending"); if (r.ok) setPending((await r.json()).pending); };
+  useEffect(() => { void loadPending(); }, []);
+  async function review(id: string, approve: boolean) {
+    if (approve && !confirm("Approve: this is clearly an ADULT (looks 21+), is not a real person, and has no nudity?")) return;
+    await fetch("/api/admin/pending", { method: "POST", body: JSON.stringify({ id, approve }) });
+    await loadPending(); await load();
+  }
 
   async function load() {
     const r = await fetch("/api/admin/characters");
@@ -67,7 +75,7 @@ export default function Models() {
     setBusy(id);
     await act({ action: "portrait", id });
     setBusy(null);
-    await load();
+    await load(); await loadPending();
   }
 
   async function upload(id: string, file: File | undefined) {
@@ -102,6 +110,25 @@ export default function Models() {
         </div>
       </div>
       <p style={{ color: theme.muted, fontSize: 13 }}>Fictional adults only (18+). Names or looks of real people are blocked. Pictures are generated fully clothed.</p>
+
+      {pending.length > 0 && (
+        <section style={{ ...card, margin: "12px 0", border: "2px solid #e0a060" }}>
+          <h3 style={{ marginTop: 0 }}>⏳ Waiting for your approval ({pending.length})</h3>
+          <p style={{ color: theme.muted, fontSize: 13, marginTop: 0 }}>Reject anything that looks under 21, looks like a real person, or shows nudity.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
+            {pending.map((p) => (
+              <div key={p.id}>
+                <img src={`/api/admin/pending/${p.id}?t=${p.at}`} alt={p.name} style={{ width: "100%", borderRadius: 8 }} />
+                <div style={{ fontSize: 13, margin: "4px 0" }}>{p.name}</div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button style={{ ...small, background: "#2a7" }} onClick={() => void review(p.id, true)}>Approve</button>
+                  <button style={{ ...small, background: "#a33" }} onClick={() => void review(p.id, false)}>Reject</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {form && (
         <section style={{ ...card, margin: "12px 0", display: "grid", gap: 8 }}>

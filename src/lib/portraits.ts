@@ -60,6 +60,49 @@ export function portraitPrompt(c: Character): string {
 
 type Fetch = typeof fetch;
 
+/** SAFETY_SCANNER=manual: Stable Diffusion pictures wait in a review queue instead of being published. */
+export const manualReview = () => useSD() && process.env.SAFETY_SCANNER === "manual";
+
+const pending: PMap<{ file: string; at: number }> = ((globalThis as unknown as { __pending?: PMap<{ file: string; at: number }> }).__pending ??= new PMap(db.sql, "portraits_pending"));
+
+function savePending(c: Character, data: Buffer, ext: string): string {
+  const file = `pending-${c.id}-${Date.now()}.${ext}`;
+  fs.mkdirSync(portraitDir(), { recursive: true });
+  fs.writeFileSync(path.join(portraitDir(), file), data);
+  const old = pending.get(c.id);
+  pending.set(c.id, { file, at: Date.now() });
+  if (old) fs.rm(path.join(portraitDir(), old.file), { force: true }, () => {});
+  audit({ userId: "system", kind: "portrait_pending", detail: c.id });
+  return file;
+}
+
+export function listPending() {
+  return [...pending.entries()].map(([id, p]) => ({ id, at: p.at, name: db.characters.get(id)?.name ?? id, ownerId: db.characters.get(id)?.ownerId }))
+    .sort((a, b) => a.at - b.at);
+}
+
+export function readPending(id: string): { data: Buffer; type: string } | null {
+  const p = pending.get(id);
+  if (!p) return null;
+  const f = path.join(portraitDir(), path.basename(p.file));
+  return fs.existsSync(f) ? { data: fs.readFileSync(f), type: "image/png" } : null;
+}
+
+/** Admin decision on a queued picture. Approving publishes it; rejecting deletes it. */
+export function reviewPending(adminId: string, id: string, approve: boolean) {
+  const p = pending.get(id);
+  const c = db.characters.get(id);
+  if (!p || !c) throw new Error("Nothing waiting for this character");
+  pending.delete(id);
+  const src = path.join(portraitDir(), path.basename(p.file));
+  if (approve) {
+    const data = fs.readFileSync(src);
+    savePortrait(c, data, "png");
+  }
+  fs.rm(src, { force: true }, () => {});
+  audit({ userId: adminId, kind: approve ? "portrait_approved" : "portrait_rejected", detail: id });
+}
+
 /** Self-hosted Stable Diffusion (AUTOMATIC1111 / Forge / SD.Next API): IMAGE_PROVIDER=sd, IMAGE_ENDPOINT=http://gpu:7860 */
 const useSD = () => process.env.IMAGE_PROVIDER === "sd";
 /** Nudity is always excluded; lingerie/swimwear outfits are allowed. */
@@ -77,7 +120,9 @@ async function generateSD(c: Character, fetchImpl: Fetch, scanner: () => SafetyS
   if (!res.ok) throw new Error(`Stable Diffusion ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const b64 = ((await res.json()) as { images?: string[] }).images?.[0];
   if (!b64) throw new Error("Stable Diffusion returned no image");
-  // Open models have no built-in safety: every image must pass the scanner (fails closed).
+  // Manual mode: nothing is published until an admin looks at it and approves (see approvePending).
+  if (manualReview()) return { data: Buffer.from(b64, "base64"), ext: "png" };
+  // Otherwise every image must pass the automated scanner (fails closed).
   const verdict = await scanFailClosed(scanner, `data:image/png;base64,${b64}`, "image/png");
   if (!verdict.ok) {
     audit({ userId: "system", kind: "portrait_blocked", category: verdict.category, detail: `${c.id} ${verdict.detail}` });
@@ -90,7 +135,7 @@ async function generateSD(c: Character, fetchImpl: Fetch, scanner: () => SafetyS
 export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch, scanner: () => SafetyScanner = getScanner): Promise<string> {
   if (useSD()) {
     const { data, ext } = await generateSD(c, fetchImpl, scanner);
-    return savePortrait(c, data, ext);
+    return manualReview() ? savePending(c, data, ext) : savePortrait(c, data, ext);
   }
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OPENAI_API_KEY is not set");
