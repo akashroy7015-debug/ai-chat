@@ -13,6 +13,11 @@ describe("featured catalog", () => {
     expect(listFeatured({ category: "guys" }).every((c) => c.gender === "male")).toBe(true);
     expect(listFeatured({ category: "girls" }).every((c) => c.gender === "female" && c.style === "photoreal")).toBe(true);
   });
+  it("milf category is women 35+", () => {
+    const m = listFeatured({ category: "milf" });
+    expect(m.length).toBeGreaterThanOrEqual(4);
+    expect(m.every((c) => c.gender === "female" && c.age >= 35)).toBe(true);
+  });
   it("filters by ethnicity and age range", () => {
     expect(listFeatured({ ethnicity: "latina" }).every((c) => c.ethnicity === "latina")).toBe(true);
     expect(listFeatured({ ageRange: "30s" }).every((c) => c.age >= 30 && c.age < 40)).toBe(true);

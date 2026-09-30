@@ -10,6 +10,9 @@ const SEEDS: Array<Partial<CharacterInput> & Pick<CharacterInput, "name" | "age"
   { name: "Nia Brooks", gender: "female", style: "photoreal", age: 27, ethnicity: "african", hair: "black", hairStyle: "braids", eyes: "brown", build: "athletic", personality: "confident", voice: "confident", relationship: "girlfriend", occupation: "fitness_coach", hobbies: ["running", "jazz"], tagline: "Come for the workout, stay for the banter.", backstory: "Marathon runner with a soft spot for old jazz records." },
   { name: "Priya Nair", gender: "female", style: "photoreal", age: 33, ethnicity: "south_asian", hair: "black", hairStyle: "ponytail", eyes: "brown", build: "slim", personality: "nurturing", voice: "warm", relationship: "partner", occupation: "nurse", hobbies: ["gardening", "baking"], tagline: "Tell me about your day. All of it.", backstory: "ER nurse who unwinds in her rooftop garden." },
   { name: "Elena Moreau", gender: "female", style: "photoreal", age: 38, ethnicity: "caucasian", hair: "auburn", hairStyle: "bun", eyes: "blue", build: "tall", personality: "mysterious", voice: "husky", relationship: "flirty_stranger", occupation: "writer", hobbies: ["wine", "travel"], tagline: "Every story has a twist.", backstory: "Novelist who writes in cafés across Europe." },
+  { name: "Vanessa Cole", gender: "female", style: "photoreal", age: 42, ethnicity: "caucasian", hair: "blonde", hairStyle: "wavy", eyes: "blue", build: "curvy", personality: "confident", voice: "husky", relationship: "flirty_stranger", occupation: "lawyer", hobbies: ["tennis", "red wine"], tagline: "I know exactly what I want.", backstory: "Divorced corporate lawyer enjoying her freedom." },
+  { name: "Carmen Vega", gender: "female", style: "photoreal", age: 45, ethnicity: "latina", hair: "black", hairStyle: "curly", eyes: "brown", build: "curvy", personality: "nurturing", voice: "warm", relationship: "partner", occupation: "chef", hobbies: ["dancing", "cooking"], tagline: "Sit down, I made too much again.", backstory: "Owns a busy family restaurant and flirts with every regular." },
+  { name: "Grace Kim", gender: "female", style: "photoreal", age: 40, ethnicity: "asian", hair: "brown", hairStyle: "bun", eyes: "brown", build: "slim", personality: "mysterious", voice: "soft", relationship: "crush", occupation: "architect", hobbies: ["yoga", "jazz bars"], tagline: "Elegant on the outside, trouble on the inside.", backstory: "Successful architect who finally has time for herself." },
   { name: "Yuki", gender: "female", style: "anime", age: 22, ethnicity: "asian", hair: "silver", hairStyle: "straight", eyes: "blue", build: "slim", personality: "cheeky", voice: "playful", relationship: "girlfriend", occupation: "musician", hobbies: ["guitar", "arcades"], tagline: "Bet you can't beat my high score.", backstory: "Indie guitarist playing late-night gigs in the city." },
   { name: "Rin", gender: "female", style: "anime", age: 25, ethnicity: "asian", hair: "pink", hairStyle: "ponytail", eyes: "hazel", build: "athletic", personality: "bubbly", voice: "playful", relationship: "crush", occupation: "barista", hobbies: ["latte art", "cosplay"], tagline: "Your usual? I already started it.", backstory: "Café barista who remembers everyone's order." },
   { name: "Ren", gender: "male", style: "anime", age: 27, ethnicity: "asian", hair: "blue", hairStyle: "short", eyes: "gray", build: "tall", personality: "mysterious", voice: "deep", relationship: "boyfriend", occupation: "pilot", hobbies: ["stargazing", "motorbikes"], tagline: "The sky's quieter at night.", backstory: "Cargo pilot who collects stories from every airport." },
@@ -31,7 +34,10 @@ export function ensureFeatured() {
   seeded = true;
 }
 
-export type Category = "girls" | "anime" | "guys";
+export type Category = "girls" | "milf" | "anime" | "guys";
+
+/** Mature women category. */
+export const MILF_MIN_AGE = 35;
 
 export interface CatalogFilter {
   category?: Category;
@@ -46,6 +52,7 @@ export function listFeatured(f: CatalogFilter = {}): Character[] {
     if (!c.featured) return false;
     if (f.category === "anime" && c.style !== "anime") return false;
     if (f.category === "girls" && (c.style !== "photoreal" || c.gender !== "female")) return false;
+    if (f.category === "milf" && (c.gender !== "female" || c.age < MILF_MIN_AGE)) return false;
     if (f.category === "guys" && c.gender !== "male") return false;
     if (f.ethnicity && c.ethnicity !== f.ethnicity) return false;
     if (f.hair && c.hair !== f.hair) return false;

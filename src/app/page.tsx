@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { btn, chip, pretty, Portrait, theme, type CharacterCard } from "./ui";
 
-const CATEGORIES = [["girls", "Girls"], ["anime", "Anime"], ["guys", "Guys"]] as const;
+const CATEGORIES = [["girls", "Girls"], ["milf", "MILF"], ["anime", "Anime"], ["guys", "Guys"]] as const;
 const ETHNICITIES = ["caucasian", "latina", "asian", "arab", "african", "south_asian"];
 const HAIRS = ["blonde", "brown", "black", "red", "auburn"];
 const AGES = [["20s", "20s"], ["30s", "30s"], ["40plus", "40+"]] as const;
