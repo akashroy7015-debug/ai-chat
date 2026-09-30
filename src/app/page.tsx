@@ -11,7 +11,7 @@ const AGES = [["20s", "20s"], ["30s", "30s"], ["40plus", "40+"]] as const;
 
 export default function Home() {
   const [status, setStatus] = useState("loading");
-  const [me, setMe] = useState<{ email?: string } | null | undefined>(undefined);
+  const [me, setMe] = useState<{ email?: string; premium?: boolean; admin?: boolean } | null | undefined>(undefined);
   const [balance, setBalance] = useState<number | null>(null);
   const [category, setCategory] = useState<string>("girls");
   const [ethnicity, setEthnicity] = useState("");
@@ -71,6 +71,8 @@ export default function Home() {
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <h1 style={{ margin: 0 }}>AI Chat</h1>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {me?.premium && <span style={{ background: "#b8860b", borderRadius: 6, padding: "2px 8px", fontSize: 12, fontWeight: 700 }}>👑 PREMIUM</span>}
+          {me?.admin && <Link href="/admin" style={{ color: theme.muted }}>Admin</Link>}
           {me && (verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify with ID (18+)</button>)}
           {me && <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ Create character</button></Link>}
           {me && <button style={{ ...btn, background: "transparent", color: theme.muted }} onClick={logout}>Log out</button>}

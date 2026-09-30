@@ -1,6 +1,7 @@
 import { requireVerifiedAdult } from "./age/verification";
 import { credit } from "./tokens/ledger";
 import { audit, db, newId } from "./store";
+import { activatePlan, PLANS, type PlanId } from "./premium";
 
 export const PACKAGES = {
   starter: { tokens: 100, priceUsd: 9.99, label: "100 tokens" },
@@ -41,6 +42,17 @@ export async function startCheckout(userId: string, pkg: PackageId) {
   return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountUsd: p.priceUsd, description: p.label })) };
 }
 
+/** Subscription purchase. Only ID-verified adults can subscribe. */
+export async function startSubscription(userId: string, plan: PlanId) {
+  requireVerifiedAdult(userId);
+  const p = PLANS[plan];
+  if (!p) throw new Error("Unknown plan");
+  const orderId = newId();
+  db.orders.set(orderId, { id: orderId, userId, pkg: `sub:${plan}`, paid: false });
+  audit({ userId, kind: "checkout_started", detail: `sub:${plan} ${orderId}` });
+  return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountUsd: p.priceUsd, description: `Premium ${p.label}` })) };
+}
+
 /** Called from the processor's signed webhook. Idempotent. */
 export function fulfilOrder(orderId: string) {
   const o = db.orders.get(orderId);
@@ -48,6 +60,7 @@ export function fulfilOrder(orderId: string) {
   if (o.paid) return;
   o.paid = true;
   db.orders.save(orderId);
-  credit(o.userId, PACKAGES[o.pkg as PackageId].tokens, `purchase:${orderId}`);
+  if (o.pkg.startsWith("sub:")) activatePlan(o.userId, o.pkg.slice(4) as PlanId);
+  else credit(o.userId, PACKAGES[o.pkg as PackageId].tokens, `purchase:${orderId}`);
   audit({ userId: o.userId, kind: "order_paid", detail: orderId });
 }

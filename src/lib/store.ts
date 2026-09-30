@@ -28,6 +28,9 @@ export interface User {
   lastCountry?: string;
   banned: boolean;
   strikes: number;
+  premiumUntil?: number;
+  premiumPlan?: string;
+  premiumLastGrant?: number;
   createdAt?: number;
 }
 

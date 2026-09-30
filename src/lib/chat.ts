@@ -4,6 +4,7 @@ import { detectSelfHarm, moderateText, SELF_HARM_RESPONSE } from "./moderation";
 import { getLLM } from "./llm/provider";
 import { openaiModerate } from "./llm/openai";
 import { credit } from "./tokens/ledger";
+import { applyMonthlyGrant, chatIsFree } from "./premium";
 import { recall, remember } from "./memory";
 import { canChatWith } from "./characters/schema";
 import { ensureFeatured } from "./characters/featured";
@@ -73,7 +74,9 @@ export async function handleChat(userId: string, characterId: string, text: stri
     }
   }
 
-  spend(userId, COSTS.chat, "chat");
+  applyMonthlyGrant(userId);
+  const free = chatIsFree(userId);
+  if (!free) spend(userId, COSTS.chat, "chat");
 
   const history = db.messages
     .filter((m) => m.userId === userId && m.characterId === characterId)
@@ -84,7 +87,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
   try {
     reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit });
   } catch (e) {
-    credit(userId, COSTS.chat, "refund:chat_error");
+    if (!free) credit(userId, COSTS.chat, "refund:chat_error");
     audit({ userId, kind: "llm_error", detail: e instanceof Error ? e.message.slice(0, 200) : String(e) });
     return { kind: "refused", message: "I lost my train of thought, can you say that again? (No tokens were used.)", category: "error" };
   }
@@ -98,5 +101,5 @@ export async function handleChat(userId: string, characterId: string, text: stri
   remember(userId, characterId, message);
   push({ userId, characterId, role: "user", content: message });
   push({ userId, characterId, role: "assistant", content: reply });
-  return { kind: "reply", message: reply, tokensSpent: COSTS.chat };
+  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat };
 }

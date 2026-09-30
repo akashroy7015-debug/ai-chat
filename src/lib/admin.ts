@@ -3,6 +3,7 @@ import { balance, credit } from "./tokens/ledger";
 import { mediaJobs } from "./media/jobs";
 import { audit, db, getUser, saveUser } from "./store";
 import { PACKAGES, type PackageId } from "./payments";
+import { PLANS, type PlanId, isPremium } from "./premium";
 
 /** Admins are listed by email in ADMIN_EMAILS (comma separated). */
 export function isAdmin(userId: string): boolean {
@@ -20,9 +21,10 @@ const DAY = 86_400_000;
 export function stats(now = Date.now()) {
   const users = [...db.users.values()].filter((u) => u.email);
   const paid = [...db.orders.values()].filter((o) => o.paid);
-  const revenueUsd = paid.reduce((s, o) => s + (PACKAGES[o.pkg as PackageId]?.priceUsd ?? 0), 0);
+  const revenueUsd = paid.reduce((s, o) => s + (o.pkg.startsWith("sub:") ? (PLANS[o.pkg.slice(4) as PlanId]?.priceUsd ?? 0) : (PACKAGES[o.pkg as PackageId]?.priceUsd ?? 0)), 0);
   return {
     users: users.length,
+    premium: users.filter((u) => isPremium(u, now)).length,
     newUsers24h: users.filter((u) => (u.createdAt ?? 0) > now - DAY).length,
     verified: users.filter((u) => u.ageStatus === "verified").length,
     banned: users.filter((u) => u.banned).length,
