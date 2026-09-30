@@ -19,6 +19,10 @@ export default function Admin() {
   const [reports, setReports] = useState<R[]>([]);
   const [log, setLog] = useState<A[]>([]);
   const [err, setErr] = useState("");
+  const [pj, setPj] = useState<{ enabled: boolean; running: boolean; done: number; failed: number; total: number; missing: number; lastError: string } | null>(null);
+  const loadPj = async () => { const r = await fetch("/api/admin/portraits"); if (r.ok) setPj(await r.json()); };
+  useEffect(() => { void loadPj(); }, []);
+  useEffect(() => { if (!pj?.running) return; const t = setTimeout(() => void loadPj(), 3000); return () => clearTimeout(t); }, [pj]);
 
   async function get<T>(url: string): Promise<T | null> {
     const r = await fetch(url);
@@ -50,6 +54,17 @@ export default function Admin() {
         ))}
       </div>
 
+      {tab === "overview" && pj && (
+        <div style={{ ...card, marginBottom: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <b>Character pictures</b>
+          <span style={{ color: theme.muted, fontSize: 13 }}>
+            {!pj.enabled ? "Needs OpenAI configured." : pj.running ? `Generating ${pj.done + pj.failed}/${pj.total}…` : `${pj.missing} featured characters without a picture.`}
+            {pj.failed > 0 && ` ${pj.failed} failed: ${pj.lastError}`}
+          </span>
+          {pj.enabled && !pj.running && pj.missing > 0 && <button style={small} onClick={async () => { await post("/api/admin/portraits", {}); void loadPj(); }}>Generate missing (~$0.05 each)</button>}
+          {pj.enabled && !pj.running && pj.missing === 0 && <button style={{ ...small, background: "#333" }} onClick={async () => { if (confirm("Regenerate ALL featured pictures? This costs OpenAI credit.")) { await post("/api/admin/portraits", { regenerateAll: true }); void loadPj(); } }}>Regenerate all</button>}
+        </div>
+      )}
       {tab === "overview" && stats && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
           {Object.entries(stats).map(([k, v]) => (
