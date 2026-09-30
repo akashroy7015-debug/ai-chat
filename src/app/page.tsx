@@ -3,13 +3,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { btn, chip, pretty, Portrait, theme, type CharacterCard } from "./ui";
 import { AuthPanel } from "./auth-panel";
+import { useT } from "./i18n";
 
-const CATEGORIES = [["girls", "Girls"], ["milf", "MILF"], ["anime", "Anime"], ["guys", "Guys"]] as const;
+const CATEGORIES = ["girls", "milf", "anime", "guys"] as const;
 const ETHNICITIES = ["caucasian", "latina", "asian", "arab", "african", "south_asian"];
 const HAIRS = ["blonde", "brown", "black", "red", "auburn"];
 const AGES = [["20s", "20s"], ["30s", "30s"], ["40plus", "40+"]] as const;
 
 export default function Home() {
+  const { t } = useT();
   const [status, setStatus] = useState("loading");
   const [me, setMe] = useState<{ email?: string; premium?: boolean; admin?: boolean } | null | undefined>(undefined);
   const [balance, setBalance] = useState<number | null>(null);
@@ -73,9 +75,9 @@ export default function Home() {
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {me?.premium && <span style={{ background: "#b8860b", borderRadius: 6, padding: "2px 8px", fontSize: 12, fontWeight: 700 }}>👑 PREMIUM</span>}
           {me?.admin && <Link href="/admin" style={{ color: theme.muted }}>Admin</Link>}
-          {me && (verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify with ID (18+)</button>)}
-          {me && <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ Create character</button></Link>}
-          {me && <button style={{ ...btn, background: "transparent", color: theme.muted }} onClick={logout}>Log out</button>}
+          {me && (verified ? <span style={{ color: theme.muted }}>{t("tokens")}: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>{t("verify")}</button>)}
+          {me && <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ {t("create")}</button></Link>}
+          {me && <button style={{ ...btn, background: "transparent", color: theme.muted }} onClick={logout}>{t("logout")}</button>}
         </div>
       </header>
       {me === null && <AuthPanel onDone={refresh} />}
@@ -87,14 +89,14 @@ export default function Home() {
               Adult content (ID-verified 18+ only)
             </label>
           )}
-          <span style={{ color: theme.muted }}>Buy tokens:</span>
+          <span style={{ color: theme.muted }}>{t("buyTokens")}</span>
           {Object.entries(packages).map(([k, p]) => <button key={k} style={chip(false)} onClick={() => void buy(k)}>{p.label} · ${p.priceUsd}</button>)}
         </section>
       )}
-      <p style={{ color: theme.muted }}>18+ only. Every character is a fictional adult and not based on a real person.</p>
+      <p style={{ color: theme.muted }}>{t("tagline")}</p>
 
       <nav style={{ display: "flex", gap: 8, margin: "16px 0" }}>
-        {CATEGORIES.map(([v, l]) => <button key={v} style={{ ...chip(category === v), fontSize: 15, padding: "8px 18px" }} onClick={() => setCategory(v)}>{l}</button>)}
+        {CATEGORIES.map((v) => <button key={v} style={{ ...chip(category === v), fontSize: 15, padding: "8px 18px" }} onClick={() => setCategory(v)}>{t(v)}</button>)}
       </nav>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
         {ETHNICITIES.map((e) => <button key={e} style={chip(ethnicity === e)} onClick={() => toggle(ethnicity, setEthnicity, e)}>{pretty(e)}</button>)}
@@ -102,7 +104,7 @@ export default function Home() {
         {AGES.map(([v, l]) => <button key={v} style={chip(ageRange === v)} onClick={() => toggle(ageRange, setAgeRange, v)}>{l}</button>)}
       </div>
 
-      <h2>Explore featured characters</h2>
+      <h2>{t("explore")}</h2>
       {chars.length === 0 && <p style={{ color: theme.muted }}>No characters match these filters.</p>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
         {chars.map((c) => (

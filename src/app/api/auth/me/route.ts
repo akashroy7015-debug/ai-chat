@@ -20,6 +20,7 @@ export const GET = authed(async (_req, userId) => {
     explicitAvailable: process.env.ALLOW_EXPLICIT === "true" && explicitAllowedIn(u.lastCountry, u.idCountry),
     grievanceOfficer: GRIEVANCE_OFFICER,
     premium: isPremium(u),
+    lang: u.lang ?? "auto",
     premiumUntil: u.premiumUntil,
     admin: isAdmin(userId),
   });

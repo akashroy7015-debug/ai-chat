@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { btn, theme } from "../ui";
+import { useT } from "../i18n";
 
 interface Plan { id: string; label: string; months: number; priceUsd: number; perMonth: number; discountPct: number }
 
@@ -11,6 +12,7 @@ const PERKS = (tokens: number, cap: number) => [
 ];
 
 export default function Premium() {
+  const { t } = useT();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [info, setInfo] = useState({ monthlyTokens: 1000, dailyChatCap: 300 });
   const [sel, setSel] = useState("yearly");
@@ -36,7 +38,7 @@ export default function Premium() {
 
   return (
     <main style={{ maxWidth: 820 }}>
-      <h1 style={{ marginBottom: 4 }}>Go Premium <span style={{ background: theme.accent, borderRadius: 8, padding: "2px 10px", fontSize: 18, verticalAlign: "middle" }}>up to -70%</span></h1>
+      <h1 style={{ marginBottom: 4 }}>{t("goPremium")} <span style={{ background: theme.accent, borderRadius: 8, padding: "2px 10px", fontSize: 18, verticalAlign: "middle" }}>up to -70%</span></h1>
       {me?.premium && <p style={{ color: "#6ee7a8" }}>You&apos;re Premium until {new Date(me.premiumUntil!).toLocaleDateString()}.</p>}
       <ul style={{ lineHeight: 1.9 }}>{PERKS(info.monthlyTokens, info.dailyChatCap).map((p) => <li key={p}>✅ {p}</li>)}</ul>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, margin: "16px 0" }}>
@@ -50,7 +52,7 @@ export default function Premium() {
         ))}
       </div>
       {me === null ? <p style={{ color: theme.muted }}>Create a free account on the Home page to subscribe.</p>
-        : <button style={{ ...btn, fontSize: 18, padding: "14px 28px" }} onClick={buy}>Get Premium</button>}
+        : <button style={{ ...btn, fontSize: 18, padding: "14px 28px" }} onClick={buy}>{t("getPremium")}</button>}
       {msg && <p>{msg}</p>}
       <p style={{ color: theme.muted, fontSize: 12, marginTop: 16 }}>Discounts are compared with paying monthly. Cancel any time; access continues until the end of the paid period. Requires ID-verified 18+ account.</p>
     </main>

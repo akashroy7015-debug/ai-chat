@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { btn, pretty, Portrait, theme } from "../ui";
+import { useT } from "../i18n";
 
 interface Post { id: string; text: string; at: number; likes: number; liked: boolean; character: { id: string; name: string; age: number; hair: string; style: string; occupation: string } }
 
@@ -11,6 +12,7 @@ const ago = (t: number) => {
 };
 
 export default function Discover() {
+  const { t } = useT();
   const [posts, setPosts] = useState<Post[]>([]);
   const load = async () => setPosts((await (await fetch("/api/feed")).json()).posts);
   useEffect(() => { void load(); }, []);
@@ -23,7 +25,7 @@ export default function Discover() {
 
   return (
     <main style={{ maxWidth: 620 }}>
-      <h1>Discover</h1>
+      <h1>{t("discover")}</h1>
       <div style={{ display: "grid", gap: 14 }}>
         {posts.map((p) => (
           <article key={p.id} style={{ background: theme.card, borderRadius: 16, padding: 14 }}>
@@ -36,7 +38,7 @@ export default function Discover() {
               <button onClick={() => void like(p.id)} style={{ background: "none", border: `1px solid ${theme.line}`, color: theme.text, borderRadius: 999, padding: "6px 12px", cursor: "pointer" }}>
                 {p.liked ? "❤️" : "🤍"} {p.likes}
               </button>
-              <Link href={`/chat?c=${p.character.id}`} style={{ marginLeft: "auto" }}><button style={btn}>Chat with {p.character.name.split(" ")[0]}</button></Link>
+              <Link href={`/chat?c=${p.character.id}`} style={{ marginLeft: "auto" }}><button style={btn}>{t("chatWith")} {p.character.name.split(" ")[0]}</button></Link>
             </footer>
           </article>
         ))}

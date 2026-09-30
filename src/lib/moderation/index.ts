@@ -28,6 +28,8 @@ const LEET: Record<string, string> = {
 /** Lowercase, undo simple leetspeak, collapse separators. Digits are kept for age checks. */
 export function normalize(input: string): string {
   return input
+    // Devanagari digits -> ASCII so "१६ साल" is read as 16.
+    .replace(/[०-९]/g, (d) => String(d.charCodeAt(0) - 0x0966))
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
@@ -79,16 +81,49 @@ const MINOR_TERMS = [
 
 const MINOR_RE = new RegExp(`\\b(?:${MINOR_TERMS.join("|")})\\b`);
 
+/** Hinglish (Hindi in Latin script) minor terms. */
+const MINOR_TERMS_HINGLISH = [
+  "bachcha", "bachche", "bachchi", "bacchi", "baccha", "bacche", "bachon", "bachchon",
+  "naabalig", "nabalig", "nabaalig", "kishor", "kishori",
+  "school wali", "school vali", "school ki ladki", "school ka ladka", "school jaane wali",
+  "chhoti ladki", "choti ladki", "chhoti bachchi", "choti bachi", "chhota ladka", "chota ladka",
+];
+const MINOR_HINGLISH_RE = new RegExp(`\\b(?:${MINOR_TERMS_HINGLISH.join("|")})\\b`);
+
+/** Devanagari minor terms (matched as substrings; \\b does not work for Devanagari). */
+const MINOR_TERMS_DEVANAGARI = [
+  "बच्चा", "बच्ची", "बच्चे", "बच्चों", "नाबालिग", "नाबालिक", "किशोर", "किशोरी",
+  "स्कूल वाली", "स्कूल की लड़की", "स्कूल का लड़का", "छोटी लड़की", "छोटी बच्ची", "छोटा लड़का",
+].map((t) => t.normalize("NFKD"));
+
+/** Hindi/Hinglish explicit slang, for the default non-explicit policy. OpenAI moderation adds broader coverage. */
+const EXPLICIT_HINGLISH_RE = /\b(?:lund|nangi|nanga|chut|chudai|chudne|randi|sex karo|sex karna)\b/;
+const EXPLICIT_DEVANAGARI = ["चोद", "चूत", "लंड", "लौड़ा", "नंगी", "नंगा", "चुदाई", "रंडी"].map((t) => t.normalize("NFKD"));
+
 /** Any stated age below 18: "17 yo", "age 15", "15 years old", "aged 12", "12-year-old". */
 export function statedAges(text: string): number[] {
   const ages: number[] = [];
   const patterns = [
-    /\b(\d{1,2})\s*-?\s*(?:y\s*\/?\s*o|yo|yrs?|years?)\s*-?\s*(?:old)?\b/g,
+    /\b(\d{1,2})\s*-?\s*(?:y\s*\/?\s*o|yo|yrs?|years?)\s*-?\s*(?:old)?\b(?!\s*(?:pehle|pahle|baad|bad|se|tak|ago|back|later|before|after|since|from now|पहले|बाद|से|तक))/g,
     /\bage[d]?\s*(?:is|of|:)?\s*(\d{1,2})\b/g,
     /\b(\d{1,2})\s*(?:th|st|nd|rd)\s+birthday\b/g,
+    // Hindi / Hinglish: "16 saal", "16 sal ki", "umar 16", "16 साल", "उम्र 16"
+    /\b(\d{1,2})\s*-?\s*(?:saal|sal|varsh|baras)\b(?!\s*(?:pehle|pahle|baad|bad|se|tak|ago|back|later|before|after|since|from now|पहले|बाद|से|तक))/g,
+    /\b(?:umar|umr|umra|age)\s*(?:hai|he|:)?\s*(\d{1,2})\b/g,
+    /(\d{1,2})\s*(?:साल|वर्ष|बरस)(?!\s*(?:pehle|pahle|baad|bad|se|tak|ago|back|later|before|after|since|from now|पहले|बाद|से|तक))/g,
+    /उम्र\s*(?:है)?\s*(\d{1,2})/g,
   ];
   for (const re of patterns) {
     for (const m of text.matchAll(re)) ages.push(Number(m[1]));
+  }
+  // Spelled-out teen ages: "solah saal", "सत्रह साल".
+  const WORD_AGES: Record<string, number> = {
+    das: 10, gyarah: 11, barah: 12, terah: 13, chaudah: 14, pandrah: 15, solah: 16, satrah: 17,
+    "दस": 10, "ग्यारह": 11, "बारह": 12, "तेरह": 13, "चौदह": 14, "पंद्रह": 15, "पन्द्रह": 15, "सोलह": 16, "सत्रह": 17,
+  };
+  for (const [w, n] of Object.entries(WORD_AGES)) {
+    const re = /^[a-z]+$/.test(w) ? new RegExp(`\\b${w}\\s*(?:saal|sal|varsh|baras)\\b(?!\\s*(?:pehle|pahle|baad|bad|se|tak|ago|back|later|before|after|since|from now|पहले|बाद|से|तक))`) : new RegExp(`${w.normalize("NFKD")}\\s*(?:साल|वर्ष|बरस)(?!\\s*(?:pehle|pahle|baad|bad|se|tak|ago|back|later|before|after|since|from now|पहले|बाद|से|तक))`.normalize("NFKD"));
+    if (re.test(text)) ages.push(n);
   }
   return ages;
 }
@@ -167,7 +202,11 @@ export function moderateText(input: string, opts: ModerationOptions = {}): Moder
       };
     }
   }
-  if (MINOR_RE.test(text) || MINOR_RE.test(squashed)) {
+  if (
+    MINOR_RE.test(text) || MINOR_RE.test(squashed) ||
+    MINOR_HINGLISH_RE.test(text) || MINOR_HINGLISH_RE.test(squashed) ||
+    MINOR_TERMS_DEVANAGARI.some((t) => text.includes(t))
+  ) {
     return {
       allowed: false,
       category: "minor",
@@ -193,7 +232,10 @@ export function moderateText(input: string, opts: ModerationOptions = {}): Moder
   }
 
   if (!(opts.explicitAllowed && process.env.ALLOW_EXPLICIT === "true")) {
-    if (EXPLICIT_RE.test(text) || EXPLICIT_RE.test(squashed)) {
+    if (
+      EXPLICIT_RE.test(text) || EXPLICIT_RE.test(squashed) ||
+      EXPLICIT_HINGLISH_RE.test(text) || EXPLICIT_DEVANAGARI.some((t) => text.includes(t))
+    ) {
       return {
         allowed: false,
         category: "explicit",

@@ -23,18 +23,19 @@ async function post<T>(path: string, body: unknown, timeoutMs: number): Promise<
 
 /** Chat Completions. Model is configurable with OPENAI_MODEL. */
 export const openaiLLM: LLMProvider = {
-  async reply({ character, history, facts, userMessage, explicit }) {
+  async reply({ character, history, facts, userMessage, explicit, lang }) {
     const r = await post<{ choices: { message: { content: string | null } }[] }>(
       "/chat/completions",
       {
         model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
         messages: [
-          { role: "system", content: systemPrompt(character, facts, explicit) },
+          { role: "system", content: systemPrompt(character, facts, explicit, lang) },
           ...history,
           { role: "user", content: userMessage },
         ],
         max_tokens: 300,
-        temperature: 0.9,
+        temperature: 1.0,
+        presence_penalty: 0.4,
       },
       30_000,
     );

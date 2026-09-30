@@ -2,8 +2,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { btn, field, theme } from "./ui";
+import { useT } from "./i18n";
 
 export function AuthPanel({ onDone }: { onDone: () => void }) {
+  const { t } = useT();
   const [mode, setMode] = useState<"login" | "register">("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,20 +31,20 @@ export function AuthPanel({ onDone }: { onDone: () => void }) {
       <div style={{ display: "flex", gap: 8 }}>
         {(["register", "login"] as const).map((m) => (
           <button type="button" key={m} onClick={() => setMode(m)} style={{ ...btn, background: mode === m ? theme.accent : "#333", flex: 1 }}>
-            {m === "register" ? "Create free account" : "Log in"}
+            {m === "register" ? t("signup") : t("login")}
           </button>
         ))}
       </div>
-      <input style={field} type="email" autoComplete="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      <input style={field} type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Password (8+ characters)" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+      <input style={field} type="email" autoComplete="email" placeholder={t("email")} value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <input style={field} type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder={t("password")} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
       {mode === "register" && (
         <label style={{ fontSize: 13, display: "flex", gap: 8, alignItems: "flex-start" }}>
           <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />
-          <span>I am 18 or older and accept the <Link href="/terms" style={{ color: theme.accent }}>Terms</Link> and <Link href="/privacy" style={{ color: theme.accent }}>Privacy Policy</Link>. I understand ID verification is required to chat.</span>
+          <span>{t("confirm18")} (<Link href="/terms" style={{ color: theme.accent }}>Terms</Link> · <Link href="/privacy" style={{ color: theme.accent }}>Privacy</Link>)</span>
         </label>
       )}
       {err && <div style={{ color: "#ff8a8a", fontSize: 14 }}>{err}</div>}
-      <button style={btn} disabled={busy}>{busy ? "…" : mode === "register" ? "Sign up" : "Log in"}</button>
+      <button style={btn} disabled={busy}>{busy ? "…" : mode === "register" ? t("signupBtn") : t("login")}</button>
     </form>
   );
 }

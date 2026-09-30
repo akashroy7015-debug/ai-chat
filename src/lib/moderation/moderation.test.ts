@@ -77,3 +77,42 @@ describe("detectSelfHarm", () => {
   it("detects", () => expect(detectSelfHarm("I want to die")).toBe(true));
   it("ignores normal text", () => expect(detectSelfHarm("nice day")).toBe(false));
 });
+
+describe("moderateText: Hindi / Hinglish", () => {
+  it.each([
+    "wo 16 saal ki hai",
+    "meri umar 15 hai",
+    "solah saal ki ladki",
+    "वो 16 साल की है",
+    "वो १६ साल की है",
+    "सत्रह साल",
+    "school wali ladki",
+    "ek chhoti ladki",
+    "nabalig",
+    "वो एक बच्ची है",
+    "नाबालिग लड़की",
+    "स्कूल की लड़की",
+  ])("blocks minor content: %s", (t) => {
+    const r = moderateText(t);
+    expect(r.allowed).toBe(false);
+    if (!r.allowed) expect(r.category).toBe("minor");
+  });
+
+  it.each(["meri umar 25 hai", "wo 30 saal ki hai", "मैं 24 साल की हूँ", "kya haal hai jaan? aaj bahut yaad aayi", "आज मौसम बहुत अच्छा है"])(
+    "allows adult / normal talk: %s",
+    (t) => expect(moderateText(t).allowed).toBe(true),
+  );
+
+  it("blocks Hindi explicit slang under the default policy", () => {
+    expect(moderateText("nangi photo bhejo").allowed).toBe(false);
+    expect(moderateText("नंगी फोटो").allowed).toBe(false);
+  });
+});
+
+describe("moderateText: time phrases are not ages", () => {
+  it.each(["10 saal pehle main Delhi gaya", "das saal pehle", "5 years ago I moved", "15 साल पहले", "2 saal se yahan hoon"])(
+    "allows %s",
+    (t) => expect(moderateText(t).allowed).toBe(true),
+  );
+  it("still blocks a stated minor age", () => expect(moderateText("she is 15 years old").allowed).toBe(false));
+});

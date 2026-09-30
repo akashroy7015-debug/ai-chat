@@ -3,11 +3,13 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { btn, field, pretty, Portrait, theme, type CharacterCard } from "../ui";
+import { useT } from "../i18n";
 
 interface Line { who: "you" | "them"; text: string; id?: string }
 interface Media { id: string; kind: string; scene: string; status: string; url?: string }
 
 function Chat() {
+  const { t } = useT();
   const cid = useSearchParams().get("c");
   const [c, setC] = useState<CharacterCard | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
@@ -88,7 +90,7 @@ function Chat() {
     <main className="chatgrid" style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 16 }}>
       <style>{`@media (max-width:760px){.chatgrid{grid-template-columns:1fr !important}}`}</style>
       <aside>
-        <Link href="/" style={{ color: theme.muted }}>← All characters</Link>
+        <Link href="/" style={{ color: theme.muted }}>{t("allChars")}</Link>
         <div style={{ marginTop: 8 }}><Portrait c={c} height={240} /></div>
         <h2 style={{ marginBottom: 4 }}>{c.name}, {c.age}</h2>
         <div style={{ color: theme.muted, fontSize: 13 }}>{pretty(c.occupation)} · {pretty(c.personality)} · {pretty(c.ethnicity)}</div>
@@ -116,7 +118,7 @@ function Chat() {
       </aside>
       <section style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ flex: 1, minHeight: 360 }}>
-          {lines.length === 0 && <p style={{ color: theme.muted }}>Say hi to {c.name}.</p>}
+          {lines.length === 0 && <p style={{ color: theme.muted }}>{t("sayHi")} {c.name}.</p>}
           {lines.map((l, i) => (
             <p key={i} style={{ textAlign: l.who === "you" ? "right" : "left" }}>
               <span style={{ display: "inline-block", padding: "8px 12px", borderRadius: 14, background: l.who === "you" ? theme.accent : theme.card, maxWidth: "80%" }}>{l.text}</span>
@@ -127,8 +129,8 @@ function Chat() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <input style={{ ...field, flex: 1 }} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void send()} placeholder={`Message ${c.name}…`} />
-          <button style={btn} onClick={send}>Send</button>
+          <input style={{ ...field, flex: 1 }} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void send()} placeholder={`${t("message")} ${c.name}…`} />
+          <button style={btn} onClick={send}>{t("send")}</button>
         </div>
       </section>
     </main>

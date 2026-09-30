@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Portrait, theme } from "../ui";
+import { useT } from "../i18n";
 
 interface Conv { character: { id: string; name: string; age: number; hair: string; style: string }; last: { role: string; content: string; at: number } }
 
 export default function Chats() {
+  const { t } = useT();
   const [convs, setConvs] = useState<Conv[] | null>(null);
   const [err, setErr] = useState("");
   useEffect(() => {
@@ -16,9 +18,9 @@ export default function Chats() {
   }, []);
   return (
     <main>
-      <h1>Chats</h1>
+      <h1>{t("chats")}</h1>
       {err && <p style={{ color: "#ff8a8a" }}>{err} <Link href="/" style={{ color: theme.accent }}>Go home</Link></p>}
-      {convs?.length === 0 && <p style={{ color: theme.muted }}>No chats yet. <Link href="/" style={{ color: theme.accent }}>Pick a character</Link>.</p>}
+      {convs?.length === 0 && <p style={{ color: theme.muted }}>{t("noChats")} <Link href="/" style={{ color: theme.accent }}>{t("pickChar")}</Link>.</p>}
       <div style={{ display: "grid", gap: 8 }}>
         {convs?.map((c) => (
           <Link key={c.character.id} href={`/chat?c=${c.character.id}`} style={{ display: "flex", gap: 12, alignItems: "center", background: theme.card, padding: 10, borderRadius: 12, color: "inherit", textDecoration: "none" }}>

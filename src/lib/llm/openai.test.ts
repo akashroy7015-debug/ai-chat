@@ -80,3 +80,15 @@ describe("chat with openai", () => {
     expect(balance("oa2")).toBe(10);
   });
 });
+
+describe("system prompt language and style", () => {
+  it("adds language rule and keeps guardrails", async () => {
+    const { systemPrompt } = await import("./provider");
+    const p = systemPrompt(character, [], false, "hinglish");
+    expect(p).toContain("Hinglish");
+    expect(p).toContain("flirty");
+    expect(p).toContain("under 18");
+    expect(p).toContain("rather than graphic");
+    expect(systemPrompt(character, [], false, "hi")).toContain("Devanagari");
+  });
+});

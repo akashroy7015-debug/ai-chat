@@ -87,7 +87,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
 
   let reply: string;
   try {
-    reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit });
+    reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit, lang: user.lang ?? "auto" });
   } catch (e) {
     if (!free) credit(userId, COSTS.chat, "refund:chat_error");
     audit({ userId, kind: "llm_error", detail: e instanceof Error ? e.message.slice(0, 200) : String(e) });

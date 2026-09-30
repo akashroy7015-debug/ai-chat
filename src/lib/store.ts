@@ -28,6 +28,8 @@ export interface User {
   lastCountry?: string;
   banned: boolean;
   strikes: number;
+  /** Preferred chat language. */
+  lang?: "auto" | "en" | "hi" | "hinglish";
   premiumUntil?: number;
   premiumPlan?: string;
   premiumLastGrant?: number;
