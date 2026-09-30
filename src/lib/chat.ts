@@ -5,7 +5,7 @@ import { getLLM } from "./llm/provider";
 import { recall, remember } from "./memory";
 import { canChatWith } from "./characters/schema";
 import { ensureFeatured } from "./characters/featured";
-import { audit, db, newId, type Message } from "./store";
+import { audit, db, newId, saveUser, type Message } from "./store";
 
 export const MAX_MESSAGE_LEN = 2000;
 export const BAN_AT_STRIKES = 3;
@@ -45,6 +45,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
         user.banned = true;
         audit({ userId, kind: "auto_ban", category: verdict.category, detail: `strikes=${user.strikes}` });
       }
+      saveUser(user);
     }
     return { kind: "refused", message: REFUSAL, category: verdict.category };
   }

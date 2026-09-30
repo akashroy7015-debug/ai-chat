@@ -12,7 +12,12 @@ npm test           # unit tests
 npm run typecheck
 ```
 
-Dev mode uses mocks (`AGE_PROVIDER=mock`, `LLM_PROVIDER=mock`) and an in-memory store, so no keys or DB are needed.
+Dev mode uses mocks for age verification, the LLM, payments and media, so no API keys are needed.
+Data is stored in SQLite at `DB_PATH` (default `./data/app.db`). Back this file up. Tests use an in-memory database.
+
+Accounts use email and password (scrypt hash) with 30-day server-side sessions (httpOnly cookie). Login is rate-limited.
+Signup requires ticking an 18+/Terms box, and chatting also requires ID verification.
+Legal page templates are at `/terms`, `/privacy` and `/grievance`. Set `OPERATOR_NAME`, `GRIEVANCE_OFFICER_NAME` and `GRIEVANCE_OFFICER_EMAIL`.
 
 ## Safety model (src/lib)
 
@@ -48,8 +53,9 @@ Also for India: appoint a Grievance Officer (`GRIEVANCE_OFFICER_*`, shown in the
 
 ## Before going live (not done yet)
 
-- **Auth:** the dev cookie identity in `lib/http.ts` must be replaced with real login.
-- **Postgres adapter:** `store.ts` is in-memory; implement it against `db/schema.sql`.
+- **Auth extras:** email verification and password reset (needs an email provider).
+- **Scale:** SQLite suits a single server. Move to Postgres (`db/schema.sql`) when running more than one instance.
+- **Legal pages:** templates only; get them reviewed.
 - **Age provider:** implement Persona / Veriff / Yoti behind `AgeProvider`, with signed webhooks. Remove the mock.
 - **LLM provider:** implement behind `LLMProvider` with a vendor whose policy allows this use; keep `systemPrompt` guardrails.
 - **Moderation:** the rule-based filter is a first line only. Add a hosted classifier, a maintained public-figure list, and image checks (age estimation + face similarity) before enabling images.

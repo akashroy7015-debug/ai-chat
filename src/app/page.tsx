@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { btn, chip, pretty, Portrait, theme, type CharacterCard } from "./ui";
+import { AuthPanel } from "./auth-panel";
 
 const CATEGORIES = [["girls", "Girls"], ["milf", "MILF"], ["anime", "Anime"], ["guys", "Guys"]] as const;
 const ETHNICITIES = ["caucasian", "latina", "asian", "arab", "african", "south_asian"];
@@ -10,6 +11,7 @@ const AGES = [["20s", "20s"], ["30s", "30s"], ["40plus", "40+"]] as const;
 
 export default function Home() {
   const [status, setStatus] = useState("loading");
+  const [me, setMe] = useState<{ email?: string } | null | undefined>(undefined);
   const [balance, setBalance] = useState<number | null>(null);
   const [category, setCategory] = useState<string>("girls");
   const [ethnicity, setEthnicity] = useState("");
@@ -20,10 +22,14 @@ export default function Home() {
   const [packages, setPackages] = useState<Record<string, { label: string; priceUsd: number }>>({});
 
   async function refresh() {
-    setStatus((await (await fetch("/api/verify-age")).json()).ageStatus);
-    setBalance((await (await fetch("/api/tokens")).json()).balance);
-    setSettings(await (await fetch("/api/settings")).json());
     setPackages((await (await fetch("/api/checkout")).json()).packages);
+    const r = await fetch("/api/auth/me");
+    if (!r.ok) { setMe(null); setStatus("unverified"); return; }
+    const m = await r.json();
+    setMe(m);
+    setStatus(m.ageStatus);
+    setBalance(m.balance);
+    setSettings(m);
   }
 
   async function setExplicit(on: boolean) {
@@ -55,15 +61,22 @@ export default function Home() {
   const toggle = (cur: string, set: (v: string) => void, v: string) => set(cur === v ? "" : v);
   const verified = status === "verified";
 
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    await refresh();
+  }
+
   return (
     <main>
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <h1 style={{ margin: 0 }}>AI Chat</h1>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify with ID (18+)</button>}
-          <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ Create character</button></Link>
+          {me && (verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify with ID (18+)</button>)}
+          {me && <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ Create character</button></Link>}
+          {me && <button style={{ ...btn, background: "transparent", color: theme.muted }} onClick={logout}>Log out</button>}
         </div>
       </header>
+      {me === null && <AuthPanel onDone={refresh} />}
       {verified && (
         <section style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", background: theme.card, padding: 12, borderRadius: 12, margin: "12px 0" }}>
           {settings.explicitAvailable && (
@@ -91,7 +104,7 @@ export default function Home() {
       {chars.length === 0 && <p style={{ color: theme.muted }}>No characters match these filters.</p>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
         {chars.map((c) => (
-          <Link key={c.id} href={verified ? `/chat?c=${c.id}` : "#"} onClick={(e) => { if (!verified) { e.preventDefault(); alert("Verify your age (18+) to start chatting."); } }} style={{ color: "inherit", textDecoration: "none" }}>
+          <Link key={c.id} href={verified ? `/chat?c=${c.id}` : "#"} onClick={(e) => { if (!verified) { e.preventDefault(); alert(me ? "Verify your age (18+) to start chatting." : "Create a free account to start chatting."); } }} style={{ color: "inherit", textDecoration: "none" }}>
             <article style={{ background: theme.card, borderRadius: 14, padding: 8 }}>
               <Portrait c={c} />
               <div style={{ padding: "8px 4px" }}>
@@ -104,7 +117,8 @@ export default function Home() {
         ))}
       </div>
       <footer style={{ marginTop: 32, color: theme.muted, fontSize: 12 }}>
-        All characters and media are AI-generated and fictional. Report content from any gallery item.
+        All characters and media are AI-generated and fictional. Report content from any gallery item.{" "}
+        <Link href="/terms" style={{ color: theme.muted }}>Terms</Link> · <Link href="/privacy" style={{ color: theme.muted }}>Privacy</Link> · <Link href="/grievance" style={{ color: theme.muted }}>Grievances</Link>.
         {settings.grievanceOfficer && <> Grievance Officer: {settings.grievanceOfficer.name} · {settings.grievanceOfficer.email}</>}
       </footer>
     </main>

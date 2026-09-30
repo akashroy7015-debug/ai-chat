@@ -3,8 +3,9 @@ import { describeAppearance, NEGATIVE_PROMPT } from "../characters/appearance";
 import { ensureFeatured } from "../characters/featured";
 import { canChatWith } from "../characters/schema";
 import { credit, spend } from "../tokens/ledger";
-import { audit, db, newId } from "../store";
+import { audit, db, newId, saveUser } from "../store";
 import { AccessDenied } from "../age/verification";
+import { PMap } from "../store";
 import { getMediaProvider, type MediaKind, type MediaProvider } from "./provider";
 import { getScanner, scanFailClosed, type SafetyScanner } from "./safety";
 
@@ -42,8 +43,9 @@ export interface MediaJob {
   done?: Promise<void>;
 }
 
-const g = globalThis as unknown as { __media?: Map<string, MediaJob> };
-export const mediaJobs: Map<string, MediaJob> = (g.__media ??= new Map());
+const g = globalThis as unknown as { __media?: PMap<MediaJob> };
+export const mediaJobs: PMap<MediaJob> = (g.__media ??= new PMap<MediaJob>(db.sql, "media"));
+const saveJob = (j: MediaJob) => mediaJobs.save(j.id);
 
 export interface Deps {
   provider: () => MediaProvider;
@@ -79,18 +81,22 @@ export async function requestMedia(
   const run = async () => {
     try {
       job.status = "generating";
+      saveJob(job);
       const out = await deps.provider().generate({
         kind, prompt, negativePrompt: NEGATIVE_PROMPT, contentLevel, seed: Math.floor(Math.random() * 2 ** 31),
       });
       job.status = "checking";
+      saveJob(job);
       const verdict = await scanFailClosed(deps.scanner, out.url, out.mimeType);
       if (!verdict.ok) {
         job.status = "blocked";
+        saveJob(job);
         credit(userId, cost, `refund:${job.id}`);
         audit({ userId, kind: "media_blocked", category: verdict.category, detail: `${job.id} ${verdict.detail}` });
         if (verdict.category === "csam") {
           // Must be escalated to a human trust & safety reviewer and reported per law (e.g. NCMEC in the US).
           user.banned = true;
+          saveUser(user);
           audit({ userId, kind: "csam_escalation_required", category: "csam", detail: job.id });
         }
         return;
@@ -98,9 +104,11 @@ export async function requestMedia(
       job.url = out.url;
       job.mimeType = out.mimeType;
       job.status = "ready";
+      saveJob(job);
       audit({ userId, kind: "media_ready", detail: job.id });
     } catch (e) {
       job.status = "failed";
+      saveJob(job);
       credit(userId, cost, `refund:${job.id}`);
       audit({ userId, kind: "media_failed", detail: `${job.id} ${e instanceof Error ? e.message : e}` });
     }
@@ -122,5 +130,6 @@ export function reportMedia(userId: string, jobId: string, reason: string) {
   const job = mediaJobs.get(jobId);
   if (!job || job.userId !== userId) throw new AccessDenied("banned", "Not found.", 404);
   job.hidden = true;
+  saveJob(job);
   audit({ userId, kind: "media_reported", detail: `${jobId} ${reason.slice(0, 200)}` });
 }

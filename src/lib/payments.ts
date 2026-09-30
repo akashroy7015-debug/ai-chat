@@ -14,7 +14,6 @@ export interface PaymentProvider {
   createCheckout(args: { orderId: string; userId: string; amountUsd: number; description: string }): Promise<{ checkoutUrl: string }>;
 }
 
-const orders = new Map<string, { userId: string; pkg: PackageId; paid: boolean }>();
 
 export const mockPayments: PaymentProvider = {
   async createCheckout({ orderId }) {
@@ -37,18 +36,18 @@ export async function startCheckout(userId: string, pkg: PackageId) {
   const p = PACKAGES[pkg];
   if (!p) throw new Error("Unknown package");
   const orderId = newId();
-  orders.set(orderId, { userId, pkg, paid: false });
+  db.orders.set(orderId, { id: orderId, userId, pkg, paid: false });
   audit({ userId, kind: "checkout_started", detail: `${pkg} ${orderId}` });
   return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountUsd: p.priceUsd, description: p.label })) };
 }
 
 /** Called from the processor's signed webhook. Idempotent. */
 export function fulfilOrder(orderId: string) {
-  const o = orders.get(orderId);
+  const o = db.orders.get(orderId);
   if (!o) throw new Error("Unknown order");
   if (o.paid) return;
   o.paid = true;
-  credit(o.userId, PACKAGES[o.pkg].tokens, `purchase:${orderId}`);
+  db.orders.save(orderId);
+  credit(o.userId, PACKAGES[o.pkg as PackageId].tokens, `purchase:${orderId}`);
   audit({ userId: o.userId, kind: "order_paid", detail: orderId });
-  void db;
 }

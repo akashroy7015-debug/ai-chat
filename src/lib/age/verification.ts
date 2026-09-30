@@ -1,4 +1,4 @@
-import { audit, getUser, type User } from "../store";
+import { audit, getUser, saveUser, type User } from "../store";
 import { explicitAllowedIn } from "../jurisdiction";
 
 /**
@@ -42,6 +42,7 @@ export async function beginVerification(userId: string) {
   const { ref, redirectUrl } = await getProvider().start(userId);
   user.ageStatus = "pending";
   user.ageVerificationRef = ref;
+  saveUser(user);
   audit({ userId, kind: "age_verification_started", detail: ref });
   return { redirectUrl };
 }
@@ -55,13 +56,14 @@ export async function completeVerification(userId: string) {
     user.ageMethod = "id_document";
     user.idCountry = (await getProvider().idCountry?.(user.ageVerificationRef))?.toUpperCase();
   }
+  saveUser(user);
   audit({ userId, kind: "age_verification_result", detail: outcome });
   return user.ageStatus;
 }
 
 export class AccessDenied extends Error {
   constructor(
-    public code: "age_verification_required" | "banned",
+    public code: "age_verification_required" | "banned" | "login_required",
     message: string,
     public status = 403,
   ) {
