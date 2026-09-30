@@ -42,3 +42,9 @@ describe("admin-managed models", async () => {
     expect(() => createFeatured({ ...base, name: "Taylor Swift" })).toThrow();
   });
 });
+
+describe("extra models", () => {
+  it("loads models from extra-models.json into the catalog", () => {
+    expect(listFeatured({ category: "girls" }).some((c) => c.id === "featured-isabela" && c.age >= 18)).toBe(true);
+  });
+});

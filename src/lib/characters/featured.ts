@@ -21,6 +21,9 @@ const SEEDS: Array<Partial<CharacterInput> & Pick<CharacterInput, "name" | "age"
   { name: "Daniel Cruz", gender: "male", style: "photoreal", age: 35, ethnicity: "latina", hair: "black", hairStyle: "short", eyes: "brown", build: "tall", personality: "nurturing", voice: "warm", relationship: "partner", occupation: "lawyer", hobbies: ["hiking", "dogs"], tagline: "Long day? Tell me everything.", backstory: "Public defender who spends weekends on trails with his dog." },
 ];
 
+/** Extra catalog models added over time (extra-models.json), validated by the same schema as SEEDS. */
+import EXTRA from "./extra-models.json";
+
 let seeded = false;
 
 /**
@@ -35,6 +38,10 @@ export function ensureFeatured() {
     const data = CharacterInput.parse(s);
     db.characters.set(id, { ...data, id, ownerId: SYSTEM_OWNER, createdAt: 0, featured: true });
   });
+  for (const { id, ...rest } of EXTRA as Array<{ id: string } & Record<string, unknown>>) {
+    if (db.characters.has(id)) continue;
+    db.characters.set(id, { ...CharacterInput.parse(rest), id, ownerId: SYSTEM_OWNER, createdAt: Date.now(), featured: true });
+  }
   seeded = true;
 }
 
