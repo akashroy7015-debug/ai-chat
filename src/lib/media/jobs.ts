@@ -38,6 +38,8 @@ export interface MediaJob {
   /** Always true: every output is labelled as AI-generated. */
   aiGenerated: true;
   hidden: boolean;
+  /** Set when an admin has handled a report. */
+  reviewed?: boolean;
   createdAt: number;
   /** Background promise; internal, used by tests. */
   done?: Promise<void>;
