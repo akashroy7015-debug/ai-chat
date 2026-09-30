@@ -10,6 +10,9 @@ export interface User {
   id: string;
   ageStatus: AgeStatus;
   ageVerificationRef?: string;
+  /** How age was proven. Only "id_document" unlocks explicit mode. */
+  ageMethod?: "id_document";
+  explicitOptIn: boolean;
   banned: boolean;
   strikes: number;
 }
@@ -62,7 +65,7 @@ export const db: DB = (g.__db ??= {
 export function getUser(id: string): User {
   let u = db.users.get(id);
   if (!u) {
-    u = { id, ageStatus: "unverified", banned: false, strikes: 0 };
+    u = { id, ageStatus: "unverified", banned: false, strikes: 0, explicitOptIn: false };
     db.users.set(id, u);
   }
   return u;

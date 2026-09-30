@@ -56,6 +56,23 @@ describe("moderateText: explicit (default policy)", () => {
   });
 });
 
+describe("moderateText: explicit opt-in", () => {
+  it("allows explicit terms only when eligible AND globally enabled", () => {
+    process.env.ALLOW_EXPLICIT = "true";
+    expect(moderateText("send nudes", { explicitAllowed: true }).allowed).toBe(true);
+    expect(moderateText("send nudes").allowed).toBe(false);
+    delete process.env.ALLOW_EXPLICIT;
+    expect(moderateText("send nudes", { explicitAllowed: true }).allowed).toBe(false);
+  });
+  it("never relaxes minor or real-person checks", () => {
+    process.env.ALLOW_EXPLICIT = "true";
+    expect(moderateText("naked 17 yo", { explicitAllowed: true }).allowed).toBe(false);
+    expect(moderateText("nude schoolgirl", { explicitAllowed: true }).allowed).toBe(false);
+    expect(moderateText("nude Taylor Swift", { explicitAllowed: true }).allowed).toBe(false);
+    delete process.env.ALLOW_EXPLICIT;
+  });
+});
+
 describe("detectSelfHarm", () => {
   it("detects", () => expect(detectSelfHarm("I want to die")).toBe(true));
   it("ignores normal text", () => expect(detectSelfHarm("nice day")).toBe(false));

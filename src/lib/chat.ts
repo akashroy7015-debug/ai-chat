@@ -1,4 +1,4 @@
-import { AccessDenied, requireVerifiedAdult } from "./age/verification";
+import { AccessDenied, explicitAllowed, requireVerifiedAdult } from "./age/verification";
 import { COSTS, spend } from "./tokens/ledger";
 import { detectSelfHarm, moderateText, SELF_HARM_RESPONSE } from "./moderation";
 import { getLLM } from "./llm/provider";
@@ -34,7 +34,8 @@ export async function handleChat(userId: string, characterId: string, text: stri
   const message = text.trim().slice(0, MAX_MESSAGE_LEN);
   if (!message) throw new AccessDenied("banned", "Empty message.", 400);
 
-  const verdict = moderateText(message);
+  const explicit = explicitAllowed(user);
+  const verdict = moderateText(message, { explicitAllowed: explicit });
   if (!verdict.allowed) {
     // Explicit-content requests are refused without penalty; minor / real-person attempts earn strikes.
     audit({ userId, kind: "input_blocked", category: verdict.category, detail: message.slice(0, 200) });
@@ -67,9 +68,10 @@ export async function handleChat(userId: string, characterId: string, text: stri
     history,
     facts: recall(userId, characterId),
     userMessage: message,
+    explicit,
   });
 
-  const out = moderateText(reply);
+  const out = moderateText(reply, { explicitAllowed: explicit });
   if (!out.allowed) {
     audit({ userId, kind: "output_blocked", category: out.category, detail: reply.slice(0, 200) });
     return { kind: "refused", message: REFUSAL, category: out.category };

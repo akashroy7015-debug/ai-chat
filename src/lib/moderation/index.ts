@@ -148,7 +148,13 @@ const LIKENESS_RE =
 const SELF_HARM_RE =
   /\b(?:kill\s+myself|end\s+my\s+life|suicid\w*|self\s*harm|want\s+to\s+die|cut\s+myself)\b/;
 
-export function moderateText(input: string): ModerationResult {
+export interface ModerationOptions {
+  /** True only for ID-verified adults who opted in, and only when ALLOW_EXPLICIT=true. */
+  explicitAllowed?: boolean;
+}
+
+/** Minor and real-person checks always run; the explicit check is the only one a user setting can relax. */
+export function moderateText(input: string, opts: ModerationOptions = {}): ModerationResult {
   const text = normalize(input);
   const squashed = deleet(text);
 
@@ -186,7 +192,7 @@ export function moderateText(input: string): ModerationResult {
     };
   }
 
-  if (process.env.ALLOW_EXPLICIT !== "true") {
+  if (!(opts.explicitAllowed && process.env.ALLOW_EXPLICIT === "true")) {
     if (EXPLICIT_RE.test(text) || EXPLICIT_RE.test(squashed)) {
       return {
         allowed: false,

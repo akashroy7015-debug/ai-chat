@@ -11,6 +11,10 @@ const O = {
   hairStyle: ["straight", "wavy", "curly", "bangs", "ponytail", "bun", "short", "braids"],
   eyes: ["brown", "blue", "green", "hazel", "gray"],
   build: ["slim", "athletic", "curvy", "average", "muscular", "tall"],
+  bodyShape: ["hourglass", "curvy", "athletic", "slim", "pear", "muscular", "plus_size"],
+  bust: ["small", "medium", "large", "extra_large"],
+  hips: ["slim", "medium", "wide", "extra_wide"],
+  outfit: ["short_dress", "bodycon_dress", "cocktail_dress", "evening_gown", "crop_top_skirt", "bikini", "lingerie", "office_wear", "casual", "gym_wear"],
   personality: ["bubbly", "calm", "cheeky", "nurturing", "intellectual", "adventurous", "shy", "confident", "mysterious"],
   voice: ["soft", "warm", "playful", "deep", "confident", "husky"],
   relationship: ["girlfriend", "boyfriend", "friend", "crush", "partner", "flirty_stranger"],
@@ -21,6 +25,7 @@ type Key = keyof typeof O;
 const STEPS: { title: string; keys: Key[] }[] = [
   { title: "Style", keys: ["gender", "style"] },
   { title: "Looks", keys: ["ethnicity", "hair", "hairStyle", "eyes", "build"] },
+  { title: "Body & outfit", keys: ["bodyShape", "bust", "hips", "outfit"] },
   { title: "Personality", keys: ["personality", "voice", "relationship", "occupation"] },
 ];
 
@@ -29,7 +34,7 @@ export default function Create() {
   const [step, setStep] = useState(0);
   const [err, setErr] = useState("");
   const [f, setF] = useState<Record<Key, string> & { name: string; age: number; hobbies: string; tagline: string; backstory: string }>({
-    gender: "female", style: "photoreal", ethnicity: "caucasian", hair: "brown", hairStyle: "wavy", eyes: "green", build: "athletic",
+    gender: "female", style: "photoreal", ethnicity: "caucasian", hair: "brown", hairStyle: "wavy", eyes: "green", build: "athletic", bodyShape: "hourglass", bust: "large", hips: "wide", outfit: "short_dress",
     personality: "calm", voice: "warm", relationship: "girlfriend", occupation: "artist",
     name: "", age: 25, hobbies: "", tagline: "", backstory: "",
   });

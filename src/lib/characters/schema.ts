@@ -10,6 +10,21 @@ export const HAIR = ["black", "brown", "blonde", "red", "auburn", "silver", "pin
 export const HAIR_STYLE = ["straight", "wavy", "curly", "bangs", "ponytail", "bun", "short", "braids"] as const;
 export const EYES = ["brown", "blue", "green", "hazel", "gray"] as const;
 export const BUILD = ["slim", "athletic", "curvy", "average", "muscular", "tall"] as const;
+export const BODY_SHAPE = ["hourglass", "curvy", "athletic", "slim", "pear", "muscular", "plus_size"] as const;
+export const BUST = ["small", "medium", "large", "extra_large"] as const;
+export const HIPS = ["slim", "medium", "wide", "extra_wide"] as const;
+export const OUTFIT = [
+  "short_dress",
+  "bodycon_dress",
+  "cocktail_dress",
+  "evening_gown",
+  "crop_top_skirt",
+  "bikini",
+  "lingerie",
+  "office_wear",
+  "casual",
+  "gym_wear",
+] as const;
 export const PERSONALITY = [
   "bubbly",
   "calm",
@@ -62,6 +77,10 @@ export const CharacterInput = z.object({
   hairStyle: z.enum(HAIR_STYLE).default("straight"),
   eyes: z.enum(EYES),
   build: z.enum(BUILD),
+  bodyShape: z.enum(BODY_SHAPE).default("athletic"),
+  bust: z.enum(BUST).default("medium"),
+  hips: z.enum(HIPS).default("medium"),
+  outfit: z.enum(OUTFIT).default("casual"),
   personality: z.enum(PERSONALITY),
   voice: z.enum(VOICE).default("warm"),
   relationship: z.enum(RELATIONSHIP).default("partner"),

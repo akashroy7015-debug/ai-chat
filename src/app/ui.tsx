@@ -11,6 +11,8 @@ export interface CharacterCard {
   occupation: string;
   personality: string;
   tagline: string;
+  bodyShape?: string;
+  outfit?: string;
   featured?: boolean;
 }
 

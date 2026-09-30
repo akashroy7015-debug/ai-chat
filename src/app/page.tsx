@@ -16,10 +16,27 @@ export default function Home() {
   const [hair, setHair] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [chars, setChars] = useState<CharacterCard[]>([]);
+  const [settings, setSettings] = useState({ explicitOptIn: false, explicitActive: false, explicitAvailable: false });
+  const [packages, setPackages] = useState<Record<string, { label: string; priceUsd: number }>>({});
 
   async function refresh() {
     setStatus((await (await fetch("/api/verify-age")).json()).ageStatus);
     setBalance((await (await fetch("/api/tokens")).json()).balance);
+    setSettings(await (await fetch("/api/settings")).json());
+    setPackages((await (await fetch("/api/checkout")).json()).packages);
+  }
+
+  async function setExplicit(on: boolean) {
+    if (on && !confirm("Enable adult content? You confirm you are 18+ and want to see mature content.")) return;
+    const r = await fetch("/api/settings", { method: "POST", body: JSON.stringify({ explicit: on }) });
+    if (!r.ok) alert((await r.json()).error);
+    await refresh();
+  }
+
+  async function buy(pkg: string) {
+    const r = await fetch("/api/checkout", { method: "POST", body: JSON.stringify({ pkg }) });
+    if (!r.ok) alert((await r.json()).error);
+    await refresh();
   }
   useEffect(() => { void refresh(); }, []);
 
@@ -43,10 +60,22 @@ export default function Home() {
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <h1 style={{ margin: 0 }}>AI Chat</h1>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify age (18+)</button>}
+          {verified ? <span style={{ color: theme.muted }}>Tokens: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>Verify with ID (18+)</button>}
           <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ Create character</button></Link>
         </div>
       </header>
+      {verified && (
+        <section style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", background: theme.card, padding: 12, borderRadius: 12, margin: "12px 0" }}>
+          {settings.explicitAvailable && (
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={settings.explicitOptIn} onChange={(e) => void setExplicit(e.target.checked)} />
+              Adult content (ID-verified 18+ only)
+            </label>
+          )}
+          <span style={{ color: theme.muted }}>Buy tokens:</span>
+          {Object.entries(packages).map(([k, p]) => <button key={k} style={chip(false)} onClick={() => void buy(k)}>{p.label} · ${p.priceUsd}</button>)}
+        </section>
+      )}
       <p style={{ color: theme.muted }}>18+ only. Every character is a fictional adult and not based on a real person.</p>
 
       <nav style={{ display: "flex", gap: 8, margin: "16px 0" }}>
@@ -67,7 +96,7 @@ export default function Home() {
               <Portrait c={c} />
               <div style={{ padding: "8px 4px" }}>
                 <b>{c.name}</b> <span style={{ color: theme.muted }}>{c.age}</span>
-                <div style={{ fontSize: 12, color: theme.muted }}>{pretty(c.occupation)} · {pretty(c.personality)}</div>
+                <div style={{ fontSize: 12, color: theme.muted }}>{pretty(c.occupation)} · {pretty(c.personality)}{c.outfit ? ` · ${pretty(c.outfit)}` : ""}</div>
                 <div style={{ fontSize: 13, marginTop: 4 }}>{c.tagline}</div>
               </div>
             </article>
