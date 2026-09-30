@@ -1,3 +1,4 @@
+import { openaiLLM } from "./openai";
 import type { Character } from "../characters/schema";
 
 export interface ChatTurn {
@@ -37,5 +38,6 @@ export const mockLLM: LLMProvider = {
 
 export function getLLM(): LLMProvider {
   if (!process.env.LLM_PROVIDER || process.env.LLM_PROVIDER === "mock") return mockLLM;
+  if (process.env.LLM_PROVIDER === "openai") return openaiLLM;
   throw new Error(`Unknown LLM_PROVIDER: ${process.env.LLM_PROVIDER}. Implement it in src/lib/llm.`);
 }

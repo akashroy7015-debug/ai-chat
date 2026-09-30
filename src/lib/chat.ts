@@ -2,6 +2,8 @@ import { AccessDenied, explicitAllowed, requireVerifiedAdult } from "./age/verif
 import { COSTS, spend } from "./tokens/ledger";
 import { detectSelfHarm, moderateText, SELF_HARM_RESPONSE } from "./moderation";
 import { getLLM } from "./llm/provider";
+import { openaiModerate } from "./llm/openai";
+import { credit } from "./tokens/ledger";
 import { recall, remember } from "./memory";
 import { canChatWith } from "./characters/schema";
 import { ensureFeatured } from "./characters/featured";
@@ -18,6 +20,12 @@ export type ChatResult =
 
 function push(m: Omit<Message, "id" | "at">) {
   db.messages.push({ id: newId(), at: Date.now(), ...m });
+}
+
+function supportReply(userId: string, characterId: string, message: string): ChatResult {
+  push({ userId, characterId, role: "user", content: message });
+  push({ userId, characterId, role: "assistant", content: SELF_HARM_RESPONSE });
+  return { kind: "support", message: SELF_HARM_RESPONSE };
 }
 
 /**
@@ -52,9 +60,17 @@ export async function handleChat(userId: string, characterId: string, text: stri
 
   if (detectSelfHarm(message)) {
     audit({ userId, kind: "self_harm_routed", detail: "" });
-    push({ userId, characterId, role: "user", content: message });
-    push({ userId, characterId, role: "assistant", content: SELF_HARM_RESPONSE });
-    return { kind: "support", message: SELF_HARM_RESPONSE };
+    return supportReply(userId, characterId, message);
+  }
+
+  // Second moderation layer (OpenAI, free) when configured. Fails closed if the call errors.
+  if (process.env.OPENAI_MODERATION === "true") {
+    const cat = await openaiModerate(message, explicit).catch(() => "unavailable" as const);
+    if (cat === "self_harm") return supportReply(userId, characterId, message);
+    if (cat) {
+      audit({ userId, kind: "input_blocked", category: `openai:${cat}`, detail: message.slice(0, 200) });
+      return { kind: "refused", message: REFUSAL, category: cat };
+    }
   }
 
   spend(userId, COSTS.chat, "chat");
@@ -64,13 +80,14 @@ export async function handleChat(userId: string, characterId: string, text: stri
     .slice(-20)
     .map((m) => ({ role: m.role, content: m.content }));
 
-  const reply = await getLLM().reply({
-    character,
-    history,
-    facts: recall(userId, characterId),
-    userMessage: message,
-    explicit,
-  });
+  let reply: string;
+  try {
+    reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit });
+  } catch (e) {
+    credit(userId, COSTS.chat, "refund:chat_error");
+    audit({ userId, kind: "llm_error", detail: e instanceof Error ? e.message.slice(0, 200) : String(e) });
+    return { kind: "refused", message: "I lost my train of thought, can you say that again? (No tokens were used.)", category: "error" };
+  }
 
   const out = moderateText(reply, { explicitAllowed: explicit });
   if (!out.allowed) {

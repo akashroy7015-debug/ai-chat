@@ -31,6 +31,12 @@ Legal page templates are at `/terms`, `/privacy` and `/grievance`. Set `OPERATOR
 | Audit log of every block | `store.ts` (`audit_log` table) |
 | Append-only token ledger | `tokens/ledger.ts` |
 
+## OpenAI
+
+Set `LLM_PROVIDER=openai`, `OPENAI_API_KEY` and optionally `OPENAI_MODEL` (default `gpt-4o-mini`).
+`OPENAI_MODERATION=true` adds OpenAI's free moderation check before each message is sent. If that check errors, the message is blocked.
+If a reply fails, the user's token is refunded. OpenAI's usage policies apply, so keep `ALLOW_EXPLICIT=false`.
+
 ## Image & video pipeline (src/lib/media)
 
 `requestMedia` checks age verification, charges tokens, builds a prompt only from character attributes and a fixed scene preset, then generates and scans in the background. Tokens are refunded if the output fails or is blocked. Outputs are labelled AI-generated, and users can report any item, which hides it immediately.
@@ -57,7 +63,6 @@ Also for India: appoint a Grievance Officer (`GRIEVANCE_OFFICER_*`, shown in the
 - **Scale:** SQLite suits a single server. Move to Postgres (`db/schema.sql`) when running more than one instance.
 - **Legal pages:** templates only; get them reviewed.
 - **Age provider:** implement Persona / Veriff / Yoti behind `AgeProvider`, with signed webhooks. Remove the mock.
-- **LLM provider:** implement behind `LLMProvider` with a vendor whose policy allows this use; keep `systemPrompt` guardrails.
 - **Moderation:** the rule-based filter is a first line only. Add a hosted classifier, a maintained public-figure list, and image checks (age estimation + face similarity) before enabling images.
 - **Billing:** no top-ups exist yet. Use a processor that accepts this category. Add chargeback handling.
 - **Legal:** ToS, privacy policy, DSAR/erasure, 48-hour takedown flow, jurisdiction review.
