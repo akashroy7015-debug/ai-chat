@@ -44,11 +44,21 @@ export async function body<T>(req: NextRequest): Promise<Partial<T>> {
   return ((await req.json().catch(() => ({}))) ?? {}) as Partial<T>;
 }
 
-export function setSessionCookie(res: NextResponse, sid: string, maxAgeDays: number) {
+/** True when the visitor's connection is HTTPS (directly, or via Caddy/Cloudflare's forwarded header). */
+export function isHttps(req: NextRequest): boolean {
+  const fwd = req.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  return (fwd ?? req.nextUrl.protocol.replace(":", "")) === "https";
+}
+
+/**
+ * `secure` follows the actual connection: a Secure cookie is dropped by browsers on plain http,
+ * which would log everyone out immediately before HTTPS is set up.
+ */
+export function setSessionCookie(req: NextRequest, res: NextResponse, sid: string, maxAgeDays: number) {
   res.cookies.set(SESSION_COOKIE, sid, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isHttps(req),
     path: "/",
     maxAge: maxAgeDays * 86_400,
   });

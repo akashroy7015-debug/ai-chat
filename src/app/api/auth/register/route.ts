@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const b = await body<{ email: string; password: string; confirmAdultAndTerms: boolean }>(req);
     const u = register(String(b.email ?? ""), String(b.password ?? ""), b.confirmAdultAndTerms === true);
     const res = json({ id: u.id, email: u.email }, 201);
-    setSessionCookie(res, createSession(u.id), SESSION_DAYS);
+    setSessionCookie(req, res, createSession(u.id), SESSION_DAYS);
     return res;
   } catch (e) {
     return errorResponse(e);

@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const b = await body<{ email: string; password: string }>(req);
     const u = login(String(b.email ?? ""), String(b.password ?? ""));
     const res = json({ id: u.id, email: u.email });
-    setSessionCookie(res, createSession(u.id), SESSION_DAYS);
+    setSessionCookie(req, res, createSession(u.id), SESSION_DAYS);
     return res;
   } catch (e) {
     return errorResponse(e);
