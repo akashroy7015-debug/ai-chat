@@ -10,9 +10,9 @@ as_app() { sudo -u aichat "$@"; }
 
 BRANCH=$(as_app git -C "$APP" rev-parse --abbrev-ref HEAD)
 URL=$(as_app git -C "$APP" remote get-url origin)
-[ -d "$STAGE/.git" ] || as_app git clone -q --branch "$BRANCH" "$URL" "$STAGE" || exit 0
+[ -d "$STAGE/.git" ] || as_app git clone -q --branch "$BRANCH" "$URL" "$STAGE" || { echo "$(date -Is) clone of $URL failed"; exit 0; }
 
-as_app git -C "$STAGE" fetch -q origin || exit 0
+as_app git -C "$STAGE" fetch -q origin || { echo "$(date -Is) git fetch failed"; exit 0; }
 LIVE=$(as_app git -C "$APP" rev-parse HEAD)
 NEW=$(as_app git -C "$STAGE" rev-parse "origin/$BRANCH")
 [ "$LIVE" = "$NEW" ] && exit 0
