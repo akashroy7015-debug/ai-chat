@@ -6,4 +6,9 @@ try {
 } catch {}
 
 /** @type {import('next').NextConfig} */
-export default { reactStrictMode: true, env: { BUILD_COMMIT: commit } };
+export default {
+  reactStrictMode: true,
+  // The updater builds into .next-build and swaps it in, so the live site keeps running during builds.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+  env: { BUILD_COMMIT: commit },
+};

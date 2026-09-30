@@ -24,7 +24,7 @@ Legal page templates are at `/terms`, `/privacy` and `/grievance`. Set `OPERATOR
 | Control | Where |
 |---|---|
 | ID-based age gate before characters, chat or spending | `age/verification.ts`, enforced in every route |
-| Characters 18+ only (schema and DB `CHECK`), attribute-based builder, no photo upload | `characters/schema.ts`, `db/schema.sql` |
+| Characters 18+ only, attribute-based builder | `characters/schema.ts` |
 | Input and output moderation: minors, real people / likeness, explicit content | `moderation/index.ts`, `chat.ts` |
 | Strikes and auto-ban for minor or real-person attempts | `chat.ts` |
 | Crisis routing for self-harm instead of a model reply | `chat.ts` |
@@ -60,7 +60,7 @@ Also for India: appoint a Grievance Officer (`GRIEVANCE_OFFICER_*`, shown in the
 ## Before going live (not done yet)
 
 - **Auth extras:** email verification and password reset (needs an email provider).
-- **Scale:** SQLite suits a single server. Move to Postgres (`db/schema.sql`) when running more than one instance.
+- **Scale:** SQLite suits a single server; move to Postgres when running more than one instance.
 - **Legal pages:** templates only; get them reviewed.
 - **Age provider:** implement Persona / Veriff / Yoti behind `AgeProvider`, with signed webhooks. Remove the mock.
 - **Moderation:** the rule-based filter is a first line only. Add a hosted classifier, a maintained public-figure list, and image checks (age estimation + face similarity) before enabling images.

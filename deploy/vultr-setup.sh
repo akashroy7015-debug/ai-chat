@@ -126,6 +126,6 @@ echo "Updated."
 UPD
 chmod +x /usr/local/bin/ai-chat-update
 
-bash /opt/ai-chat/app/deploy/enable-autodeploy.sh || true
+bash /opt/ai-chat/app/deploy/install-updater.sh || true
 
 echo "== ai-chat setup finished $(date). Open: ${DOMAIN:+https://$DOMAIN}${DOMAIN:-http://$(curl -s -4 ifconfig.me)}"
