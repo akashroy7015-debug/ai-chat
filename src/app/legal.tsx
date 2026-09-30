@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-export const OPERATOR = process.env.OPERATOR_NAME ?? "(set OPERATOR_NAME)";
-export const SUPPORT_EMAIL = process.env.GRIEVANCE_OFFICER_EMAIL ?? "(set GRIEVANCE_OFFICER_EMAIL)";
+export const OPERATOR = process.env.OPERATOR_NAME ?? "the operator of this service";
+export const SUPPORT_EMAIL = process.env.GRIEVANCE_OFFICER_EMAIL ?? "support@yourdomain.com";
 
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {
   return (
