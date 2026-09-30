@@ -16,7 +16,7 @@ export default function Home() {
   const [hair, setHair] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [chars, setChars] = useState<CharacterCard[]>([]);
-  const [settings, setSettings] = useState({ explicitOptIn: false, explicitActive: false, explicitAvailable: false });
+  const [settings, setSettings] = useState<{ explicitOptIn: boolean; explicitActive: boolean; explicitAvailable: boolean; grievanceOfficer?: { name: string; email: string } }>({ explicitOptIn: false, explicitActive: false, explicitAvailable: false });
   const [packages, setPackages] = useState<Record<string, { label: string; priceUsd: number }>>({});
 
   async function refresh() {
@@ -103,6 +103,10 @@ export default function Home() {
           </Link>
         ))}
       </div>
+      <footer style={{ marginTop: 32, color: theme.muted, fontSize: 12 }}>
+        All characters and media are AI-generated and fictional. Report content from any gallery item.
+        {settings.grievanceOfficer && <> Grievance Officer: {settings.grievanceOfficer.name} · {settings.grievanceOfficer.email}</>}
+      </footer>
     </main>
   );
 }

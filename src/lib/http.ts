@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { AccessDenied } from "./age/verification";
 import { InsufficientTokens } from "./tokens/ledger";
-import { newId } from "./store";
+import { getUser, newId } from "./store";
+import { countryFromHeaders } from "./jurisdiction";
 
 /**
  * DEV-ONLY identity: an anonymous cookie. Replace with real auth (email/social login)
@@ -9,7 +10,10 @@ import { newId } from "./store";
  */
 export function userIdFrom(req: NextRequest): { userId: string; isNew: boolean } {
   const existing = req.cookies.get("uid")?.value;
-  return existing ? { userId: existing, isNew: false } : { userId: newId(), isNew: true };
+  const id = existing ? { userId: existing, isNew: false } : { userId: newId(), isNew: true };
+  // Country is refreshed on every request so travelling into a blocked country switches explicit off.
+  getUser(id.userId).lastCountry = countryFromHeaders(req.headers) ?? process.env.DEV_COUNTRY;
+  return id;
 }
 
 export function json(userId: { userId: string; isNew: boolean }, body: unknown, status = 200) {

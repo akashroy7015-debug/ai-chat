@@ -1,4 +1,5 @@
 import { audit, getUser, type User } from "../store";
+import { explicitAllowedIn } from "../jurisdiction";
 
 /**
  * Age verification is delegated to a third-party ID + selfie provider
@@ -9,6 +10,8 @@ export interface AgeProvider {
   start(userId: string): Promise<{ ref: string; redirectUrl: string }>;
   /** Must only return "verified" after a government ID document + liveness selfie check with DOB >= 18. */
   result(ref: string): Promise<"verified" | "rejected" | "pending">;
+  /** ISO country of the verified ID document. */
+  idCountry?(ref: string): Promise<string | undefined>;
 }
 
 /** Dev mock: verification "passes" on the first result poll. Never use in production. */
@@ -18,6 +21,9 @@ export const mockProvider: AgeProvider = {
   },
   async result() {
     return "verified";
+  },
+  async idCountry() {
+    return process.env.MOCK_ID_COUNTRY || undefined;
   },
 };
 
@@ -45,7 +51,10 @@ export async function completeVerification(userId: string) {
   if (!user.ageVerificationRef) throw new Error("No verification in progress");
   const outcome = await getProvider().result(user.ageVerificationRef);
   if (outcome !== "pending") user.ageStatus = outcome;
-  if (outcome === "verified") user.ageMethod = "id_document";
+  if (outcome === "verified") {
+    user.ageMethod = "id_document";
+    user.idCountry = (await getProvider().idCountry?.(user.ageVerificationRef))?.toUpperCase();
+  }
   audit({ userId, kind: "age_verification_result", detail: outcome });
   return user.ageStatus;
 }
@@ -67,7 +76,8 @@ export function explicitAllowed(user: User): boolean {
     !user.banned &&
     user.ageStatus === "verified" &&
     user.ageMethod === "id_document" &&
-    user.explicitOptIn
+    user.explicitOptIn &&
+    explicitAllowedIn(user.lastCountry, user.idCountry)
   );
 }
 

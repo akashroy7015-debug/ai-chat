@@ -18,9 +18,19 @@ describe("age gate", () => {
     expect(explicitAllowed(u)).toBe(false);
     await completeVerification("u-x");
     u.explicitOptIn = true;
+    u.idCountry = "GB";
+    u.lastCountry = "GB";
     expect(explicitAllowed(u)).toBe(false); // global flag off
     process.env.ALLOW_EXPLICIT = "true";
     expect(explicitAllowed(u)).toBe(true);
+    u.lastCountry = "IN";
+    expect(explicitAllowed(u)).toBe(false); // India: never
+    u.lastCountry = "GB";
+    u.idCountry = "IN";
+    expect(explicitAllowed(u)).toBe(false); // Indian ID abroad: never
+    u.idCountry = undefined;
+    expect(explicitAllowed(u)).toBe(false); // unknown: fail closed
+    u.idCountry = "GB";
     u.banned = true;
     expect(explicitAllowed(u)).toBe(false);
     delete process.env.ALLOW_EXPLICIT;

@@ -8,7 +8,7 @@ Shipped policy: **romantic, not explicit** (`ALLOW_EXPLICIT=false`).
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm test           # 48 unit tests
+npm test           # unit tests
 npm run typecheck
 ```
 
@@ -25,6 +25,26 @@ Dev mode uses mocks (`AGE_PROVIDER=mock`, `LLM_PROVIDER=mock`) and an in-memory 
 | Crisis routing for self-harm instead of a model reply | `chat.ts` |
 | Audit log of every block | `store.ts` (`audit_log` table) |
 | Append-only token ledger | `tokens/ledger.ts` |
+
+## Image & video pipeline (src/lib/media)
+
+`requestMedia` checks age verification, charges tokens, builds a prompt only from character attributes and a fixed scene preset, then generates and scans in the background. Tokens are refunded if the output fails or is blocked. Outputs are labelled AI-generated, and users can report any item, which hides it immediately.
+
+**Your GPU server** (`MEDIA_PROVIDER=self_hosted`, `MEDIA_ENDPOINT`, `MEDIA_API_KEY`):
+`POST MEDIA_ENDPOINT` with `{ kind, prompt, negativePrompt, contentLevel: "sfw"|"adult", seed }` must return `{ url, mimeType }`.
+Always apply `negativePrompt`. Only produce adult output when `contentLevel` is `"adult"`.
+
+**Safety service** (`SAFETY_SCANNER=remote`, `SAFETY_ENDPOINT`, `SAFETY_API_KEY`), required in production:
+`POST SAFETY_ENDPOINT` with `{ url, mimeType }` must return `{ csamMatch, minApparentAge, realPersonSimilarity }`.
+Use PhotoDNA or Thorn Safer for `csamMatch`, an age-estimation model, and face similarity against a public-figure set.
+Output is blocked if apparent age < `MIN_APPARENT_AGE` (21), similarity > 0.6, any hash match, or any scanner error (fails closed).
+A CSAM match bans the user and logs `csam_escalation_required`. It must be reviewed by a human and reported as the law requires (e.g. NCMEC in the US).
+
+## Countries (src/lib/jurisdiction.ts)
+
+Explicit mode needs **both** the request country (CDN header) and the verified ID's country to be allowed. An unknown country fails closed.
+**India is blocked**: IT Act 2000 s.67/67A make publishing or transmitting sexually explicit material electronically an offence. Indian users get the romantic, non-explicit product only.
+Also for India: appoint a Grievance Officer (`GRIEVANCE_OFFICER_*`, shown in the footer). IT Rules 2021 require acknowledgement within 24h, resolution within 15 days, and removal of intimate imagery within 24h. Under the DPDP Act 2023, keep consent records and support deletion requests. Do not store Aadhaar numbers; use a licensed provider (e.g. DigiLocker-based) that returns only an 18+ result.
 
 ## Before going live (not done yet)
 

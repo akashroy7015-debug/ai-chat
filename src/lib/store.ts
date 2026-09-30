@@ -13,6 +13,10 @@ export interface User {
   /** How age was proven. Only "id_document" unlocks explicit mode. */
   ageMethod?: "id_document";
   explicitOptIn: boolean;
+  /** ISO country from the verified ID document. */
+  idCountry?: string;
+  /** ISO country of the user's most recent request (CDN geo header). */
+  lastCountry?: string;
   banned: boolean;
   strikes: number;
 }
