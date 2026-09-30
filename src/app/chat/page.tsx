@@ -17,13 +17,14 @@ function Chat() {
   const [scenes, setScenes] = useState<string[]>([]);
   const [costs, setCosts] = useState<Record<string, number>>({});
   const [scene, setScene] = useState("selfie");
+  const [mediaOn, setMediaOn] = useState(false);
 
   async function loadMedia() {
     if (!cid) return;
     const r = await fetch(`/api/media?characterId=${cid}`);
     if (!r.ok) return;
     const b = await r.json();
-    setMedia(b.media); setScenes(b.scenes); setCosts(b.costs);
+    setMedia(b.media); setScenes(b.scenes); setCosts(b.costs); setMediaOn(b.enabled);
   }
   useEffect(() => { void loadMedia(); }, [cid]);
   // Poll while anything is still being generated.
@@ -74,13 +75,14 @@ function Chat() {
         <h2 style={{ marginBottom: 4 }}>{c.name}, {c.age}</h2>
         <div style={{ color: theme.muted, fontSize: 13 }}>{pretty(c.occupation)} · {pretty(c.personality)} · {pretty(c.ethnicity)}</div>
         <p style={{ fontSize: 14 }}>{c.tagline}</p>
-        <div style={{ display: "grid", gap: 6 }}>
+        {!mediaOn && <p style={{ color: theme.muted, fontSize: 13 }}>Photos &amp; videos coming soon.</p>}
+        {mediaOn && <div style={{ display: "grid", gap: 6 }}>
           <select style={field} value={scene} onChange={(e) => setScene(e.target.value)}>
             {scenes.map((s) => <option key={s} value={s}>{pretty(s)}</option>)}
           </select>
           <button style={btn} onClick={() => void requestMedia("image")}>Get a photo · {costs.image ?? "…"} tokens</button>
           <button style={{ ...btn, background: "#7a3cff" }} onClick={() => void requestMedia("video")}>Get a video · {costs.video ?? "…"} tokens</button>
-        </div>
+        </div>}
         <h3>Gallery</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {media.map((m) => (

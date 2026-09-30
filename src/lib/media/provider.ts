@@ -49,6 +49,11 @@ export function selfHosted(endpoint: string, apiKey: string, timeoutMs = 180_000
   };
 }
 
+/** Media is offered only when a backend is configured (or in dev, where the mock is used). */
+export function mediaEnabled(): boolean {
+  return Boolean(process.env.MEDIA_PROVIDER) || process.env.NODE_ENV !== "production";
+}
+
 export function getMediaProvider(): MediaProvider {
   const p = process.env.MEDIA_PROVIDER ?? "mock";
   if (p === "mock") {
