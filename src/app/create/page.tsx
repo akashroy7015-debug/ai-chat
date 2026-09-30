@@ -57,7 +57,7 @@ export default function Create() {
         {[...STEPS.map((s) => s.title), "Details"].map((t, i) => <span key={t} style={chip(i === step)}>{i + 1}. {t}</span>)}
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 16 }}>
-        <Portrait c={{ name: f.name || "?", hair: f.hair, style: f.style }} height={240} />
+        <Portrait c={{ ...f, name: f.name || "?" }} height={240} />
         <div>
           {!last ? STEPS[step].keys.map((k) => (
             <section key={k} style={{ marginBottom: 12 }}>
