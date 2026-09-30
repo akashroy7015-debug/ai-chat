@@ -22,6 +22,12 @@ const w = (s: string) => s.replace(/_/g, " ");
 /** Swimwear/lingerie become a glamorous dress so portraits stay SFW and pass the image provider's policy. */
 const OUTFIT: Record<string, string> = { lingerie: "elegant silk slip dress", bikini: "stylish summer dress" };
 
+/** Describes the figure in fashion-shoot terms (no body-part wording the image provider may reject). */
+const FIGURE_EXTRA = (c: Character) => {
+  const curvy = c.bust === "large" || c.bust === "extra_large" || c.hips === "wide" || c.hips === "extra_wide";
+  return curvy ? (c.bust === "extra_large" || c.hips === "extra_wide" ? ", very voluptuous curvy silhouette" : ", voluptuous curvy silhouette") : "";
+};
+
 /** Attribute-only portrait prompt: always adult, clothed, fictional, waist-up. No user free text. */
 export function portraitPrompt(c: Character): string {
   const who = c.gender === "male" ? "man" : "woman";
@@ -31,9 +37,10 @@ export function portraitPrompt(c: Character): string {
       ? `High-quality anime illustration of a fictional adult ${who}, clearly ${c.age} years old, mature adult proportions`
       : `Photorealistic glamour portrait photo of a fictional adult ${who}, clearly ${c.age} years old`,
     `${w(c.ethnicity)}`,
-    `${c.hair} ${w(c.hairStyle)} hair, ${c.eyes} eyes, ${figure}`,
+    `${c.hair} ${w(c.hairStyle)} hair, ${c.eyes} eyes, ${figure}${c.gender === "female" ? FIGURE_EXTRA(c) : ""}`,
     `wearing a ${OUTFIT[c.outfit] ?? w(c.outfit)}`,
-    `${c.personality} expression, confident, looking at the camera, waist-up, fully clothed`,
+    `${c.personality} expression, confident pose, looking at the camera`,
+    "three-quarter length fashion shot from head to mid-thigh showing figure and outfit, fully clothed, tasteful",
     c.style === "anime" ? "soft cel shading, vibrant colors" : "soft studio lighting, shallow depth of field, 85mm lens",
     "not resembling any real person, no text, no watermark",
   ].join(", ");

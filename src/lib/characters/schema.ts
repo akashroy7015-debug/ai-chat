@@ -97,10 +97,12 @@ export type Character = CharacterInput & {
   createdAt: number;
   /** Featured catalog characters are public; user-built ones are private to the owner. */
   featured?: boolean;
+  /** Featured characters can be hidden from the catalog by an admin. */
+  hidden?: boolean;
 };
 
 export const SYSTEM_OWNER = "system";
 
 export function canChatWith(character: Character, userId: string): boolean {
-  return character.featured === true || character.ownerId === userId;
+  return (character.featured === true && !character.hidden) || character.ownerId === userId;
 }

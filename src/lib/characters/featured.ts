@@ -1,5 +1,5 @@
 import { CharacterInput, SYSTEM_OWNER, type Character } from "./schema";
-import { db } from "../store";
+import { db, newId } from "../store";
 
 /** Fictional catalog characters. All adults, none based on real people. */
 const SEEDS: Array<Partial<CharacterInput> & Pick<CharacterInput, "name" | "age" | "style" | "hair" | "eyes" | "build" | "personality">> = [
@@ -23,15 +23,50 @@ const SEEDS: Array<Partial<CharacterInput> & Pick<CharacterInput, "name" | "age"
 
 let seeded = false;
 
-/** Validated through the same schema as user characters, so catalog entries meet every rule too. */
+/**
+ * Inserts the built-in catalog on first run. Existing entries are left alone so admin edits persist.
+ * Validated through the same schema as user characters, so catalog entries meet every rule too.
+ */
 export function ensureFeatured() {
   if (seeded) return;
   SEEDS.forEach((s, i) => {
+    const id = `featured-${i + 1}`;
+    if (db.characters.has(id)) return;
     const data = CharacterInput.parse(s);
-    const c: Character = { ...data, id: `featured-${i + 1}`, ownerId: SYSTEM_OWNER, createdAt: 0, featured: true };
-    db.characters.set(c.id, c);
+    db.characters.set(id, { ...data, id, ownerId: SYSTEM_OWNER, createdAt: 0, featured: true });
   });
   seeded = true;
+}
+
+/** Admin: add a new catalog model. Goes through the full schema (18+, no real people, moderated text). */
+export function createFeatured(input: unknown): Character {
+  ensureFeatured();
+  const data = CharacterInput.parse(input);
+  const id = `featured-${newId().slice(0, 8)}`;
+  const c: Character = { ...data, id, ownerId: SYSTEM_OWNER, createdAt: Date.now(), featured: true };
+  db.characters.set(id, c);
+  return c;
+}
+
+export function updateFeatured(id: string, input: unknown): Character {
+  const old = db.characters.get(id);
+  if (!old?.featured) throw new Error("Not a featured character");
+  const data = CharacterInput.parse(input);
+  const c: Character = { ...old, ...data };
+  db.characters.set(id, c);
+  return c;
+}
+
+export function setFeaturedHidden(id: string, hidden: boolean) {
+  const c = db.characters.get(id);
+  if (!c?.featured) throw new Error("Not a featured character");
+  c.hidden = hidden;
+  db.characters.save(id);
+}
+
+export function allFeatured(): Character[] {
+  ensureFeatured();
+  return [...db.characters.values()].filter((c) => c.featured).sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export type Category = "girls" | "milf" | "anime" | "guys";
@@ -49,7 +84,7 @@ export interface CatalogFilter {
 export function listFeatured(f: CatalogFilter = {}): Character[] {
   ensureFeatured();
   return [...db.characters.values()].filter((c) => {
-    if (!c.featured) return false;
+    if (!c.featured || c.hidden) return false;
     if (f.category === "anime" && c.style !== "anime") return false;
     if (f.category === "girls" && (c.style !== "photoreal" || c.gender !== "female")) return false;
     if (f.category === "milf" && (c.gender !== "female" || c.age < MILF_MIN_AGE)) return false;

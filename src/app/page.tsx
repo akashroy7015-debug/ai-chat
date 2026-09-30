@@ -110,7 +110,7 @@ export default function Home() {
         {chars.map((c) => (
           <Link key={c.id} href={verified ? `/chat?c=${c.id}` : "#"} onClick={(e) => { if (!verified) { e.preventDefault(); alert(me ? "Verify your age (18+) to start chatting." : "Create a free account to start chatting."); } }} style={{ color: "inherit", textDecoration: "none" }}>
             <article style={{ background: theme.card, borderRadius: 14, padding: 8 }}>
-              <Portrait c={c} />
+              <Portrait c={c} height={280} />
               <div style={{ padding: "8px 4px" }}>
                 <b>{c.name}</b> <span style={{ color: theme.muted }}>{c.age}</span>
                 <div style={{ fontSize: 12, color: theme.muted }}>{pretty(c.occupation)} · {pretty(c.personality)}{c.outfit ? ` · ${pretty(c.outfit)}` : ""}</div>

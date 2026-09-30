@@ -46,7 +46,8 @@ export default function Admin() {
   return (
     <main>
       <h1>Admin</h1>
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+        <a href="/admin/models"><button style={{ ...btn, background: "#7a3cff" }}>💃 Models</button></a>
         {(["overview", "users", "reports", "log"] as const).map((t) => (
           <button key={t} style={{ ...btn, background: tab === t ? theme.accent : "#333" }} onClick={() => setTab(t)}>
             {t[0].toUpperCase() + t.slice(1)}{t === "reports" && stats?.openReports ? ` (${stats.openReports})` : ""}

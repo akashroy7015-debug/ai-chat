@@ -26,3 +26,19 @@ describe("featured catalog", () => {
     expect(canChatWith(listFeatured()[0], "anyone")).toBe(true);
   });
 });
+
+describe("admin-managed models", async () => {
+  const { createFeatured, updateFeatured, setFeaturedHidden, allFeatured } = await import("./featured");
+  const base = { name: "Zara", age: 27, hair: "black", eyes: "brown", build: "curvy", style: "photoreal", personality: "confident", bodyShape: "hourglass" };
+  it("creates, edits, hides; validation still applies", () => {
+    const c = createFeatured(base);
+    expect(listFeatured().some((x) => x.id === c.id)).toBe(true);
+    updateFeatured(c.id, { ...base, tagline: "hey you" });
+    expect(allFeatured().find((x) => x.id === c.id)!.tagline).toBe("hey you");
+    setFeaturedHidden(c.id, true);
+    expect(listFeatured().some((x) => x.id === c.id)).toBe(false);
+    expect(canChatWith(allFeatured().find((x) => x.id === c.id)!, "anyone")).toBe(false);
+    expect(() => createFeatured({ ...base, age: 17 })).toThrow();
+    expect(() => createFeatured({ ...base, name: "Taylor Swift" })).toThrow();
+  });
+});
