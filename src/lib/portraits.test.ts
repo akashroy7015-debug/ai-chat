@@ -20,13 +20,14 @@ afterEach(() => vi.clearAllMocks());
 const base = CharacterInput.parse({ name: "V", age: 30, hair: "red", eyes: "green", build: "curvy", style: "photoreal", personality: "confident", bodyShape: "hourglass", bust: "large", outfit: "lingerie" });
 
 describe("portraits", () => {
-  it("prompt is adult, clothed, fictional, and swaps lingerie for a dress", () => {
+  it("prompt is adult and fictional; lingerie is shown as a catalogue shot, never nude", () => {
     const p = portraitPrompt({ ...base, id: "x", ownerId: "o", createdAt: 0 });
     expect(p).toContain("30 years old");
-    expect(p).toContain("fully clothed");
     expect(p).toContain("not resembling any real person");
-    expect(p).not.toContain("lingerie");
-    expect(p).not.toContain("bust");
+    expect(p).toContain("lace lingerie set");
+    expect(p).toContain("no nudity");
+    const dress = portraitPrompt({ ...base, outfit: "cocktail_dress", id: "y", ownerId: "o", createdAt: 0 });
+    expect(dress).toContain("fully clothed");
   });
 
   it("admin job generates all featured portraits and serves them", async () => {

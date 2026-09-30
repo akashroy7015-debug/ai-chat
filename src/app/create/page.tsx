@@ -14,7 +14,7 @@ const O = {
   bodyShape: ["hourglass", "curvy", "athletic", "slim", "pear", "muscular", "plus_size"],
   bust: ["small", "medium", "large", "extra_large"],
   hips: ["slim", "medium", "wide", "extra_wide"],
-  outfit: ["short_dress", "bodycon_dress", "cocktail_dress", "evening_gown", "crop_top_skirt", "bikini", "lingerie", "office_wear", "casual", "gym_wear"],
+  outfit: ["short_dress", "bodycon_dress", "cocktail_dress", "evening_gown", "crop_top_skirt", "bikini", "lingerie", "office_wear", "casual", "gym_wear", "bralette_top", "night_dress"],
   personality: ["bubbly", "calm", "cheeky", "nurturing", "intellectual", "adventurous", "shy", "confident", "mysterious"],
   voice: ["soft", "warm", "playful", "deep", "confident", "husky"],
   relationship: ["girlfriend", "boyfriend", "friend", "crush", "partner", "flirty_stranger"],

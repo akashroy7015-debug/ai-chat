@@ -24,6 +24,8 @@ export const OUTFIT = [
   "office_wear",
   "casual",
   "gym_wear",
+  "bralette_top",
+  "night_dress",
 ] as const;
 export const PERSONALITY = [
   "bubbly",

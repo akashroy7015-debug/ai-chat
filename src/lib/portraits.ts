@@ -22,7 +22,15 @@ export const portraitVersion = (id: string) => portraits.get(id)?.at;
 
 const w = (s: string) => s.replace(/_/g, " ");
 /** Swimwear/lingerie become a glamorous dress so portraits stay SFW and pass the image provider's policy. */
-const OUTFIT: Record<string, string> = { lingerie: "elegant silk slip dress", bikini: "stylish summer dress" };
+const OUTFIT: Record<string, string> = {
+  lingerie: "matching lace lingerie set (bra and panties)",
+  bikini: "stylish bikini",
+  bralette_top: "lace bralette with high-waisted shorts",
+  night_dress: "short satin night dress",
+  short_dress: "short mini dress",
+};
+/** Outfits shot as a lingerie/swimwear catalogue: revealing but never nude. */
+const INTIMATE = new Set(["lingerie", "bikini", "bralette_top", "night_dress"]);
 
 /** Describes the figure in fashion-shoot terms (no body-part wording the image provider may reject). */
 const FIGURE_EXTRA = (c: Character) => {
@@ -42,7 +50,9 @@ export function portraitPrompt(c: Character): string {
     `${c.hair} ${w(c.hairStyle)} hair, ${c.eyes} eyes, ${figure}${c.gender === "female" ? FIGURE_EXTRA(c) : ""}`,
     `wearing a ${OUTFIT[c.outfit] ?? w(c.outfit)}`,
     `${c.personality} expression, confident pose, looking at the camera`,
-    "three-quarter length fashion shot from head to mid-thigh showing figure and outfit, fully clothed, tasteful",
+    INTIMATE.has(c.outfit)
+      ? "three-quarter length lingerie/swimwear catalogue photo showing figure and outfit, confident sensual pose, tasteful, no nudity"
+      : "three-quarter length fashion shot from head to mid-thigh showing figure and outfit, fully clothed, tasteful",
     c.style === "anime" ? "soft cel shading, vibrant colors" : "soft studio lighting, shallow depth of field, 85mm lens",
     "not resembling any real person, no text, no watermark",
   ].join(", ");
@@ -52,7 +62,8 @@ type Fetch = typeof fetch;
 
 /** Self-hosted Stable Diffusion (AUTOMATIC1111 / Forge / SD.Next API): IMAGE_PROVIDER=sd, IMAGE_ENDPOINT=http://gpu:7860 */
 const useSD = () => process.env.IMAGE_PROVIDER === "sd";
-const SD_NEGATIVE = `${NEGATIVE_PROMPT}, nude, nudity, naked, nsfw, topless, underwear, lingerie, cleavage, deformed, extra limbs, lowres`;
+/** Nudity is always excluded; lingerie/swimwear outfits are allowed. */
+const SD_NEGATIVE = `${NEGATIVE_PROMPT}, nude, nudity, naked, topless, nipples, genitals, see-through, explicit, deformed, extra limbs, lowres`;
 
 async function generateSD(c: Character, fetchImpl: Fetch, scanner: () => SafetyScanner): Promise<{ data: Buffer; ext: string }> {
   const base = (process.env.IMAGE_ENDPOINT ?? "").replace(/\/$/, "");
@@ -91,7 +102,7 @@ export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch, s
     body: JSON.stringify({
       model, prompt: portraitPrompt(c), n: 1,
       ...(gpt
-        ? { size: "1024x1536", quality: "medium", output_format: "webp", output_compression: 80, moderation: "auto" }
+        ? { size: "1024x1536", quality: "medium", output_format: "webp", output_compression: 80, moderation: process.env.OPENAI_IMAGE_MODERATION ?? "low" }
         : { size: "1024x1792", response_format: "b64_json" }),
     }),
     signal: AbortSignal.timeout(120_000),
