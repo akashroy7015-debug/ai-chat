@@ -92,3 +92,25 @@ describe("system prompt language and style", () => {
     expect(systemPrompt(character, [], false, "hi")).toContain("Devanagari");
   });
 });
+
+describe("OpenAI-compatible servers (Ollama, OpenRouter, ...)", () => {
+  it("uses LLM_BASE_URL / LLM_MODEL and works without a key for local servers", async () => {
+    process.env.LLM_BASE_URL = "http://gpu-box:11434/v1/";
+    process.env.LLM_MODEL = "llama3.1:8b";
+    const f = mockFetch(() => ({ choices: [{ message: { content: "heyy 😏" } }] }));
+    expect(await openaiLLM.reply({ character, history: [], facts: [], userMessage: "hi", explicit: false })).toBe("heyy 😏");
+    const [url, init] = f.mock.calls[0];
+    expect(url).toBe("http://gpu-box:11434/v1/chat/completions");
+    expect(JSON.parse(String(init.body)).model).toBe("llama3.1:8b");
+    delete process.env.LLM_BASE_URL;
+    delete process.env.LLM_MODEL;
+  });
+  it("moderation still goes to OpenAI", async () => {
+    process.env.LLM_BASE_URL = "http://gpu-box:11434/v1";
+    process.env.OPENAI_API_KEY = "sk-test";
+    const f = mockFetch(() => ({ results: [{ flagged: false, categories: {} }] }));
+    await openaiModerate("hello", false);
+    expect(f.mock.calls[0][0]).toBe("https://api.openai.com/v1/moderations");
+    delete process.env.LLM_BASE_URL;
+  });
+});

@@ -6,6 +6,8 @@ import { ensureFeatured } from "./characters/featured";
 import { requireVerifiedAdult, AccessDenied } from "./age/verification";
 import { COSTS, credit, spend } from "./tokens/ledger";
 import { audit, db, PMap } from "./store";
+import { NEGATIVE_PROMPT } from "./characters/appearance";
+import { getScanner, scanFailClosed, type SafetyScanner } from "./media/safety";
 
 export function portraitDir(): string {
   if (process.env.PORTRAIT_DIR) return process.env.PORTRAIT_DIR;
@@ -48,8 +50,37 @@ export function portraitPrompt(c: Character): string {
 
 type Fetch = typeof fetch;
 
-/** Calls OpenAI Images and saves the result. Returns the saved file name. */
-export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch): Promise<string> {
+/** Self-hosted Stable Diffusion (AUTOMATIC1111 / Forge / SD.Next API): IMAGE_PROVIDER=sd, IMAGE_ENDPOINT=http://gpu:7860 */
+const useSD = () => process.env.IMAGE_PROVIDER === "sd";
+const SD_NEGATIVE = `${NEGATIVE_PROMPT}, nude, nudity, naked, nsfw, topless, underwear, lingerie, cleavage, deformed, extra limbs, lowres`;
+
+async function generateSD(c: Character, fetchImpl: Fetch, scanner: () => SafetyScanner): Promise<{ data: Buffer; ext: string }> {
+  const base = (process.env.IMAGE_ENDPOINT ?? "").replace(/\/$/, "");
+  if (!base) throw new Error("IMAGE_ENDPOINT is not set");
+  const res = await fetchImpl(`${base}/sdapi/v1/txt2img`, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...(process.env.IMAGE_API_KEY ? { authorization: `Bearer ${process.env.IMAGE_API_KEY}` } : {}) },
+    body: JSON.stringify({ prompt: portraitPrompt(c), negative_prompt: SD_NEGATIVE, width: 832, height: 1216, steps: Number(process.env.IMAGE_STEPS ?? 28), cfg_scale: 6, sampler_name: "DPM++ 2M Karras" }),
+    signal: AbortSignal.timeout(300_000),
+  });
+  if (!res.ok) throw new Error(`Stable Diffusion ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const b64 = ((await res.json()) as { images?: string[] }).images?.[0];
+  if (!b64) throw new Error("Stable Diffusion returned no image");
+  // Open models have no built-in safety: every image must pass the scanner (fails closed).
+  const verdict = await scanFailClosed(scanner, `data:image/png;base64,${b64}`, "image/png");
+  if (!verdict.ok) {
+    audit({ userId: "system", kind: "portrait_blocked", category: verdict.category, detail: `${c.id} ${verdict.detail}` });
+    throw new Error(`Picture blocked by safety check (${verdict.category})`);
+  }
+  return { data: Buffer.from(b64, "base64"), ext: "png" };
+}
+
+/** Generates a portrait (OpenAI Images, or self-hosted Stable Diffusion) and saves it. Returns the file name. */
+export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch, scanner: () => SafetyScanner = getScanner): Promise<string> {
+  if (useSD()) {
+    const { data, ext } = await generateSD(c, fetchImpl, scanner);
+    return savePortrait(c, data, ext);
+  }
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("OPENAI_API_KEY is not set");
   const model = process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1";
@@ -69,10 +100,13 @@ export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch): 
   const b = (await res.json()) as { data?: { b64_json?: string }[] };
   const b64 = b.data?.[0]?.b64_json;
   if (!b64) throw new Error("OpenAI returned no image");
-  const ext = gpt ? "webp" : "png";
+  return savePortrait(c, Buffer.from(b64, "base64"), gpt ? "webp" : "png");
+}
+
+function savePortrait(c: Character, data: Buffer, ext: string): string {
   const file = `${c.id}-${Date.now()}.${ext}`;
   fs.mkdirSync(portraitDir(), { recursive: true });
-  fs.writeFileSync(path.join(portraitDir(), file), Buffer.from(b64, "base64"));
+  fs.writeFileSync(path.join(portraitDir(), file), data);
   const old = portraits.get(c.id);
   portraits.set(c.id, { file, at: Date.now() });
   if (old) fs.rm(path.join(portraitDir(), old.file), { force: true }, () => {});
@@ -87,7 +121,7 @@ export function readPortrait(id: string): { data: Buffer; type: string } | null 
   return { data: fs.readFileSync(f), type: f.endsWith(".webp") ? "image/webp" : "image/png" };
 }
 
-export const portraitsEnabled = () => !!process.env.OPENAI_API_KEY && process.env.LLM_PROVIDER === "openai";
+export const portraitsEnabled = () => (useSD() ? !!process.env.IMAGE_ENDPOINT : !!process.env.OPENAI_API_KEY);
 
 /** User-created character portrait: owner only, costs an image's tokens, refunded on failure. */
 export async function userPortrait(userId: string, characterId: string, fetchImpl: Fetch = fetch) {

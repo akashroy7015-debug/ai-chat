@@ -2,18 +2,20 @@ import type { LLMProvider } from "./provider";
 import { systemPrompt } from "./provider";
 import type { ModerationCategory } from "../moderation";
 
-const API = "https://api.openai.com/v1";
+const OPENAI = "https://api.openai.com/v1";
 
-function key(): string {
-  const k = process.env.OPENAI_API_KEY;
-  if (!k) throw new Error("OPENAI_API_KEY is not set");
-  return k;
-}
+/**
+ * Chat can use any OpenAI-compatible server: OpenAI itself, a self-hosted Ollama / vLLM / llama.cpp,
+ * or a host like OpenRouter / Together / DeepInfra. Set LLM_BASE_URL (+ LLM_API_KEY, LLM_MODEL).
+ */
+const chatBase = () => (process.env.LLM_BASE_URL ?? OPENAI).replace(/\/$/, "");
+const chatKey = () => process.env.LLM_API_KEY ?? process.env.OPENAI_API_KEY ?? (process.env.LLM_BASE_URL ? "none" : undefined);
 
-async function post<T>(path: string, body: unknown, timeoutMs: number): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+async function post<T>(base: string, apiKey: string | undefined, path: string, body: unknown, timeoutMs: number): Promise<T> {
+  if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
+  const res = await fetch(`${base}${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key()}` },
+    headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
@@ -25,9 +27,9 @@ async function post<T>(path: string, body: unknown, timeoutMs: number): Promise<
 export const openaiLLM: LLMProvider = {
   async reply({ character, history, facts, userMessage, explicit, lang }) {
     const r = await post<{ choices: { message: { content: string | null } }[] }>(
-      "/chat/completions",
+      chatBase(), chatKey(), "/chat/completions",
       {
-        model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+        model: process.env.LLM_MODEL ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt(character, facts, explicit, lang) },
           ...history,
@@ -52,7 +54,8 @@ type OpenAIModeration = { results: { flagged: boolean; categories: Record<string
  * Returns the category to block with, or null if clean.
  */
 export async function openaiModerate(text: string, explicitAllowed: boolean): Promise<ModerationCategory | null> {
-  const r = await post<OpenAIModeration>("/moderations", { model: "omni-moderation-latest", input: text }, 10_000);
+  // Moderation always uses OpenAI's free endpoint, even when chat runs on another model.
+  const r = await post<OpenAIModeration>(OPENAI, process.env.OPENAI_API_KEY, "/moderations", { model: "omni-moderation-latest", input: text }, 10_000);
   const c = r.results[0]?.categories ?? {};
   if (c["sexual/minors"]) return "minor";
   if (c["self-harm/intent"] || c["self-harm/instructions"]) return "self_harm";

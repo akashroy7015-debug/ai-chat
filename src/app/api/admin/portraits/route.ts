@@ -9,7 +9,7 @@ export const GET = authed(async (_req, userId) => {
 
 export const POST = authed(async (req, userId) => {
   requireAdmin(userId);
-  if (!portraitsEnabled()) return json({ error: "Set LLM_PROVIDER=openai and OPENAI_API_KEY first." }, 400);
+  if (!portraitsEnabled()) return json({ error: "Set OPENAI_API_KEY, or IMAGE_PROVIDER=sd with IMAGE_ENDPOINT, first." }, 400);
   const { regenerateAll } = await body<{ regenerateAll: boolean }>(req);
   const { done: _d, ...status } = startFeaturedPortraits(userId, regenerateAll === true) as ReturnType<typeof featuredJobStatus> & { done?: unknown };
   return json(status);

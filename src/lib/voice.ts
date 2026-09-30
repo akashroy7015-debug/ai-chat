@@ -30,7 +30,8 @@ export const openaiTTS: TTS = {
   },
 };
 
-export const voiceEnabled = () => process.env.LLM_PROVIDER === "openai" && !!process.env.OPENAI_API_KEY;
+/** Voice uses OpenAI TTS; set VOICE_ENABLED=false to turn it off (e.g. to avoid OpenAI costs). */
+export const voiceEnabled = () => !!process.env.OPENAI_API_KEY && process.env.VOICE_ENABLED !== "false";
 
 // Replaying a message you already paid for is free (small in-memory cache).
 const cache = new Map<string, ArrayBuffer>();

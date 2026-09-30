@@ -57,6 +57,6 @@ export const mockLLM: LLMProvider = {
 
 export function getLLM(): LLMProvider {
   if (!process.env.LLM_PROVIDER || process.env.LLM_PROVIDER === "mock") return mockLLM;
-  if (process.env.LLM_PROVIDER === "openai") return openaiLLM;
+  if (process.env.LLM_PROVIDER === "openai" || process.env.LLM_PROVIDER === "openai_compatible") return openaiLLM;
   throw new Error(`Unknown LLM_PROVIDER: ${process.env.LLM_PROVIDER}. Implement it in src/lib/llm.`);
 }

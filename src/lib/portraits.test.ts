@@ -49,3 +49,32 @@ describe("portraits", () => {
     await expect(userPortrait("other", "uc1", okFetch)).rejects.toThrow();
   });
 });
+
+describe("self-hosted Stable Diffusion portraits", () => {
+  const sdFetch = vi.fn(async () => new Response(JSON.stringify({ images: [img] }), { status: 200 })) as unknown as typeof fetch;
+  const c = { ...base, id: "sd1", ownerId: "system", createdAt: 0 };
+  const scanner = (r: Partial<{ csamMatch: boolean; minApparentAge: number | null; realPersonSimilarity: number }>) => () => ({
+    scan: async () => ({ csamMatch: false, minApparentAge: 30, realPersonSimilarity: 0, ...r }),
+  });
+
+  it("saves when the scan passes, sends the negative prompt", async () => {
+    process.env.IMAGE_PROVIDER = "sd";
+    process.env.IMAGE_ENDPOINT = "http://gpu:7860/";
+    const { generatePortrait } = await import("./portraits");
+    await generatePortrait(c, sdFetch, scanner({}));
+    const [url, init] = (sdFetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0];
+    expect(url).toBe("http://gpu:7860/sdapi/v1/txt2img");
+    expect(JSON.parse(String(init.body)).negative_prompt).toMatch(/minor/);
+    expect(readPortrait("sd1")?.type).toBe("image/png");
+  });
+
+  it("blocks young-looking output and fails closed when the scanner errors", async () => {
+    const { generatePortrait } = await import("./portraits");
+    const c2 = { ...c, id: "sd2" };
+    await expect(generatePortrait(c2, sdFetch, scanner({ minApparentAge: 15 }))).rejects.toThrow("blocked");
+    await expect(generatePortrait(c2, sdFetch, () => ({ scan: async () => { throw new Error("down"); } }))).rejects.toThrow("blocked");
+    expect(readPortrait("sd2")).toBeNull();
+    delete process.env.IMAGE_PROVIDER;
+    delete process.env.IMAGE_ENDPOINT;
+  });
+});
