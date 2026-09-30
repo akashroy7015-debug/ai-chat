@@ -52,6 +52,11 @@ function Chat() {
       const b = await r.json();
       if (r.ok) setC(b.character); else setErr(b.error);
     });
+    void fetch(`/api/chat?characterId=${cid}`).then(async (r) => {
+      if (!r.ok) return;
+      const b = await r.json();
+      setLines(b.messages.map((m: { role: string; content: string }) => ({ who: m.role === "user" ? "you" : "them", text: m.content })));
+    });
   }, [cid]);
 
   async function send() {
@@ -68,7 +73,8 @@ function Chat() {
   if (!c) return <main>Loading…</main>;
 
   return (
-    <main style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 16 }}>
+    <main className="chatgrid" style={{ display: "grid", gridTemplateColumns: "200px 1fr", gap: 16 }}>
+      <style>{`@media (max-width:760px){.chatgrid{grid-template-columns:1fr !important}}`}</style>
       <aside>
         <Link href="/" style={{ color: theme.muted }}>← All characters</Link>
         <div style={{ marginTop: 8 }}><Portrait c={c} height={240} /></div>
@@ -83,7 +89,7 @@ function Chat() {
           <button style={btn} onClick={() => void requestMedia("image")}>Get a photo · {costs.image ?? "…"} tokens</button>
           <button style={{ ...btn, background: "#7a3cff" }} onClick={() => void requestMedia("video")}>Get a video · {costs.video ?? "…"} tokens</button>
         </div>}
-        <h3>Gallery</h3>
+        {mediaOn && <h3>Gallery</h3>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
           {media.map((m) => (
             <div key={m.id} style={{ background: theme.card, borderRadius: 8, padding: 4, fontSize: 11 }}>

@@ -22,7 +22,7 @@ if [ ! -f /swapfile ]; then
 fi
 
 apt-get update -y
-apt-get install -y curl git build-essential python3 ca-certificates gnupg debian-keyring debian-archive-keyring apt-transport-https ufw sqlite3
+apt-get install -y curl git build-essential python3 ca-certificates gnupg debian-keyring debian-archive-keyring apt-transport-https ufw sqlite3 rsync
 
 # Node.js 22
 if ! command -v node >/dev/null || [ "$(node -v | cut -d. -f1)" != "v22" ]; then
