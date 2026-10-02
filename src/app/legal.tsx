@@ -5,7 +5,7 @@ import Link from "next/link";
 // Placeholder values (e.g. "your@email.com") are treated as not set.
 const real = (v?: string) => (v && !/your|xxxx|example/i.test(v) ? v.trim() : "");
 export const OPERATOR = real(process.env.OPERATOR_NAME) || "Sizzly";
-export const SUPPORT_EMAIL_SET = real(process.env.SUPPORT_EMAIL) || real(process.env.GRIEVANCE_OFFICER_EMAIL);
+export const SUPPORT_EMAIL_SET = real(process.env.SUPPORT_EMAIL) || real(process.env.GRIEVANCE_OFFICER_EMAIL) || "rizzlabsupport@gmail.com";
 export const SUPPORT_EMAIL = SUPPORT_EMAIL_SET || "our support team";
 export const SUPPORT_PHONE = real(process.env.SUPPORT_PHONE);
 export const BUSINESS_ADDRESS = real(process.env.BUSINESS_ADDRESS) || "India";

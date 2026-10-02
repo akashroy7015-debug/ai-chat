@@ -16,7 +16,7 @@ function vapid() {
     kv.set("vapid_private", { v: k.privateKey });
     pub = k.publicKey; priv = k.privateKey;
   }
-  webpush.setVapidDetails(`mailto:${process.env.GRIEVANCE_OFFICER_EMAIL ?? "support@yourdomain.com"}`, pub, priv);
+  webpush.setVapidDetails(`mailto:${process.env.GRIEVANCE_OFFICER_EMAIL ?? "rizzlabsupport@gmail.com"}`, pub, priv);
   return pub;
 }
 
