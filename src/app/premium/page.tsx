@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useT } from "../i18n";
 
-interface Plan { id: string; label: string; months: number; priceInr: number; perMonth: number; discountPct: number }
+interface Plan { id: string; label: string; months: number; priceInr: number; perMonth: number; discountPct: number; credits: number }
 interface Pack { id: string; tokens: number; priceInr: number; label: string }
 type Me = { premium?: boolean; premiumUntil?: number; balance?: number } | null;
 
@@ -13,7 +13,8 @@ export default function Premium() {
   const { t } = useT();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [packs, setPacks] = useState<Pack[]>([]);
-  const [monthly, setMonthly] = useState(600);
+  const [monthly, setMonthly] = useState(400);
+  const [freeMsgs, setFreeMsgs] = useState(10);
   const [costs, setCosts] = useState({ chat: 1, voice: 5, image: 20 });
   const [sel, setSel] = useState("yearly");
   const [me, setMe] = useState<Me | undefined>(undefined);
@@ -23,7 +24,7 @@ export default function Premium() {
   async function load() {
     const [s, c, r] = await Promise.all([fetch("/api/subscribe"), fetch("/api/checkout"), fetch("/api/auth/me")]);
     const sb = await s.json();
-    setPlans(sb.plans); setMonthly(sb.monthlyTokens); if (sb.costs) setCosts(sb.costs);
+    setPlans(sb.plans); setMonthly(sb.monthlyTokens); if (sb.freeMessages) setFreeMsgs(sb.freeMessages); if (sb.costs) setCosts(sb.costs);
     const cb = await c.json();
     setPacks(Object.entries(cb.packages as Record<string, Omit<Pack, "id">>).map(([id, p]) => ({ id, ...p })));
     setMe(r.ok ? await r.json() : null);
@@ -49,8 +50,8 @@ export default function Premium() {
       {me && !premium && <p className="muted" style={{ margin: "4px 0" }}>💎 {me.balance ?? 0} free credits left</p>}
 
       <section className="pp-how">
-        <div><b>1</b><span>Sign up free and get <b>15 free messages</b></span></div>
-        <div><b>2</b><span>Go Premium: <b>{monthly} credits every month</b> + exclusive galleries</span></div>
+        <div><b>1</b><span>Sign up free and get <b>{freeMsgs} free messages</b></span></div>
+        <div><b>2</b><span>Go Premium: <b>up to {monthly} credits every month</b> + exclusive galleries</span></div>
         <div><b>3</b><span>Ran out? <b>Top up credits</b> any time, pay as you go</span></div>
       </section>
 
@@ -62,12 +63,13 @@ export default function Premium() {
             {p.id === "yearly" && <span className="pp-best">Best value</span>}
             <div className="pp-label">{p.label}</div>
             <div className="pp-price">{inr(p.perMonth)}<small>/month</small></div>
+            <div className="pp-cred">💎 {p.credits} credits / month</div>
             <div className="muted" style={{ fontSize: 13 }}>{inr(p.priceInr)} one-time · no auto-renewal</div>
           </button>
         ))}
       </div>
       <ul className="pp-perks">
-        <li>💎 {monthly} credits every month of your plan</li>
+        <li>💎 {plans.find((p) => p.id === sel)?.credits ?? monthly} credits every month of your plan</li>
         <li>💬 Chat with every character ({costs.chat} credit per message)</li>
         <li>🔊 Voice notes ({costs.voice} credits) and 📸 photos ({costs.image} credits)</li>
         <li>🔒 Unlock every model&apos;s private photo &amp; video gallery</li>

@@ -223,7 +223,7 @@ function Chat() {
                   <Link href="/premium#credits" className="btn btn-gold" style={{ width: "100%" }}>Buy credits</Link>
                 </>) : (<>
                   <h2>Don&apos;t leave her hanging…</h2>
-                  <p className="muted">You&apos;ve used your free messages. Go Premium to keep chatting with {c.name.split(" ")[0]}: 600 credits every month, voice notes, photos and her private gallery.</p>
+                  <p className="muted">You&apos;ve used your free messages. Go Premium to keep chatting with {c.name.split(" ")[0]}: monthly credits, voice notes, photos and her private gallery.</p>
                   <Link href="/premium" className="btn btn-gold" style={{ width: "100%" }}>Get Premium · up to 70% off</Link>
                 </>)}
                 <button className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={() => setPaywall(false)}>Maybe later</button>

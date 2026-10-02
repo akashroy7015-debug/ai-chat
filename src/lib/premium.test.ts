@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activatePlan, applyMonthlyGrant, isPremium, MONTHLY_TOKENS, planDiscountPct } from "./premium";
+import { activatePlan, applyMonthlyGrant, isPremium, MONTHLY_TOKENS, PLANS, planDiscountPct } from "./premium";
 import { balance } from "./tokens/ledger";
 import { getUser } from "./store";
 
@@ -26,7 +26,7 @@ describe("premium", () => {
     const now = Date.now();
     activatePlan("p2", "yearly", now);
     applyMonthlyGrant("p2", now + 31 * DAY);
-    expect(balance("p2")).toBe(2 * MONTHLY_TOKENS);
+    expect(balance("p2")).toBe(2 * PLANS.yearly.credits);
   });
   it("expires", () => {
     const now = Date.now();

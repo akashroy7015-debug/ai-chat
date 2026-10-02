@@ -4,15 +4,19 @@ import { audit, getUser, saveUser, type User } from "./store";
 const DAY = 86_400_000;
 const MONTH = 30 * DAY;
 
-/** Credits Premium members get each month (chat 1, voice 5, photo 20). */
-export const MONTHLY_TOKENS = 600;
-
-/** One-time payments in rupees (GST included). Plans never renew automatically. */
+/**
+ * One-time payments in rupees (GST included). Plans never renew automatically.
+ * `credits` is the allowance granted each month of the plan (chat 1, voice 5, photo 20);
+ * the cheaper-per-month long plans get a smaller allowance, so heavy users top up.
+ */
 export const PLANS = {
-  monthly: { label: "1 month", months: 1, priceInr: 999 },
-  quarterly: { label: "3 months", months: 3, priceInr: 2097 },
-  yearly: { label: "12 months", months: 12, priceInr: 3588 },
+  monthly: { label: "1 month", months: 1, priceInr: 999, credits: 400 },
+  quarterly: { label: "3 months", months: 3, priceInr: 2097, credits: 350 },
+  yearly: { label: "12 months", months: 12, priceInr: 3588, credits: 300 },
 } as const;
+/** Credits per month on the monthly plan. */
+export const MONTHLY_TOKENS = PLANS.monthly.credits;
+const creditsFor = (plan: string | undefined) => PLANS[(plan ?? "monthly") as PlanId]?.credits ?? MONTHLY_TOKENS;
 export type PlanId = keyof typeof PLANS;
 
 /** Discount vs paying monthly, computed rather than claimed. */
@@ -33,7 +37,7 @@ export function activatePlan(userId: string, plan: PlanId, now = Date.now()) {
   u.premiumUntil = start + PLANS[plan].months * MONTH;
   u.premiumPlan = plan;
   if (!u.premiumLastGrant || now - u.premiumLastGrant >= MONTH) {
-    credit(userId, MONTHLY_TOKENS, `premium_grant:${plan}`);
+    credit(userId, creditsFor(plan), `premium_grant:${plan}`);
     u.premiumLastGrant = now;
   }
   saveUser(u);
@@ -44,7 +48,7 @@ export function activatePlan(userId: string, plan: PlanId, now = Date.now()) {
 export function applyMonthlyGrant(userId: string, now = Date.now()) {
   const u = getUser(userId);
   if (!isPremium(u, now) || !u.premiumLastGrant || now - u.premiumLastGrant < MONTH) return;
-  credit(userId, MONTHLY_TOKENS, "premium_grant:monthly");
+  credit(userId, creditsFor(u.premiumPlan), `premium_grant:${u.premiumPlan ?? "monthly"}`);
   u.premiumLastGrant = now;
   saveUser(u);
 }

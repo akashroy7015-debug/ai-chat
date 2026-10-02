@@ -2,7 +2,7 @@ import { db, newId } from "../store";
 
 export const COSTS = { chat: 1, voice: 5, image: 20 } as const;
 /** Free credits on signup: one credit per chat message. */
-export const FREE_TRIAL_TOKENS = 15;
+export const FREE_TRIAL_TOKENS = 10;
 
 export class InsufficientTokens extends Error {
   status = 402;
