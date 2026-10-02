@@ -50,7 +50,7 @@ export function Portrait({ c, height = 220, round = 12 }: { c: AvatarChar & { po
 }
 
 /** Site name; set NEXT_PUBLIC_BRAND at build time to rename. */
-export const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "AI Chat";
+export const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "Sizzly";
 
 export const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 

@@ -15,7 +15,7 @@ const FILTERS: [group: "ethnicity" | "hair" | "ageRange", value: string, label: 
 ];
 
 const SLIDES = [
-  { title: "Big", em: "Sale", caption: "70% OFF", action: "Join Now", href: "/premium" },
+  { title: "Sizzly", em: "Sale", caption: "70% OFF", action: "Join Now", href: "/premium" },
   { title: "Play with her", em: "", caption: "Flirty chats, voice notes & photos", action: "Explore Now", href: "#models" },
   { title: "Your story", em: "", caption: "Create the AI girlfriend of your dreams", action: "Create Now", href: "/create" },
 ];
