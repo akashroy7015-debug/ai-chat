@@ -29,6 +29,20 @@ const FAQ = [
   ["Does it speak Hindi?", "Yes. Write in English, Hindi or Hinglish and your companion replies in the same language."],
 ];
 
+const TEASE = ["hey… you finally came", "i was just thinking about you", "come closer, i saved something for you"];
+
+/** Her messages appear one by one with typing dots in between. */
+function TeaseChat() {
+  const [n, setN] = useState(1);
+  useEffect(() => { const t = setInterval(() => setN((k) => (k > TEASE.length ? 1 : k + 1)), 1800); return () => clearInterval(t); }, []);
+  return (
+    <div className="tease-chat" aria-live="polite">
+      {TEASE.slice(0, Math.min(n, TEASE.length)).map((m) => <div key={m} className="tb">{m}</div>)}
+      {n <= TEASE.length && <div className="tb typing"><i /><i /><i /></div>}
+    </div>
+  );
+}
+
 /** Real countdown to midnight India time (the daily deal resets each day). */
 function Countdown() {
   const [left, setLeft] = useState<number | null>(null);
@@ -160,6 +174,36 @@ export default function Home() {
         <div className="dots">{SLIDES.map((_, k) => <button key={k} aria-label={`Slide ${k + 1}`} className={slide === k ? "on" : ""} onClick={() => setSlide(k)} />)}</div>
       </section>
 
+      {chars && chars.length > 0 && (() => {
+        const star = chars.find((c) => c.clipV) ?? chars[0];
+        return (<>
+          <section className="stories" aria-label="Online now">
+            {chars.slice(0, 12).map((c) => (
+              <button key={c.id} className="story" onClick={() => open(c.id)}>
+                <span className="ring"><Portrait c={c} height="100%" round={999} /></span>
+                <span>{c.name.split(" ")[0]}</span>
+              </button>
+            ))}
+          </section>
+          <section className="hero" aria-label="Featured">
+            <div className="hero-media" onClick={() => open(star.id)}>
+              <Portrait c={star} height="100%" round={0} />
+              {star.clipV && <ClipVideo className="clip" src={`/api/portraits/${star.id}/clip?v=${star.clipV}`} />}
+              <div className="shade" />
+              <span className="live"><i />Online now</span>
+              <div className="hero-name"><div className="script">she&apos;s been waiting…</div>{star.name.split(" ")[0]} <small>{star.age}</small></div>
+            </div>
+            <div className="hero-side">
+              <div className="script">psst… over here</div>
+              <h2>She&apos;s been waiting for you</h2>
+              <TeaseChat />
+              <button className="btn hero-cta" onClick={() => open(star.id)}>💬 Message {star.name.split(" ")[0]}</button>
+              <p className="muted" style={{ margin: 0, fontSize: 13 }}>Free to start · replies in English, Hindi &amp; Hinglish</p>
+            </div>
+          </section>
+        </>);
+      })()}
+
       <h2 id="models" style={{ margin: "0 0 12px" }}><span style={{ color: "var(--pink)" }}>Explore</span> {t("explore").replace(/^Explore /, "")}</h2>
       <div className="chips" style={{ marginBottom: 18 }}>
         <label className="search">🔍<input aria-label="Search" placeholder="Search" value={query} onChange={(e) => setQuery(e.target.value)} /></label>
@@ -185,6 +229,20 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {!me?.premium && chars && chars.length > 3 && (
+        <section className="locked" aria-label="Premium photos">
+          <div className="locked-pics">
+            {chars.slice(3, 7).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} /><span>🔒</span></div>)}
+          </div>
+          <div>
+            <div className="script">just for you…</div>
+            <h2 style={{ margin: "2px 0 8px" }}>She saves her best photos for Premium</h2>
+            <p className="muted" style={{ margin: "0 0 14px" }}>Unlimited chats, voice notes and surprise photos. 70% off today.</p>
+            <Link href="/premium" className="btn btn-gold">Unlock Premium →</Link>
+          </div>
+        </section>
+      )}
 
       <h2 style={{ margin: "36px 0 0" }}>Explore more</h2>
       <div className="explore" style={{ marginTop: 12 }}>

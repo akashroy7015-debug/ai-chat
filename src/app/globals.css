@@ -196,3 +196,43 @@ button { font: inherit; }
   .bubble-a { left: -4px; top: -14px; font-size: 12px; } .bubble-b { display: none; }
   .banner .arrow { top: 120px; }
 }
+
+/* Home: stories, featured hero, locked teaser */
+.script { font-family: var(--font-script, 'Pacifico', cursive); color: #ff8fb1; }
+.stories { display: flex; gap: 14px; overflow-x: auto; padding: 4px 2px 14px; margin: 18px 0 8px; scrollbar-width: none; }
+.stories::-webkit-scrollbar { display: none; }
+.story { flex: none; display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: 0; color: var(--text, #f7f3f6); font-weight: 800; font-size: 12px; cursor: pointer; }
+.story .ring { width: 70px; height: 70px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #ffb347, var(--pink) 55%, #c94a6e); display: block; position: relative; }
+.story .ring > div { border: 3px solid var(--bg); box-sizing: border-box; }
+.story .ring::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 13px; height: 13px; border-radius: 50%; background: #4ee38b; border: 2px solid var(--bg); }
+.story:hover .ring { transform: scale(1.06); }
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: center; margin: 6px 0 34px; }
+.hero-media { position: relative; height: 520px; border-radius: 26px; overflow: hidden; cursor: pointer; box-shadow: 0 24px 60px rgba(232,93,128,.18); }
+.hero-media .clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-media .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(14,11,14,.92)); }
+.hero-media .live { position: absolute; top: 16px; left: 16px; background: rgba(0,0,0,.55); padding: 6px 12px; border-radius: 999px; font-weight: 900; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.hero-media .live i { width: 8px; height: 8px; border-radius: 50%; background: #4ee38b; animation: pulse 1.6s infinite; }
+.hero-name { position: absolute; left: 20px; bottom: 18px; font-size: 40px; font-weight: 900; line-height: 1; }
+.hero-name small { font-size: 24px; font-weight: 600; color: #f1dce5; } .hero-name .script { font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+.hero-side { display: flex; flex-direction: column; gap: 12px; }
+.hero-side h2 { margin: 0; font-size: 34px; line-height: 1.1; } .hero-side > .script { font-size: 22px; }
+.tease-chat { display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+.tb { align-self: flex-start; background: #221d22; border: 1px solid #2f292f; padding: 10px 14px; border-radius: 18px 18px 18px 6px; font-size: 15px; animation: pop .3s ease-out; }
+.tb.typing { display: flex; gap: 4px; padding: 13px 14px; } .tb.typing i { width: 7px; height: 7px; border-radius: 50%; background: #c9bcc5; animation: blink 1.2s infinite; }
+.tb.typing i:nth-child(2) { animation-delay: .2s; } .tb.typing i:nth-child(3) { animation-delay: .4s; }
+.hero-cta { align-self: flex-start; font-size: 18px; padding: 15px 30px; border-radius: 999px; box-shadow: 0 10px 30px rgba(232,93,128,.45); }
+@keyframes pop { from { opacity: 0; transform: translateY(6px) scale(.97); } }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 5px rgba(78,227,139,.25); } }
+.locked { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 26px; align-items: center; margin-top: 40px; padding: 22px; border-radius: 24px; background: linear-gradient(135deg, #2a1424, #181418); border: 1px solid #3a2333; }
+.locked-pics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.locked-pics > div { position: relative; height: 200px; border-radius: 16px; overflow: hidden; }
+.locked-pics > div > div { filter: blur(14px) saturate(1.2); transform: scale(1.15); }
+.locked-pics span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; gap: 14px; }
+  .hero-media { height: 470px; } .hero-side h2 { font-size: 26px; } .hero-cta { align-self: stretch; text-align: center; }
+  .tease-chat { min-height: 130px; }
+  .locked { grid-template-columns: 1fr; } .locked-pics > div { height: 130px; }
+  .story .ring { width: 62px; height: 62px; }
+}
