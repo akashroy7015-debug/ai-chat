@@ -272,7 +272,7 @@ export default function Home() {
 
       <footer className="muted" style={{ margin: "32px 0 16px", fontSize: 12, lineHeight: 1.7 }}>
         © {new Date().getFullYear()} {BRAND}. All characters and media are AI-generated and fictional. 18+ only.{" "}
-        <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/grievance">Grievances</Link>
+        <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/refund">Refunds</Link> · <Link href="/contact">Contact</Link> · <Link href="/grievance">Grievances</Link>
       </footer>
 
       {daily && (

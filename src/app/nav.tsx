@@ -33,7 +33,7 @@ export function Nav() {
       <button className="menu-btn" aria-label="Open menu" onClick={() => setOpen(true)}>☰</button>
       <div className="lang"><LangSwitch /></div>
       <div className="foot">
-        <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/grievance">Help</Link>
+        <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/refund">Refunds</Link> · <Link href="/contact">Contact</Link>
       </div>
       <style>{`
         .side{position:fixed;inset:0 auto 0 0;width:230px;padding:18px 12px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px;z-index:10}
@@ -72,7 +72,7 @@ export function Nav() {
         <b>Premium, 70% off today</b>
         <Link href="/premium" className="btn btn-gold" tabIndex={open ? 0 : -1}>Go Premium</Link>
       </div>
-      <div className="d-foot"><LangSwitch /> <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/grievance">Help</Link></div>
+      <div className="d-foot"><LangSwitch /> <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/refund">Refunds</Link> · <Link href="/contact">Contact</Link></div>
     </aside>
     <style>{`
       .side .menu-btn{display:none}

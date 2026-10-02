@@ -1,4 +1,6 @@
 import { GRIEVANCE_OFFICER } from "@/lib/jurisdiction";
+
+export const dynamic = "force-dynamic";
 import { LegalPage } from "../legal";
 
 export const metadata = { title: "Grievance Redressal" };
