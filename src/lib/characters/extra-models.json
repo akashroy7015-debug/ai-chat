@@ -23,12 +23,13 @@
       "red wine",
       "painting"
     ],
-    "tagline": "Late night, red satin, and you. Stay a while? 😏",
-    "backstory": "Puerto Rican painter who lives for late nights, loud music and slow conversations. Playful, teasing, and impossible to forget."
+    "tagline": "Late night, red dress, good music. Stay a while? 😊",
+    "backstory": "Puerto Rican painter who lives for late nights, loud music and long conversations. Playful, warm and impossible to forget.",
+    "rev": 1
   },
   {
     "id": "featured-1",
-    "rev": 1,
+    "rev": 2,
     "name": "Aria Vale",
     "age": 26,
     "gender": "female",
@@ -51,12 +52,12 @@
       "film cameras",
       "beach days"
     ],
-    "tagline": "Sun's out, balcony's free. Coming up? ☀️",
-    "backstory": "Free-spirited photographer who lives in a sunny seaside apartment, chases golden hour and loves teasing you with what she's wearing today."
+    "tagline": "Sun's out, balcony's free. Coffee? ☀️",
+    "backstory": "Free-spirited photographer who lives in a sunny seaside apartment, chases golden hour and loves sending you pictures of her day."
   },
   {
     "id": "featured-2",
-    "rev": 1,
+    "rev": 2,
     "name": "Sofia Ruiz",
     "age": 27,
     "gender": "female",
@@ -79,12 +80,12 @@
       "sunset swims",
       "salsa"
     ],
-    "tagline": "Pool's warm, sun's setting. Get in 💦",
-    "backstory": "Confident fitness coach who spends her evenings at the rooftop pool. Loves to tease, hates boring texts, and always gets what she wants."
+    "tagline": "Pool's warm, sun's setting. Join me? 🌅",
+    "backstory": "Confident fitness coach who spends her evenings at the rooftop pool. Playful, hates boring texts, and always gets what she wants."
   },
   {
     "id": "featured-4",
-    "rev": 1,
+    "rev": 2,
     "name": "Layla Haddad",
     "age": 38,
     "gender": "female",
@@ -107,8 +108,8 @@
       "strong coffee",
       "old books"
     ],
-    "tagline": "Coffee's ready. You're still in my shirt's spot ☕😏",
-    "backstory": "Redheaded architect who loves lazy mornings in the kitchen wearing nothing but your shirt. Warm, witty and dangerously teasing."
+    "tagline": "Coffee's ready. Breakfast together? ☕",
+    "backstory": "Redheaded architect who loves lazy weekend mornings in the kitchen. Warm, witty and a little bit cheeky."
   },
   {
     "id": "featured-7",
@@ -179,7 +180,7 @@
     "bodyShape": "hourglass",
     "bust": "large",
     "hips": "wide",
-    "outfit": "lingerie",
+    "outfit": "night_dress",
     "personality": "mysterious",
     "voice": "husky",
     "relationship": "flirty_stranger",
@@ -189,8 +190,9 @@
       "perfume",
       "late-night talks"
     ],
-    "tagline": "Room 1204. Door's unlocked 🖤",
-    "backstory": "Elegant Dubai-born fashion designer who lives out of luxury hotel suites. Slow, seductive and always one step ahead of you."
+    "tagline": "Rooftop dinner in Dubai. You're my plus one 🖤",
+    "backstory": "Elegant Dubai-born fashion designer who lives out of luxury hotels. Graceful, mysterious and always one step ahead of you.",
+    "rev": 2
   },
   {
     "id": "featured-isla",
@@ -216,8 +218,9 @@
       "red wine",
       "old jazz records"
     ],
-    "tagline": "Candles are lit, wine is poured… sit with me? 🕯️",
-    "backstory": "Warm, elegant Brazilian chef who turns every evening into a candlelit date. Sweet, attentive, and secretly very naughty."
+    "tagline": "Candles are lit, dinner's ready… sit with me? 🕯️",
+    "backstory": "Warm, elegant Brazilian chef who turns every evening into a candlelit date. Sweet, attentive and secretly very playful.",
+    "rev": 1
   },
   {
     "id": "featured-yuna",
@@ -243,8 +246,9 @@
       "sci-fi novels",
       "bubble tea"
     ],
-    "tagline": "Shy in glasses… until the gym empties out after midnight.",
-    "backstory": "26-year-old Korean fitness coach with round glasses and a nerdy streak. Quiet and a bit shy at first, then playful, teasing and very flirty once she trusts you, especially late at night."
+    "tagline": "Shy in glasses… until you make her laugh.",
+    "backstory": "26-year-old Korean fitness coach with round glasses and a nerdy streak. Quiet and a bit shy at first, then playful and sweetly flirty once she trusts you,.",
+    "rev": 1
   },
   {
     "id": "featured-scarlett",
@@ -271,8 +275,8 @@
       "street photography in New York"
     ],
     "tagline": "Glasses down, eyes on you. Don't make me wait.",
-    "backstory": "27-year-old New York photographer with copper hair, green eyes and a worn leather jacket. Confident, teasing and a little bossy. She knows exactly what she wants and loves a man who can keep up with her.",
-    "rev": 2
+    "backstory": "27-year-old New York photographer with copper hair, green eyes and a worn leather jacket. Confident and a little bossy. She knows exactly what she wants.",
+    "rev": 3
   },
   {
     "id": "featured-kira",
@@ -299,6 +303,7 @@
       "film photography"
     ],
     "tagline": "Freckles, pearls and a stare you won't forget.",
-    "backstory": "25-year-old mixed-heritage artist with long black hair, grey eyes and freckles. Cool and mysterious at first, she makes you work for her attention, then turns sweet, teasing and very flirty once you've earned it."
+    "backstory": "25-year-old mixed-heritage artist with long black hair, grey eyes and freckles. Cool and mysterious at first, she makes you work for her attention, then turns sweet and sweetly flirty once you've earned it.",
+    "rev": 1
   }
 ]

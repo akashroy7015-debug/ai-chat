@@ -15,7 +15,7 @@ const D = {
   tagline: ["18+ only. Every character is a fictional adult and not based on a real person.", "सिर्फ 18+ के लिए। हर कैरेक्टर एक काल्पनिक वयस्क है, किसी असली इंसान पर आधारित नहीं।", "Sirf 18+ ke liye. Har character ek fictional adult hai, kisi real insaan pe based nahi."],
   explore: ["Explore featured characters", "फ़ीचर्ड कैरेक्टर देखें", "Featured characters dekho"],
   girls: ["Girls", "लड़कियाँ", "Girls"],
-  milf: ["MILF", "MILF", "MILF"],
+  milf: ["Mature", "मैच्योर", "Mature"],
   anime: ["Anime", "एनीमे", "Anime"],
   guys: ["Guys", "लड़के", "Guys"],
   signup: ["Create free account", "फ्री अकाउंट बनाएं", "Free account banao"],

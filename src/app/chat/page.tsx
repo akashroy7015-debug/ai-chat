@@ -293,7 +293,7 @@ function PrivateGallery({ c }: { c: CharacterCard }) {
   );
 }
 
-const QUICK = ["Hey gorgeous", "What are you wearing?", "Tell me a secret", "Kya kar rahi ho?", "I missed you"];
+const QUICK = ["Hey gorgeous", "How was your day?", "Tell me a secret", "Kya kar rahi ho?", "I missed you"];
 
 export default function ChatPage() {
   return <Suspense><Chat /></Suspense>;

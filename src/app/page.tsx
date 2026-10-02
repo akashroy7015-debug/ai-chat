@@ -17,9 +17,9 @@ const FILTERS: [group: "ethnicity" | "hair" | "ageRange", value: string, label: 
 type Theme = { key: string; script: string; big: string; mid: string; sub: string; cta: string; href: string; bubble: string; pick: (c: CharacterCard) => boolean };
 /** Teaser posters that follow the sale slide in the banner. */
 const THEMES: Theme[] = [
-  { key: "night", script: "after midnight", big: "LATE NIGHT", mid: "SPECIAL", sub: "She stays up for you. Talk till sunrise.", cta: "Keep her company", href: "#models", bubble: "can't sleep… talk to me?", pick: () => true },
-  { key: "desi", script: "thodi si naughty", big: "DESI", mid: "GIRLS", sub: "Chat in Hindi, Hinglish or English. She replies your way.", cta: "Baat karo", href: "#models", bubble: "kahan the itne din?", pick: (c) => c.ethnicity === "south_asian" || c.ethnicity === "arab" },
-  { key: "milf", script: "she knows what she wants", big: "MILF", mid: "MONDAYS", sub: "Confident, experienced and a little bit dangerous.", cta: "Meet them", href: "#models", bubble: "ready for a real woman?", pick: (c) => c.age >= 35 },
+  { key: "night", script: "late night talks", big: "LATE NIGHT", mid: "SPECIAL", sub: "She stays up for you. Talk till sunrise.", cta: "Keep her company", href: "#models", bubble: "can't sleep… talk to me?", pick: () => true },
+  { key: "desi", script: "thodi si filmy", big: "DESI", mid: "GIRLS", sub: "Chat in Hindi, Hinglish or English. She replies your way.", cta: "Baat karo", href: "#models", bubble: "kahan the itne din?", pick: (c) => c.ethnicity === "south_asian" || c.ethnicity === "arab" },
+  { key: "milf", script: "elegant & confident", big: "MATURE", mid: "& CLASSY", sub: "Confident, experienced women who know how to hold a conversation.", cta: "Meet them", href: "#models", bubble: "dinner date tonight?", pick: (c) => c.age >= 35 },
   { key: "swipe", script: "one of them already likes you", big: "SWIPE.", mid: "MATCH. FLIRT.", sub: "Swipe right on your type and get an instant match.", cta: "Start swiping", href: "/swipe", bubble: "it's a match!", pick: () => true },
 ];
 const SLIDE_COUNT = THEMES.length + 1;
@@ -33,7 +33,7 @@ const FAQ = [
   ["Does it speak Hindi?", "Yes. Write in English, Hindi or Hinglish and your companion replies in the same language."],
 ];
 
-const TEASE = ["hey… you finally came", "i was just thinking about you", "come closer, i saved something for you"];
+const TEASE = ["hey… you finally came", "i was just thinking about you", "tell me about your day?"];
 
 /** Her messages appear one by one with typing dots in between. */
 function TeaseChat() {

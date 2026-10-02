@@ -54,6 +54,6 @@ describe("extra-models updates", () => {
     const aria = listFeatured().find((c) => c.id === "featured-1")!;
     expect(aria.hair).toBe("blonde");
     expect(aria.outfit).toBe("bralette_top");
-    expect(aria.rev).toBe(1);
+    expect(aria.rev).toBe(2);
   });
 });
