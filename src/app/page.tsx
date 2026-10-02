@@ -1,57 +1,48 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { btn, chip, pretty, Portrait, theme, type CharacterCard } from "./ui";
-import { AuthPanel } from "./auth-panel";
-import { useT } from "./i18n";
+import { useRouter } from "next/navigation";
+import { BRAND, pretty, Portrait, type CharacterCard } from "./ui";
+import { AuthModal } from "./auth-panel";
+import { LangSwitch, useT } from "./i18n";
 
 const CATEGORIES = ["girls", "milf", "anime", "guys"] as const;
-const ETHNICITIES = ["caucasian", "latina", "asian", "arab", "african", "south_asian"];
-const HAIRS = ["blonde", "brown", "black", "red", "auburn"];
-const AGES = [["20s", "20s"], ["30s", "30s"], ["40plus", "40+"]] as const;
+const FILTERS: [group: "ethnicity" | "hair" | "ageRange", value: string, label: string][] = [
+  ["ethnicity", "caucasian", "Caucasian"], ["ethnicity", "latina", "Latina"], ["ethnicity", "asian", "Asian"],
+  ["ethnicity", "arab", "Arab"], ["ethnicity", "african", "African"], ["ethnicity", "south_asian", "Indian"],
+  ["hair", "blonde", "Blonde"], ["hair", "brown", "Brunette"], ["hair", "black", "Black hair"], ["hair", "red", "Redhead"],
+  ["ageRange", "20s", "20s"], ["ageRange", "30s", "30s"], ["ageRange", "40plus", "40+"],
+];
+
+const FAQ = [
+  ["What is this?", "A place to chat with AI companions who remember you, flirt back, send voice messages and keep the conversation going. Every character is a fictional adult created by AI."],
+  ["Is it private?", "Your chats are private to your account. We never sell your data, and you can ask us to delete everything at any time."],
+  ["Why do I need to verify my age?", "Our companions are for adults only. A quick ID check keeps the platform 18+ and safe for everyone."],
+  ["Can I create my own character?", "Yes. Pick her looks, body type, outfit, personality and voice, and she's ready to chat in seconds."],
+  ["Does it speak Hindi?", "Yes. Write in English, Hindi or Hinglish and your companion replies in the same language."],
+];
+
+type Me = { email?: string; premium?: boolean; admin?: boolean; ageStatus?: string; balance?: number } | null | undefined;
 
 export default function Home() {
   const { t } = useT();
-  const [status, setStatus] = useState("loading");
-  const [me, setMe] = useState<{ email?: string; premium?: boolean; admin?: boolean } | null | undefined>(undefined);
-  const [balance, setBalance] = useState<number | null>(null);
+  const router = useRouter();
+  const [me, setMe] = useState<Me>(undefined);
+  const [auth, setAuth] = useState<null | "login" | "register">(null);
   const [category, setCategory] = useState<string>("girls");
-  const [ethnicity, setEthnicity] = useState("");
-  const [hair, setHair] = useState("");
-  const [ageRange, setAgeRange] = useState("");
-  const [chars, setChars] = useState<CharacterCard[]>([]);
-  const [settings, setSettings] = useState<{ explicitOptIn: boolean; explicitActive: boolean; explicitAvailable: boolean; grievanceOfficer?: { name: string; email: string } }>({ explicitOptIn: false, explicitActive: false, explicitAvailable: false });
-  const [packages, setPackages] = useState<Record<string, { label: string; priceUsd: number }>>({});
+  const [f, setF] = useState<{ ethnicity: string; hair: string; ageRange: string }>({ ethnicity: "", hair: "", ageRange: "" });
+  const [chars, setChars] = useState<CharacterCard[] | null>(null);
 
   async function refresh() {
-    setPackages((await (await fetch("/api/checkout")).json()).packages);
     const r = await fetch("/api/auth/me");
-    if (!r.ok) { setMe(null); setStatus("unverified"); return; }
-    const m = await r.json();
-    setMe(m);
-    setStatus(m.ageStatus);
-    setBalance(m.balance);
-    setSettings(m);
-  }
-
-  async function setExplicit(on: boolean) {
-    if (on && !confirm("Enable adult content? You confirm you are 18+ and want to see mature content.")) return;
-    const r = await fetch("/api/settings", { method: "POST", body: JSON.stringify({ explicit: on }) });
-    if (!r.ok) alert((await r.json()).error);
-    await refresh();
-  }
-
-  async function buy(pkg: string) {
-    const r = await fetch("/api/checkout", { method: "POST", body: JSON.stringify({ pkg }) });
-    if (!r.ok) alert((await r.json()).error);
-    await refresh();
+    setMe(r.ok ? await r.json() : null);
   }
   useEffect(() => { void refresh(); }, []);
 
   useEffect(() => {
-    const q = new URLSearchParams({ category, ...(ethnicity && { ethnicity }), ...(hair && { hair }), ...(ageRange && { ageRange }) });
+    const q = new URLSearchParams({ category, ...Object.fromEntries(Object.entries(f).filter(([, v]) => v)) });
     void fetch(`/api/characters/featured?${q}`).then((r) => r.json()).then((b) => setChars(b.characters));
-  }, [category, ethnicity, hair, ageRange]);
+  }, [category, f]);
 
   async function verify() {
     await fetch("/api/verify-age", { method: "POST", body: JSON.stringify({}) });
@@ -60,71 +51,79 @@ export default function Home() {
     await refresh();
   }
 
-  const toggle = (cur: string, set: (v: string) => void, v: string) => set(cur === v ? "" : v);
-  const verified = status === "verified";
-
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    await refresh();
+  const verified = me?.ageStatus === "verified";
+  function open(id: string) {
+    if (!me) return setAuth("register");
+    if (!verified) return void verify().then(() => router.push(`/chat?c=${id}`));
+    router.push(`/chat?c=${id}`);
   }
 
   return (
     <main>
-      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <h1 style={{ margin: 0 }}>AI Chat</h1>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {me?.premium && <span style={{ background: "#b8860b", borderRadius: 6, padding: "2px 8px", fontSize: 12, fontWeight: 700 }}>👑 PREMIUM</span>}
-          {me?.admin && <Link href="/admin" style={{ color: theme.muted }}>Admin</Link>}
-          {me && (verified ? <span style={{ color: theme.muted }}>{t("tokens")}: <b style={{ color: theme.text }}>{balance}</b></span> : <button style={btn} onClick={verify}>{t("verify")}</button>)}
-          {me && <Link href="/create"><button style={{ ...btn, background: "#333" }}>+ {t("create")}</button></Link>}
-          {me && <button style={{ ...btn, background: "transparent", color: theme.muted }} onClick={logout}>{t("logout")}</button>}
+      <header className="topbar">
+        <div className="tabs">
+          {CATEGORIES.map((v) => <button key={v} className={`tab ${category === v ? "on" : ""}`} onClick={() => setCategory(v)}>{t(v)}</button>)}
+        </div>
+        <div className="right">
+          {me?.admin && <Link href="/admin" className="pill">⚙️ Admin</Link>}
+          {me && <Link href="/premium" className="pill">💎 {me.balance ?? 0}</Link>}
+          <span className="sm-only"><LangSwitch /></span>
+          {me?.premium ? <span className="pill gold">👑<span className="hide-sm"> Premium</span></span> : <Link href="/premium" className="btn btn-sm">👑<span className="hide-sm"> Premium -70%</span></Link>}
+          {me === null && <button className="btn btn-sm btn-ghost" onClick={() => setAuth("login")}>{t("login")}</button>}
         </div>
       </header>
-      {me === null && <AuthPanel onDone={refresh} />}
-      {verified && (
-        <section style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", background: theme.card, padding: 12, borderRadius: 12, margin: "12px 0" }}>
-          {settings.explicitAvailable && (
-            <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <input type="checkbox" checked={settings.explicitOptIn} onChange={(e) => void setExplicit(e.target.checked)} />
-              Adult content (ID-verified 18+ only)
-            </label>
-          )}
-          <span style={{ color: theme.muted }}>{t("buyTokens")}</span>
-          {Object.entries(packages).map(([k, p]) => <button key={k} style={chip(false)} onClick={() => void buy(k)}>{p.label} · ${p.priceUsd}</button>)}
-        </section>
-      )}
-      <p style={{ color: theme.muted }}>{t("tagline")}</p>
 
-      <nav style={{ display: "flex", gap: 8, margin: "16px 0" }}>
-        {CATEGORIES.map((v) => <button key={v} style={{ ...chip(category === v), fontSize: 15, padding: "8px 18px" }} onClick={() => setCategory(v)}>{t(v)}</button>)}
-      </nav>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
-        {ETHNICITIES.map((e) => <button key={e} style={chip(ethnicity === e)} onClick={() => toggle(ethnicity, setEthnicity, e)}>{pretty(e)}</button>)}
-        {HAIRS.map((h) => <button key={h} style={chip(hair === h)} onClick={() => toggle(hair, setHair, h)}>{pretty(h)}</button>)}
-        {AGES.map(([v, l]) => <button key={v} style={chip(ageRange === v)} onClick={() => toggle(ageRange, setAgeRange, v)}>{l}</button>)}
-      </div>
+      <section className="hero">
+        <div>
+          <h1>Your AI girlfriend <span>is waiting</span></h1>
+          <p>Flirty, playful and always there for you. She remembers everything, sends voice notes and talks in English, Hindi or Hinglish.</p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {me ? (verified ? <a href="#models" className="btn">💬 Start chatting</a> : <button className="btn" onClick={() => void verify()}>✅ {t("verify")}</button>)
+              : <button className="btn" onClick={() => setAuth("register")}>✨ {t("signup")}</button>}
+            <Link href="/create" className="btn btn-ghost">➕ {t("create")}</Link>
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginTop: 14 }}>{t("tagline")}</p>
+        </div>
+        <div className="stack">
+          {(chars ?? []).slice(0, 3).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} /></div>)}
+        </div>
+      </section>
 
-      <h2>{t("explore")}</h2>
-      {chars.length === 0 && <p style={{ color: theme.muted }}>No characters match these filters.</p>}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 14 }}>
-        {chars.map((c) => (
-          <Link key={c.id} href={verified ? `/chat?c=${c.id}` : "#"} onClick={(e) => { if (!verified) { e.preventDefault(); alert(me ? "Verify your age (18+) to start chatting." : "Create a free account to start chatting."); } }} style={{ color: "inherit", textDecoration: "none" }}>
-            <article style={{ background: theme.card, borderRadius: 14, padding: 8 }}>
-              <Portrait c={c} height={280} />
-              <div style={{ padding: "8px 4px" }}>
-                <b>{c.name}</b> <span style={{ color: theme.muted }}>{c.age}</span>
-                <div style={{ fontSize: 12, color: theme.muted }}>{pretty(c.occupation)} · {pretty(c.personality)}{c.outfit ? ` · ${pretty(c.outfit)}` : ""}</div>
-                <div style={{ fontSize: 13, marginTop: 4 }}>{c.tagline}</div>
-              </div>
-            </article>
-          </Link>
+      <div className="chips" style={{ marginBottom: 18 }}>
+        {FILTERS.map(([g, v, label]) => (
+          <button key={g + v} className={`chip ${f[g] === v ? "on" : ""}`} onClick={() => setF({ ...f, [g]: f[g] === v ? "" : v })}>{label}</button>
         ))}
       </div>
-      <footer style={{ marginTop: 32, color: theme.muted, fontSize: 12 }}>
-        All characters and media are AI-generated and fictional. Report content from any gallery item.{" "}
-        <Link href="/terms" style={{ color: theme.muted }}>Terms</Link> · <Link href="/privacy" style={{ color: theme.muted }}>Privacy</Link> · <Link href="/grievance" style={{ color: theme.muted }}>Grievances</Link>.
-        {settings.grievanceOfficer && <> Grievance Officer: {settings.grievanceOfficer.name} · {settings.grievanceOfficer.email}</>}
+
+      <h2 id="models" style={{ margin: "0 0 14px" }}>🔥 {t("explore")}</h2>
+      {chars?.length === 0 && <p className="muted">No characters match these filters.</p>}
+      <div className="grid">
+        {(chars ?? []).map((c, i) => (
+          <div key={c.id} className="card" onClick={() => open(c.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && open(c.id)}>
+            <div className="img"><Portrait c={c} height="100%" round={0} /></div>
+            <div className="shade" />
+            {i < 3 && <span className="badge">🔥 HOT</span>}
+            <span className="online" title="Online" />
+            <div className="info">
+              <div className="name">{c.name.split(" ")[0]}<small>{c.age}</small></div>
+              <div className="tag">{c.tagline || `${pretty(c.occupation)} · ${pretty(c.personality)}`}</div>
+            </div>
+            <div className="cta"><span className="btn" style={{ width: "100%" }}>💬 {t("chatWith")} {c.name.split(" ")[0]}</span></div>
+          </div>
+        ))}
+      </div>
+
+      <section className="faq">
+        <h2 style={{ margin: "0 0 6px" }}>FAQ</h2>
+        {FAQ.map(([q, a]) => <details key={q}><summary>{q}</summary><p>{a}</p></details>)}
+      </section>
+
+      <footer className="muted" style={{ margin: "32px 0 16px", fontSize: 12, lineHeight: 1.7 }}>
+        © {new Date().getFullYear()} {BRAND}. All characters and media are AI-generated and fictional. 18+ only.{" "}
+        <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/grievance">Grievances</Link>
       </footer>
+
+      {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} onDone={() => { setAuth(null); void refresh(); }} />}
     </main>
   );
 }

@@ -24,7 +24,7 @@ const OUTFIT: Record<string, string> = {
 
 function hash(s: string) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }
 
-export function Avatar({ c, height }: { c: AvatarChar; height: number }) {
+export function Avatar({ c, height, round = 12 }: { c: AvatarChar; height: number | string; round?: number }) {
   const seed = hash(c.id ?? c.name);
   const male = c.gender === "male";
   const anime = c.style === "anime";
@@ -55,7 +55,7 @@ export function Avatar({ c, height }: { c: AvatarChar; height: number }) {
       : <><path d="M40 260 Q46 214 72 208 L82 218 Q100 236 118 218 L128 208 Q154 214 160 260Z" fill={cloth} /><path d="M72 208 L76 190 M128 208 L124 190" stroke={cloth} strokeWidth={4} /></>;
 
   return (
-    <svg viewBox="0 0 200 260" width="100%" height={height} preserveAspectRatio="xMidYMin slice" role="img" aria-label={`${c.name} (illustration)`} style={{ display: "block", borderRadius: 12 }}>
+    <svg viewBox="0 0 200 260" width="100%" height={height} preserveAspectRatio="xMidYMin slice" role="img" aria-label={`${c.name} (illustration)`} style={{ display: "block", borderRadius: round }}>
       <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={bg1} /><stop offset="1" stopColor={bg2} /></linearGradient></defs>
       <rect width="200" height="260" fill={`url(#${gid})`} />
       {backHair[hs] ?? backHair.straight}
