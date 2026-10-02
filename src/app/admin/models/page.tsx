@@ -177,7 +177,7 @@ export default function Models() {
             </div>
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
               <button style={small} onClick={() => { setEditId(m.id); setForm(toForm(m)); window.scrollTo(0, 0); }}>Edit</button>
-              <button style={{ ...small, background: "#7a3cff" }} disabled={busy === m.id} onClick={() => void picture(m.id)}>{busy === m.id ? "Creating…" : m.portraitV ? "New picture" : "Picture"}</button>
+              <button style={{ ...small, background: "#c94a6e" }} disabled={busy === m.id} onClick={() => void picture(m.id)}>{busy === m.id ? "Creating…" : m.portraitV ? "New picture" : "Picture"}</button>
               <label style={{ ...small, background: "#0a7", display: "inline-block", cursor: "pointer" }}>
                 ⬆ Upload
                 <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => void upload(m.id, e.target.files?.[0])} />

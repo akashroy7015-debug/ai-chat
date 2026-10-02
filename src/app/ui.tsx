@@ -21,7 +21,7 @@ export interface CharacterCard {
   featured?: boolean;
 }
 
-export const theme = { bg: "#0f0f14", card: "#1a1a22", line: "#2a2a35", accent: "#e0457b", text: "#eee", muted: "#9a9aa8" };
+export const theme = { bg: "#0e0b0e", card: "#181418", line: "#2f292f", accent: "#e85d80", text: "#f7f3f6", muted: "#a79ca5" };
 
 export const btn: CSSProperties = { padding: "10px 16px", borderRadius: 10, border: "none", background: theme.accent, color: "#fff", cursor: "pointer", fontWeight: 600 };
 export const chip = (on: boolean): CSSProperties => ({
