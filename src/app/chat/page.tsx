@@ -2,10 +2,10 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { pretty, Portrait, type CharacterCard } from "../ui";
+import { ClipVideo, pretty, Portrait, type CharacterCard } from "../ui";
 import { useT } from "../i18n";
 
-interface Line { who: "you" | "them"; text: string; id?: string }
+interface Line { who: "you" | "them"; text: string; id?: string; image?: "portrait" | "clip" }
 interface Media { id: string; kind: string; scene: string; status: string; url?: string }
 interface Conv { character: { id: string; name: string; age: number; hair: string; style: string }; last: { role: string; content: string } }
 
@@ -30,6 +30,22 @@ function Chat() {
   const [votes, setVotes] = useState<Record<string, number>>({});
   type Level = { level: number; name: string; emoji: string; messages: number; nextAt: number | null; nextName: string | null; at: number };
   const [lvl, setLvl] = useState<Level | null>(null);
+  const [fans, setFans] = useState<{ top: { rank: number; handle: string; messages: number; you: boolean }[]; yourRank: number | null } | null>(null);
+  useEffect(() => { if (cid) void fetch(`/api/leaderboard?characterId=${cid}`).then((r) => (r.ok ? r.json() : null)).then((b) => b && setFans(b)); }, [cid, lvl?.messages]);
+  const [pushState, setPushState] = useState<"unsupported" | "off" | "on">("unsupported");
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.isSecureContext || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    void fetch("/api/push").then((r) => (r.ok ? r.json() : null)).then((b) => b && setPushState(b.subscribed ? "on" : "off"));
+  }, []);
+  async function enablePush() {
+    const reg = await navigator.serviceWorker.register("/sw.js");
+    if ((await Notification.requestPermission()) !== "granted") return;
+    const { publicKey } = await (await fetch("/api/push")).json();
+    const key = Uint8Array.from(atob(publicKey.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(publicKey.length / 4) * 4, "=")), (ch) => ch.charCodeAt(0));
+    const subscription = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    const r = await fetch("/api/push", { method: "POST", body: JSON.stringify({ subscription }) });
+    if (r.ok) setPushState("on");
+  }
   const [levelUp, setLevelUp] = useState<string | null>(null);
   useEffect(() => { if (cid) void fetch(`/api/relationship?characterId=${cid}`).then((r) => (r.ok ? r.json() : null)).then((b) => b && setLvl(b)); }, [cid]);
   async function rate(id: string, v: 1 | -1) {
@@ -48,7 +64,7 @@ function Chat() {
     void fetch(`/api/chat?characterId=${cid}`).then(async (r) => {
       if (!r.ok) return;
       const b = await r.json();
-      setLines(b.messages.map((m: { id: string; role: string; content: string }) => ({ who: m.role === "user" ? "you" : "them", text: m.content, id: m.id })));
+      setLines(b.messages.map((m: { id: string; role: string; content: string; image?: "portrait" | "clip" }) => ({ who: m.role === "user" ? "you" : "them", text: m.content, id: m.id, image: m.image })));
     });
   }, [cid]);
 
@@ -76,6 +92,7 @@ function Chat() {
     const b = await r.json();
     setTyping(false);
     setLines((l) => [...l, { who: "them", text: b.message ?? b.error, id: b.messageId }]);
+    if (b.photo) setTimeout(() => setLines((l) => [...l, { who: "them", text: b.photo.content, id: b.photo.id, image: b.photo.image }]), 1200);
     if (b.level) {
       if (lvl && b.level.level > lvl.level) { setLevelUp(`${b.level.emoji} You're now her ${b.level.name}!`); setTimeout(() => setLevelUp(null), 4000); }
       setLvl(b.level);
@@ -141,6 +158,11 @@ function Chat() {
           <div className="msgs">
             {lines.map((l, i) => (
               <div key={i} className={`bubble ${l.who}`}>
+                {l.image && c && (
+                  <div style={{ width: 210, aspectRatio: "3/4", borderRadius: 14, overflow: "hidden", marginBottom: 6, position: "relative" }}>
+                    {l.image === "clip" && c.clipV ? <ClipVideo src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} className="clip" /> : <Portrait c={c} height="100%" round={0} />}
+                  </div>
+                )}
                 {l.text}
                 {l.who === "them" && l.id && (
                   <span style={{ marginLeft: 8, whiteSpace: "nowrap" }}>
@@ -170,9 +192,22 @@ function Chat() {
             <div style={{ borderRadius: 16, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}><Portrait c={c} height="100%" round={0} /></div>
             <h2 style={{ margin: "14px 0 2px" }}>{c.name}, {c.age}</h2>
             <p style={{ margin: "0 0 12px", color: "#d9d9e3" }}>{c.tagline}</p>
+            {pushState === "off" && <button className="btn btn-sm" style={{ width: "100%", margin: "4px 0 12px" }} onClick={() => void enablePush()}>🔔 Get notified when {c.name.split(" ")[0]} texts</button>}
+            {pushState === "on" && <p className="muted" style={{ fontSize: 13 }}>🔔 Notifications on</p>}
             <div className="chips" style={{ flexWrap: "wrap" }}>
               {[c.occupation, c.personality, c.ethnicity, c.outfit].filter(Boolean).map((x) => <span key={x} className="chip">{pretty(x!)}</span>)}
             </div>
+            {fans && fans.top.length > 0 && (
+              <div style={{ marginTop: 16, background: "var(--panel2)", borderRadius: 14, padding: 12 }}>
+                <div style={{ fontWeight: 800, marginBottom: 6 }}>🏆 {c.name.split(" ")[0]}'s top fans this week</div>
+                {fans.top.map((f) => (
+                  <div key={f.rank} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, padding: "3px 0", color: f.you ? "var(--pink)" : undefined, fontWeight: f.you ? 800 : 400 }}>
+                    <span>{["🥇", "🥈", "🥉"][f.rank - 1] ?? `#${f.rank}`} {f.you ? "You" : f.handle}</span><span className="muted">{f.messages} msgs</span>
+                  </div>
+                ))}
+                {fans.yourRank && fans.yourRank > fans.top.length && <div style={{ fontSize: 13, marginTop: 4 }} className="muted">You're #{fans.yourRank}. Keep chatting to climb 😏</div>}
+              </div>
+            )}
             {mediaOn ? (
               <div style={{ display: "grid", gap: 8, marginTop: 16 }}>
                 <select className="field" value={scene} onChange={(e) => setScene(e.target.value)}>

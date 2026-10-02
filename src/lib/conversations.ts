@@ -56,7 +56,7 @@ export function openConversation(userId: string, characterId: string, now = Date
   else if (now - last.at > PROACTIVE_AFTER_MS * 2) text = missYouMessage(character, seedOf(last.id));
   if (text) db.messages.push({ id: newId(), userId, characterId, role: "assistant", content: text, at: now });
 
-  return thread(userId, characterId).slice(-100).map(({ id, role, content, at }) => ({ id, role, content, at }));
+  return thread(userId, characterId).slice(-100).map(({ id, role, content, image, at }) => ({ id, role, content, image, at }));
 }
 
 /** Latest message per character, newest first: the "Chats" list. */

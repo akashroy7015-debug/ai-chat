@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { Avatar, type AvatarChar } from "./avatar";
 
 export interface CharacterCard {
@@ -70,4 +70,20 @@ export function ClipVideo({ src, className }: { src: string; className?: string 
     return () => v.removeEventListener("loadeddata", tryPlay);
   }, [src]);
   return <video ref={ref} className={className} src={src} autoPlay muted loop playsInline preload="auto" />;
+}
+
+/** Sizzly wordmark: flame + lowercase heavy type, "ly" in a hot pink→orange gradient. */
+export function Logo({ size = 26 }: { size?: number }) {
+  const gid = `flame${useId().replace(/:/g, "")}`;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: size * 0.18, fontWeight: 900, fontSize: size, letterSpacing: "-0.04em", lineHeight: 1 }}>
+      <svg width={size * 0.95} height={size * 1.15} viewBox="0 0 24 30" aria-hidden="true">
+        <defs><linearGradient id={gid} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#ff2d78" /><stop offset=".6" stopColor="#ff5a3c" /><stop offset="1" stopColor="#ffb347" /></linearGradient></defs>
+        <path d="M12 1c1 5 7 8 7 15a7 7 0 0 1-14 0c0-4 2-6 4-8 0 3 1 5 3 5-2-4-1-8 0-12z" fill={`url(#${gid})`} />
+        <path d="M12 16c.5 2.5 3 3.5 3 6.5a3 3 0 0 1-6 0c0-2 1.5-3 3-6.5z" fill="#fff" opacity=".9" />
+      </svg>
+      <span style={{ color: "#fff" }}>sizz</span>
+      <span style={{ marginLeft: "-0.18em", background: "linear-gradient(90deg,#ff2d78,#ff5a3c 60%,#ffb347)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>ly</span>
+    </span>
+  );
 }

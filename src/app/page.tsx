@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BRAND, ClipVideo, pretty, Portrait, type CharacterCard } from "./ui";
+import { BRAND, ClipVideo, Logo, pretty, Portrait, type CharacterCard } from "./ui";
 import { AuthModal } from "./auth-panel";
 import { LangSwitch, useT } from "./i18n";
 
@@ -80,6 +80,7 @@ export default function Home() {
   return (
     <main>
       <header className="topbar">
+        <span className="sm-only"><Logo size={22} /></span>
         <nav className="utabs">
           {CATEGORIES.map((v) => <button key={v} className={`utab ${category === v ? "on" : ""}`} onClick={() => setCategory(v)}><span className="ico">{{ girls: "♀", milf: "💋", anime: "✨", guys: "♂" }[v]}</span>{t(v)}</button>)}
         </nav>

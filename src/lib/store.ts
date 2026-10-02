@@ -65,6 +65,8 @@ export interface Message {
   characterId: string;
   role: "user" | "assistant";
   content: string;
+  /** A photo/video she "sends": her portrait or looping clip. */
+  image?: "portrait" | "clip";
   at: number;
 }
 

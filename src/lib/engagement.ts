@@ -51,3 +51,40 @@ export const LEVEL_TONE = [
   "You're his girlfriend: be warm, intimate and a bit possessive, miss him, share your day in detail.",
   "You're soulmates: deeply affectionate, know him completely, reference shared memories and inside jokes.",
 ];
+
+// ---- Surprise photos -------------------------------------------------------
+const PHOTO_CAPTIONS = [
+  "took this for you 😘", "just for your eyes 🙈", "thinking of you… 📸", "do you like it? 😏",
+  "couldn't resist sending you this 💕", "your turn now 😜", "miss me yet? 😉",
+];
+
+/**
+ * From the "Date" level on, she sometimes sends her picture: always on first reaching Date,
+ * otherwise ~12% of replies, never twice within 15 messages.
+ */
+export function maybeSurprisePhoto(userId: string, characterId: string, prevLevel: number, media: { portrait: boolean; clip: boolean }, rand = Math.random()) {
+  const lvl = relationship(userId, characterId).level;
+  if (lvl < 3 || (!media.portrait && !media.clip)) return null;
+  const thread = db.messages.filter((m) => m.userId === userId && m.characterId === characterId);
+  if (thread.slice(-15).some((m) => m.image)) return null;
+  if (!(prevLevel < 3 || rand < 0.12)) return null;
+  return { content: PHOTO_CAPTIONS[Math.floor(rand * 1000) % PHOTO_CAPTIONS.length], image: (media.clip && rand < 0.5 ? "clip" : media.portrait ? "portrait" : "clip") as "portrait" | "clip" };
+}
+
+// ---- Weekly top fans -------------------------------------------------------
+/** Anonymous, stable handle (never shows emails). */
+export function fanHandle(userId: string) {
+  let h = 2166136261;
+  for (const ch of userId) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return `Fan_${(h >>> 0).toString(36).slice(0, 5)}`;
+}
+
+export function topFans(characterId: string, viewerId?: string, now = Date.now(), limit = 5) {
+  const since = now - 7 * DAY;
+  const count = new Map<string, number>();
+  for (const m of db.messages) if (m.characterId === characterId && m.role === "user" && m.at >= since) count.set(m.userId, (count.get(m.userId) ?? 0) + 1);
+  const ranked = [...count.entries()].sort((a, b) => b[1] - a[1]);
+  const top = ranked.slice(0, limit).map(([u, n], i) => ({ rank: i + 1, handle: fanHandle(u), messages: n, you: u === viewerId }));
+  const mine = viewerId ? ranked.findIndex(([u]) => u === viewerId) : -1;
+  return { top, yourRank: mine >= 0 ? mine + 1 : null };
+}

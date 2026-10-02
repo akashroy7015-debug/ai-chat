@@ -19,6 +19,7 @@ const g = globalThis as unknown as { __portraits?: PMap<{ file: string; at: numb
 const portraits: PMap<{ file: string; at: number }> = (g.__portraits ??= new PMap(db.sql, "portraits"));
 
 export const portraitVersion = (id: string) => portraits.get(id)?.at;
+export const hasPortrait = (id: string) => readPortrait(id) !== null;
 
 const w = (s: string) => s.replace(/_/g, " ");
 /** Swimwear/lingerie become a glamorous dress so portraits stay SFW and pass the image provider's policy. */

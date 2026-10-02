@@ -26,3 +26,26 @@ describe("relationship level", () => {
     expect(r.nextName).toBe("Date");
   });
 });
+
+describe("surprise photos and top fans", async () => {
+  const { maybeSurprisePhoto, topFans, fanHandle } = await import("./engagement");
+  it("only from Date level, needs media, not too often", () => {
+    const u = "sp1";
+    expect(maybeSurprisePhoto(u, "featured-2", 1, { portrait: true, clip: false }, 0)).toBeNull(); // stranger
+    for (let i = 0; i < 31; i++) db.messages.push({ id: `sp${i}`, userId: u, characterId: "featured-2", role: "user", content: "x", at: i });
+    expect(maybeSurprisePhoto(u, "featured-2", 2, { portrait: false, clip: false }, 0)).toBeNull(); // no media
+    const p = maybeSurprisePhoto(u, "featured-2", 2, { portrait: true, clip: false }, 0.9)!; // just reached Date
+    expect(p.image).toBe("portrait");
+    db.messages.push({ id: "spimg", userId: u, characterId: "featured-2", role: "assistant", content: p.content, image: "portrait", at: 99 });
+    expect(maybeSurprisePhoto(u, "featured-2", 3, { portrait: true, clip: false }, 0)).toBeNull(); // too soon
+  });
+  it("ranks fans anonymously", () => {
+    const now = Date.now();
+    for (let i = 0; i < 5; i++) db.messages.push({ id: `tf${i}`, userId: "fanA", characterId: "featured-9", role: "user", content: "x", at: now });
+    db.messages.push({ id: "tfb", userId: "fanB", characterId: "featured-9", role: "user", content: "x", at: now });
+    const r = topFans("featured-9", "fanB", now);
+    expect(r.top[0].handle).toBe(fanHandle("fanA"));
+    expect(r.top[0].handle).not.toContain("fanA");
+    expect(r.yourRank).toBe(2);
+  });
+});

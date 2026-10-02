@@ -5,7 +5,8 @@ import { getLLM } from "./llm/provider";
 import { openaiModerate } from "./llm/openai";
 import { credit } from "./tokens/ledger";
 import { applyMonthlyGrant, chatIsFree } from "./premium";
-import { LEVEL_TONE, relationship } from "./engagement";
+import { LEVEL_TONE, maybeSurprisePhoto, relationship } from "./engagement";
+import { clipVersion, hasPortrait } from "./portraits";
 import { recall, remember } from "./memory";
 import { canChatWith } from "./characters/schema";
 import { ensureFeatured } from "./characters/featured";
@@ -16,11 +17,12 @@ export const BAN_AT_STRIKES = 3;
 const REFUSAL = "I can't go there, but I'm happy to keep talking about something else.";
 
 export type ChatResult =
-  | { kind: "reply"; message: string; tokensSpent: number; messageId: string; level?: ReturnType<typeof relationship> }
+  | { kind: "reply"; message: string; tokensSpent: number; messageId: string; level?: ReturnType<typeof relationship>; photo?: { id: string; content: string; image: "portrait" | "clip" } }
   | { kind: "refused"; message: string; category: string }
   | { kind: "support"; message: string };
 
 function push(m: Omit<Message, "id" | "at">): string {
+  // (image is optional on Message)
   const id = newId();
   db.messages.push({ id, at: Date.now(), ...m });
   return id;
@@ -101,8 +103,11 @@ export async function handleChat(userId: string, characterId: string, text: stri
     return { kind: "refused", message: REFUSAL, category: out.category };
   }
 
+  const prevLevel = relationship(userId, characterId).level;
   remember(userId, characterId, message);
   push({ userId, characterId, role: "user", content: message });
   const messageId = push({ userId, characterId, role: "assistant", content: reply });
-  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId, level: relationship(userId, characterId) };
+  const surprise = maybeSurprisePhoto(userId, characterId, prevLevel, { portrait: hasPortrait(characterId), clip: !!clipVersion(characterId) });
+  const photo = surprise ? { id: push({ userId, characterId, role: "assistant", ...surprise }), ...surprise } : undefined;
+  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId, level: relationship(userId, characterId), photo };
 }

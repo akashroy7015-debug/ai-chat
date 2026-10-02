@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BRAND } from "./ui";
+import { Logo } from "./ui";
 import { LangSwitch, useT, type Key } from "./i18n";
 
 const LINKS = [
@@ -19,7 +19,7 @@ export function Nav() {
   const { t } = useT();
   return (
     <nav className="side">
-      <Link href="/" className="brand">{BRAND}</Link>
+      <Link href="/" className="brand" aria-label="Sizzly home"><Logo size={28} /></Link>
       {LINKS.map(([href, icon, label]) => (
         <Link key={href} href={href} className={`${path === href ? "on" : ""} ${href === "/premium" ? "premium" : ""}`}>
           <span>{icon}</span> <span className="lbl">{t(label)}</span>
@@ -36,7 +36,7 @@ export function Nav() {
         .side a.premium{color:#ffd34d}
         .side a.on{background:linear-gradient(135deg,rgba(255,61,129,.18),rgba(124,92,255,.18));box-shadow:inset 0 0 0 1px rgba(255,61,129,.35)}
         .side a:hover{background:var(--panel2)}
-        .side .brand{border:0 !important;font-weight:900;font-size:24px;margin:0 0 14px;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .side .brand{border:0 !important;margin:0 0 14px;padding:6px 8px !important;background:none !important;box-shadow:none !important}
         .side .badge{margin-left:auto;background:#e0284f;color:#fff;font-size:11px;padding:2px 7px;border-radius:999px;font-weight:800}
         .side .lang{margin-top:auto;padding:8px 12px}
         .side .foot{font-size:12px;color:var(--muted);padding:0 12px}
