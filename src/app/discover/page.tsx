@@ -30,7 +30,7 @@ export default function Discover() {
         {posts.map((p) => (
           <article key={p.id} style={{ background: theme.card, borderRadius: 16, padding: 14 }}>
             <header style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
-              <div style={{ width: 44 }}><Portrait c={p.character} height={44} /></div>
+              <div style={{ width: 44 }}><Portrait c={p.character} height={44} w={192} /></div>
               <div><b>{p.character.name}</b> <span style={{ color: theme.muted, fontSize: 13 }}>· {pretty(p.character.occupation)} · {ago(p.at)}</span></div>
             </header>
             <p style={{ fontSize: 16, margin: "0 0 12px" }}>{p.text}</p>

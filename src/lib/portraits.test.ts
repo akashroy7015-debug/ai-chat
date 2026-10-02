@@ -131,3 +131,16 @@ describe("model video clips", () => {
     expect(readClip("clip1")).toBeNull();
   });
 });
+
+describe("resized portraits", () => {
+  it("makes a smaller WebP copy and caches it", async () => {
+    const sharp = (await import("sharp")).default;
+    const { resizedPortrait, uploadPortrait } = await import("./portraits");
+    const png = await sharp({ create: { width: 1200, height: 1600, channels: 3, background: "#c94a6e" } }).png().toBuffer();
+    uploadPortrait("admin", { ...base, id: "rs", ownerId: "o", createdAt: 0 }, png);
+    const small = await resizedPortrait("rs", 300);
+    expect(small?.type).toBe("image/webp");
+    expect((await sharp(small!.data).metadata()).width).toBe(400);
+    expect((await resizedPortrait("rs", 300))?.data.length).toBe(small!.data.length);
+  });
+});

@@ -220,6 +220,31 @@ function savePortrait(c: Character, data: Buffer, ext: string): string {
   return file;
 }
 
+const WIDTHS = [192, 400, 640, 900];
+
+/** A WebP copy of the portrait at the nearest allowed width, cached next to the original. */
+export async function resizedPortrait(id: string, want: number): Promise<{ data: Buffer; type: string } | null> {
+  const p = portraits.get(id);
+  if (!p) return null;
+  const w = WIDTHS.find((x) => x >= want) ?? WIDTHS[WIDTHS.length - 1];
+  const src = path.join(portraitDir(), path.basename(p.file));
+  const out = path.join(portraitDir(), "sized", `${path.basename(p.file)}-${w}.webp`);
+  try {
+    if (!fs.existsSync(out)) {
+      if (!fs.existsSync(src)) return null;
+      const sharp = (await import("sharp")).default;
+      fs.mkdirSync(path.dirname(out), { recursive: true });
+      const tmp = `${out}.${process.pid}.tmp`;
+      await sharp(src).resize({ width: w, withoutEnlargement: true }).webp({ quality: 78 }).toFile(tmp);
+      fs.renameSync(tmp, out);
+    }
+    return { data: fs.readFileSync(out), type: "image/webp" };
+  } catch (e) {
+    console.error("resize failed", id, e);
+    return null;
+  }
+}
+
 export function readPortrait(id: string): { data: Buffer; type: string } | null {
   const p = portraits.get(id);
   if (!p) return null;

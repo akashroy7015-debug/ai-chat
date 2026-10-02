@@ -39,7 +39,7 @@ export default function Swipe() {
             onPointerDown={(e) => { start.current = e.clientX; (e.target as HTMLElement).setPointerCapture?.(e.pointerId); }}
             onPointerMove={(e) => { if (start.current !== null) setDx(e.clientX - start.current); }}
             onPointerUp={() => { const d = dx; start.current = null; if (d > 110) decide(true); else if (d < -110) decide(false); else setDx(0); }}>
-            <div className="img"><Portrait c={c} height="100%" round={0} /></div>
+            <div className="img"><Portrait c={c} height="100%" round={0} w={640} /></div>
             {c.clipV && <ClipVideo className="clip" src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} />}
             <div className="shade" />
             {dx > 40 && <span className="badge" style={{ left: "auto", right: 14, top: 18, fontSize: 22, color: "#2ee67a", border: "3px solid #2ee67a" }}>LIKE</span>}
@@ -60,7 +60,7 @@ export default function Swipe() {
         <div className="backdrop" onClick={() => setMatch(null)}>
           <div className="modal" style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
             <h2 style={{ fontSize: 32, margin: "0 0 12px", background: "var(--grad)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>It's a match! 💘</h2>
-            <div style={{ width: 140, height: 180, margin: "0 auto 12px", borderRadius: 16, overflow: "hidden" }}><Portrait c={match} height="100%" round={0} /></div>
+            <div style={{ width: 140, height: 180, margin: "0 auto 12px", borderRadius: 16, overflow: "hidden" }}><Portrait c={match} height="100%" round={0} w={192} /></div>
             <p>{match.name.split(" ")[0]} liked you too 😏</p>
             <div style={{ display: "grid", gap: 8 }}>
               <button className="btn" onClick={() => router.push(`/chat?c=${match.id}`)}>💬 Say hi to {match.name.split(" ")[0]}</button>

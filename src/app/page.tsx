@@ -153,7 +153,7 @@ export default function Home() {
           <div className="promo-art">
             {(chars ?? []).slice(0, 3).map((c, k) => (
               <Link key={c.id} href={`/chat?c=${c.id}`} className={`pcard p${k}`}>
-                <Portrait c={c} height="100%" round={0} />
+                <Portrait c={c} height="100%" round={0} w={400} />
                 {k === 1 && <span className="online-tag">She&apos;s online</span>}
               </Link>
             ))}
@@ -175,7 +175,7 @@ export default function Home() {
                 <Link href={th.href} className="btn btn-gold">{th.cta}</Link>
               </div>
               <div className="t-art">
-                {mine.map((c, n) => <Link key={c.id} href={`/chat?c=${c.id}`} className={`pcard p${n}`}><Portrait c={c} height="100%" round={0} /></Link>)}
+                {mine.map((c, n) => <Link key={c.id} href={`/chat?c=${c.id}`} className={`pcard p${n}`}><Portrait c={c} height="100%" round={0} w={400} /></Link>)}
                 <span className="bubble-a">{th.bubble}</span>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function Home() {
           </section>
           <section className="hero" aria-label="Featured">
             <div className="hero-media" onClick={() => open(star.id)}>
-              <Portrait c={star} height="100%" round={0} />
+              <Portrait c={star} height="100%" round={0} w={900} />
               {star.clipV && <ClipVideo className="clip" src={`/api/portraits/${star.id}/clip?v=${star.clipV}`} />}
               <div className="shade" />
               <span className="live"><i />Online now</span>
@@ -228,7 +228,7 @@ export default function Home() {
       <div className="grid">
         {shown.map((c, i) => (
           <div key={c.id} className="card" onClick={() => open(c.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && open(c.id)}>
-            <div className="img"><Portrait c={c} height="100%" round={0} /></div>
+            <div className="img"><Portrait c={c} height="100%" round={0} w={400} /></div>
             {c.clipV && <ClipVideo className="clip" src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} />}
             <div className="shade" />
             {Date.now() - (c.createdAt ?? 0) < WEEK ? <span className="new">✦ NEW</span> : i < 3 && <span className="badge">🔥 HOT</span>}
@@ -245,7 +245,7 @@ export default function Home() {
       {!me?.premium && chars && chars.length > 3 && (
         <section className="locked" aria-label="Premium photos">
           <div className="locked-pics">
-            {chars.slice(3, 7).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} /><span>🔒</span></div>)}
+            {chars.slice(3, 7).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} w={192} /><span>🔒</span></div>)}
           </div>
           <div>
             <div className="script">just for you…</div>

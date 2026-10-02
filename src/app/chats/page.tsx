@@ -24,7 +24,7 @@ export default function Chats() {
       <div style={{ display: "grid", gap: 8 }}>
         {convs?.map((c) => (
           <Link key={c.character.id} href={`/chat?c=${c.character.id}`} style={{ display: "flex", gap: 12, alignItems: "center", background: theme.card, padding: 10, borderRadius: 12, color: "inherit", textDecoration: "none" }}>
-            <div style={{ width: 56 }}><Portrait c={c.character} height={56} /></div>
+            <div style={{ width: 56 }}><Portrait c={c.character} height={56} w={192} /></div>
             <div style={{ minWidth: 0 }}>
               <b>{c.character.name}</b>
               <div style={{ color: theme.muted, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>

@@ -129,7 +129,7 @@ function Chat() {
           <div style={{ padding: "14px 14px 8px", fontWeight: 800, fontSize: 18 }}>{t("chats")}</div>
           {convs.map((v) => (
             <Link key={v.character.id} href={`/chat?c=${v.character.id}`} className={`conv ${v.character.id === cid ? "on" : ""}`}>
-              <div className="avatar-sm"><Portrait c={v.character} height="100%" round={0} /></div>
+              <div className="avatar-sm"><Portrait c={v.character} height="100%" round={0} w={192} /></div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: 700 }}>{v.character.name.split(" ")[0]}</div>
                 <div className="muted" style={{ fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{v.last.role === "user" ? "You: " : ""}{v.last.content}</div>
@@ -142,7 +142,7 @@ function Chat() {
           <div className="head">
             <Link href="/" className="muted" style={{ fontSize: 20 }}>←</Link>
             {c && <>
-              <div className="avatar-sm" onClick={() => setShowProfile(true)} style={{ cursor: "pointer" }}><Portrait c={c} height="100%" round={0} /></div>
+              <div className="avatar-sm" onClick={() => setShowProfile(true)} style={{ cursor: "pointer" }}><Portrait c={c} height="100%" round={0} w={192} /></div>
               <div onClick={() => setShowProfile(true)} style={{ cursor: "pointer" }}>
                 <div style={{ fontWeight: 800 }}>{c.name}</div>
                 <div style={{ fontSize: 12, color: "#2ee67a" }}>● Online{lvl && <span style={{ color: "var(--pink)", marginLeft: 8 }}>{lvl.emoji} {lvl.name}</span>}</div>
@@ -159,7 +159,7 @@ function Chat() {
             </div>
           )}
           {levelUp && <div style={{ position: "absolute", left: "50%", top: 90, transform: "translateX(-50%)", zIndex: 5 }} className="pill gold">{levelUp}</div>}
-          {c && <div className="chat-bg" aria-hidden><Portrait c={c} height="100%" round={0} /></div>}
+          {c && <div className="chat-bg" aria-hidden><Portrait c={c} height="100%" round={0} w={192} /></div>}
           <div className="msgs">
             {c && (
               <div className="chat-intro">
@@ -275,7 +275,7 @@ function PrivateGallery({ c }: { c: CharacterCard }) {
           </button>
         ) : (
           <Link key={i.id} href="/premium" className="pgal-tile locked" aria-label="Unlock with Premium">
-            <div className="blur"><Portrait c={c} height="100%" round={0} /></div>
+            <div className="blur"><Portrait c={c} height="100%" round={0} w={192} /></div>
             <span className="pgal-lock">🔒<small>{i.kind === "video" ? "Video" : "Photo"}</small></span>
           </Link>
         ))}

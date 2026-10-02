@@ -34,13 +34,14 @@ const HAIR_HEX: Record<string, string> = { black: "#222", brown: "#6b4226", blon
 
 /** Placeholder portrait until image generation is wired up: gradient seeded by hair colour. */
 /** `height` may be a number of pixels or "100%" to fill a positioned parent (cards, hero). */
-export function Portrait({ c, height = 220, round = 12 }: { c: AvatarChar & { portraitV?: number }; height?: number | string; round?: number }) {
+export function Portrait({ c, height = 220, round = 12, w }: { c: AvatarChar & { portraitV?: number }; height?: number | string; round?: number; w?: number }) {
+  const width = w ?? (round >= 999 ? 192 : 640);
   const h = HAIR_HEX[c.hair] ?? "#555";
   const [failed, setFailed] = useState(false);
   if (c.id && !failed) {
     return (
       <div style={{ height, borderRadius: round, overflow: "hidden", background: `linear-gradient(160deg, ${h}, #2b1830 70%)`, position: "relative" }}>
-        <img src={`/api/portraits/${c.id}${c.portraitV ? `?v=${c.portraitV}` : ""}`} alt={`${c.name} (AI-generated)`} loading="lazy" onError={() => setFailed(true)}
+        <img src={`/api/portraits/${c.id}?w=${width}${c.portraitV ? `&v=${c.portraitV}` : ""}`} decoding="async" alt={`${c.name} (AI-generated)`} loading="lazy" onError={() => setFailed(true)}
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
         {c.style === "anime" && <span style={{ position: "absolute", top: 8, left: 8, fontSize: 11, background: "rgba(0,0,0,.5)", padding: "2px 8px", borderRadius: 999 }}>ANIME</span>}
       </div>
