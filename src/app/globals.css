@@ -101,3 +101,46 @@ button { font: inherit; }
   .tab { padding: 7px 12px; }
   .topbar .right .pill, .topbar .right .btn { padding: 7px 10px; }
 }
+
+/* Banner carousel */
+.banner { position: relative; height: 340px; border-radius: 22px; overflow: hidden; margin: 8px 0 18px; background: var(--panel); border: 1px solid var(--line); }
+.banner .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s; display: grid; grid-template-columns: 1fr 1fr; }
+.banner .slide.on { opacity: 1; }
+.banner .art { position: relative; display: flex; justify-content: flex-end; gap: 10px; padding: 18px 18px 0; }
+.banner .art > div { width: 31%; border-radius: 16px 16px 0 0; overflow: hidden; }
+.banner .copy { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 40px; }
+.banner::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(11,11,16,.15), transparent 60%), linear-gradient(0deg, rgba(11,11,16,.55), transparent 35%); }
+.sale { margin: 0; font-family: Georgia, serif; font-weight: 900; text-transform: uppercase; line-height: .9; font-size: clamp(30px, 4.6vw, 54px); color: #ffd34d; transform: rotate(-3deg);
+  -webkit-text-stroke: 1px #8a4b12; text-shadow: 2px 3px 0 #5a2a0c, 3px 6px 10px rgba(0,0,0,.5); }
+.sale em { display: block; font-style: normal; color: #6ec8ff; font-size: .8em; margin-top: 6px; }
+.sale-off { font-size: clamp(26px, 3.4vw, 40px); font-weight: 900; margin: 14px 0 18px; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+.btn-gold { background: linear-gradient(135deg, #ffe066, #f2b705); color: #2a1c00; box-shadow: 0 6px 24px rgba(242,183,5,.35); }
+.banner .arrow { position: absolute; z-index: 3; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 50%; border: 0; background: rgba(0,0,0,.45); color: #fff; font-size: 20px; cursor: pointer; }
+.banner .arrow.l { left: 10px; } .banner .arrow.r { right: 10px; }
+.banner .dots { position: absolute; z-index: 3; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 7px; }
+.banner .dots button { width: 7px; height: 7px; border-radius: 50%; border: 0; padding: 0; background: #fff; opacity: .4; cursor: pointer; }
+.banner .dots button.on { opacity: 1; width: 20px; border-radius: 4px; }
+@media (max-width: 760px) { .banner { height: 300px; } .banner .slide { grid-template-columns: 1fr; } .banner .art { position: absolute; inset: 0; opacity: .35; padding: 0; } .banner .art > div { width: 34%; border-radius: 0; } .banner .copy { align-items: center; text-align: center; padding: 0 20px; } }
+
+/* Underline category tabs (top bar) */
+.utabs { display: flex; gap: 6px; }
+.utab { border: 0; background: transparent; color: var(--text); font-weight: 700; padding: 10px 14px; border-bottom: 2px solid transparent; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.utab.on { color: var(--pink); border-bottom-color: var(--pink); }
+
+/* Search pill */
+.search { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); min-width: 120px; }
+.search input { border: 0; outline: 0; background: transparent; color: var(--text); padding: 8px 0; width: 120px; font-size: 13px; }
+
+/* Cards: NEW badge */
+.card .new { position: absolute; top: 10px; left: 10px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; background: var(--grad); }
+
+/* Explore more */
+.explore { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 28px; }
+.explore a { display: flex; align-items: center; gap: 10px; padding: 18px; border-radius: 16px; font-weight: 800; background: linear-gradient(135deg, rgba(255,61,129,.16), rgba(124,92,255,.16)), var(--panel); border: 1px solid var(--line); transition: transform .15s; }
+.explore a:hover { transform: translateY(-2px); border-color: rgba(255,61,129,.5); }
+.utab { white-space: nowrap; }
+@media (max-width: 760px) {
+  .topbar { overflow-x: auto; scrollbar-width: none; }
+  .utabs { gap: 0; } .utab { padding: 10px 9px; font-size: 14px; }
+  .utab .ico { display: none; }
+}

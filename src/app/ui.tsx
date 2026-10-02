@@ -13,6 +13,7 @@ export interface CharacterCard {
   occupation: string;
   personality: string;
   tagline: string;
+  createdAt?: number;
   bodyShape?: string;
   outfit?: string;
   featured?: boolean;
