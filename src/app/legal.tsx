@@ -2,10 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 // Business details come from the server's environment so they can change without a code edit.
-export const OPERATOR = process.env.OPERATOR_NAME ?? "Sizzly";
-export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL ?? process.env.GRIEVANCE_OFFICER_EMAIL ?? "support@yourdomain.com";
-export const SUPPORT_PHONE = process.env.SUPPORT_PHONE ?? "";
-export const BUSINESS_ADDRESS = process.env.BUSINESS_ADDRESS ?? "India";
+// Placeholder values (e.g. "your@email.com") are treated as not set.
+const real = (v?: string) => (v && !/your|xxxx|example/i.test(v) ? v.trim() : "");
+export const OPERATOR = real(process.env.OPERATOR_NAME) || "Sizzly";
+export const SUPPORT_EMAIL_SET = real(process.env.SUPPORT_EMAIL) || real(process.env.GRIEVANCE_OFFICER_EMAIL);
+export const SUPPORT_EMAIL = SUPPORT_EMAIL_SET || "our support team";
+export const SUPPORT_PHONE = real(process.env.SUPPORT_PHONE);
+export const BUSINESS_ADDRESS = real(process.env.BUSINESS_ADDRESS) || "India";
 export const UPDATED = "2 October 2026";
 
 export function LegalPage({ title, children }: { title: string; children: ReactNode }) {
