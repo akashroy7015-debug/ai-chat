@@ -8,7 +8,7 @@ const LINKS = [
   ["/", "🏠", "home"],
   ["/discover", "✨", "discover"],
   ["/chats", "💬", "chats"],
-  ["/collection", "🖼️", "collection"],
+  ["/swipe", "💘", "swipe"],
   ["/create", "➕", "create"],
   ["/my-ai", "💖", "myAi"],
   ["/premium", "👑", "premium"],

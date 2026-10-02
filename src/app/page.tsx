@@ -41,11 +41,19 @@ export default function Home() {
   const [chars, setChars] = useState<CharacterCard[] | null>(null);
   const [slide, setSlide] = useState(0);
   const [query, setQuery] = useState("");
+  const [daily, setDaily] = useState<{ claimedToday: boolean; streak: number; reward: number } | null>(null);
   useEffect(() => { const t = setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 6000); return () => clearInterval(t); }, []);
 
   async function refresh() {
     const r = await fetch("/api/auth/me");
-    setMe(r.ok ? await r.json() : null);
+    const m = r.ok ? await r.json() : null;
+    setMe(m);
+    if (m?.ageStatus === "verified") void fetch("/api/daily").then((x) => (x.ok ? x.json() : null)).then((d) => d && !d.claimedToday && setDaily(d));
+  }
+  async function claim() {
+    await fetch("/api/daily", { method: "POST" });
+    setDaily(null);
+    await refresh();
   }
   useEffect(() => { void refresh(); }, []);
 
@@ -132,6 +140,7 @@ export default function Home() {
       <h2 style={{ margin: "36px 0 0" }}>Explore more</h2>
       <div className="explore" style={{ marginTop: 12 }}>
         <Link href="/create">🪄 Create my AI</Link>
+        <Link href="/swipe">💘 Swipe & match</Link>
         <Link href="/discover">✨ Discover</Link>
         <Link href="/chats">💬 My chats</Link>
         <Link href="/premium">💎 Premium -70%</Link>
@@ -147,6 +156,19 @@ export default function Home() {
         <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link> · <Link href="/grievance">Grievances</Link>
       </footer>
 
+      {daily && (
+        <div className="backdrop" onClick={() => setDaily(null)}>
+          <div className="modal" style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: 54 }}>🔥</div>
+            <h2 style={{ margin: "6px 0" }}>Daily reward</h2>
+            <p className="muted" style={{ margin: "0 0 14px" }}>{daily.streak > 0 ? `${daily.streak}-day streak! Keep it going 😏` : "Come back every day for bigger rewards."}</p>
+            <div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 16 }}>
+              {[1, 2, 3, 4, 5, 6, 7].map((d) => <span key={d} className={`chip ${d <= daily.streak + 1 ? "on" : ""}`} style={{ padding: "6px 9px" }}>D{d}</span>)}
+            </div>
+            <button className="btn" style={{ width: "100%" }} onClick={() => void claim()}>Claim {daily.reward} 💎</button>
+          </div>
+        </div>
+      )}
       {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} onDone={() => { setAuth(null); void refresh(); }} />}
     </main>
   );

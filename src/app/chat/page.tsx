@@ -28,6 +28,10 @@ function Chat() {
   const [playing, setPlaying] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const [votes, setVotes] = useState<Record<string, number>>({});
+  type Level = { level: number; name: string; emoji: string; messages: number; nextAt: number | null; nextName: string | null; at: number };
+  const [lvl, setLvl] = useState<Level | null>(null);
+  const [levelUp, setLevelUp] = useState<string | null>(null);
+  useEffect(() => { if (cid) void fetch(`/api/relationship?characterId=${cid}`).then((r) => (r.ok ? r.json() : null)).then((b) => b && setLvl(b)); }, [cid]);
   async function rate(id: string, v: 1 | -1) {
     const r = await fetch("/api/feedback", { method: "POST", body: JSON.stringify({ messageId: id, vote: v }) });
     if (r.ok) { const b = await r.json(); setVotes((x) => ({ ...x, [id]: b.vote })); }
@@ -72,6 +76,10 @@ function Chat() {
     const b = await r.json();
     setTyping(false);
     setLines((l) => [...l, { who: "them", text: b.message ?? b.error, id: b.messageId }]);
+    if (b.level) {
+      if (lvl && b.level.level > lvl.level) { setLevelUp(`${b.level.emoji} You're now her ${b.level.name}!`); setTimeout(() => setLevelUp(null), 4000); }
+      setLvl(b.level);
+    }
   }
 
   async function play(id: string) {
@@ -113,17 +121,23 @@ function Chat() {
           ))}
         </aside>
 
-        <section className="center">
+        <section className="center" style={{ position: "relative" }}>
           <div className="head">
             <Link href="/" className="muted" style={{ fontSize: 20 }}>←</Link>
             {c && <>
               <div className="avatar-sm" onClick={() => setShowProfile(true)} style={{ cursor: "pointer" }}><Portrait c={c} height="100%" round={0} /></div>
               <div onClick={() => setShowProfile(true)} style={{ cursor: "pointer" }}>
                 <div style={{ fontWeight: 800 }}>{c.name}</div>
-                <div style={{ fontSize: 12, color: "#2ee67a" }}>● Online</div>
+                <div style={{ fontSize: 12, color: "#2ee67a" }}>● Online{lvl && <span style={{ color: "var(--pink)", marginLeft: 8 }}>{lvl.emoji} {lvl.name}</span>}</div>
               </div>
             </>}
           </div>
+          {lvl && lvl.nextAt !== null && (
+            <div title={`${lvl.nextAt - lvl.messages} more messages to become her ${lvl.nextName}`} style={{ height: 4, background: "var(--panel2)" }}>
+              <div style={{ height: 4, width: `${Math.min(100, ((lvl.messages - lvl.at) / (lvl.nextAt - lvl.at)) * 100)}%`, background: "var(--grad)", transition: "width .4s" }} />
+            </div>
+          )}
+          {levelUp && <div style={{ position: "absolute", left: "50%", top: 90, transform: "translateX(-50%)", zIndex: 5 }} className="pill gold">{levelUp}</div>}
           <div className="msgs">
             {lines.map((l, i) => (
               <div key={i} className={`bubble ${l.who}`}>

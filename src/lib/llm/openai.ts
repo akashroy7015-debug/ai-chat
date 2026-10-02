@@ -25,13 +25,13 @@ async function post<T>(base: string, apiKey: string | undefined, path: string, b
 
 /** Chat Completions. Model is configurable with OPENAI_MODEL. */
 export const openaiLLM: LLMProvider = {
-  async reply({ character, history, facts, userMessage, explicit, lang }) {
+  async reply({ character, history, facts, userMessage, explicit, lang, levelTone }) {
     const r = await post<{ choices: { message: { content: string | null } }[] }>(
       chatBase(), chatKey(), "/chat/completions",
       {
         model: process.env.LLM_MODEL ?? process.env.OPENAI_MODEL ?? "gpt-4o-mini",
         messages: [
-          { role: "system", content: systemPrompt(character, facts, explicit, lang) },
+          { role: "system", content: systemPrompt(character, facts, explicit, lang, levelTone) },
           ...history,
           { role: "user", content: userMessage },
         ],

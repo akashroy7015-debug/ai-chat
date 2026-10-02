@@ -5,6 +5,7 @@ import { getLLM } from "./llm/provider";
 import { openaiModerate } from "./llm/openai";
 import { credit } from "./tokens/ledger";
 import { applyMonthlyGrant, chatIsFree } from "./premium";
+import { LEVEL_TONE, relationship } from "./engagement";
 import { recall, remember } from "./memory";
 import { canChatWith } from "./characters/schema";
 import { ensureFeatured } from "./characters/featured";
@@ -15,7 +16,7 @@ export const BAN_AT_STRIKES = 3;
 const REFUSAL = "I can't go there, but I'm happy to keep talking about something else.";
 
 export type ChatResult =
-  | { kind: "reply"; message: string; tokensSpent: number; messageId: string }
+  | { kind: "reply"; message: string; tokensSpent: number; messageId: string; level?: ReturnType<typeof relationship> }
   | { kind: "refused"; message: string; category: string }
   | { kind: "support"; message: string };
 
@@ -87,7 +88,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
 
   let reply: string;
   try {
-    reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit, lang: user.lang ?? "auto" });
+    reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit, lang: user.lang ?? "auto", levelTone: LEVEL_TONE[relationship(userId, characterId).level - 1] });
   } catch (e) {
     if (!free) credit(userId, COSTS.chat, "refund:chat_error");
     audit({ userId, kind: "llm_error", detail: e instanceof Error ? e.message.slice(0, 200) : String(e) });
@@ -103,5 +104,5 @@ export async function handleChat(userId: string, characterId: string, text: stri
   remember(userId, characterId, message);
   push({ userId, characterId, role: "user", content: message });
   const messageId = push({ userId, characterId, role: "assistant", content: reply });
-  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId };
+  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId, level: relationship(userId, characterId) };
 }

@@ -31,6 +31,8 @@ export interface User {
   /** Preferred chat language. */
   lang?: "auto" | "en" | "hi" | "hinglish";
   premiumUntil?: number;
+  dailyStreak?: number;
+  lastDailyClaim?: number;
   premiumPlan?: string;
   premiumLastGrant?: number;
   createdAt?: number;

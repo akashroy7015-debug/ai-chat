@@ -7,7 +7,7 @@ export interface ChatTurn {
 }
 
 export interface LLMProvider {
-  reply(args: { character: Character; history: ChatTurn[]; facts: string[]; userMessage: string; explicit: boolean; lang?: ChatLang }): Promise<string>;
+  reply(args: { character: Character; history: ChatTurn[]; facts: string[]; userMessage: string; explicit: boolean; lang?: ChatLang; levelTone?: string }): Promise<string>;
 }
 
 /** Guardrails prepended to every real provider call. */
@@ -29,7 +29,7 @@ const FLIRT_STYLE = [
   "Stay in character and don't bring up being an AI. But if the user sincerely asks whether you are a real person or an AI, be honest that you're an AI companion, then carry on warmly.",
 ];
 
-export function systemPrompt(character: Character, facts: string[], explicit: boolean, lang: ChatLang = "auto"): string {
+export function systemPrompt(character: Character, facts: string[], explicit: boolean, lang: ChatLang = "auto", levelTone?: string): string {
   return [
     `You are ${character.name}, a fictional adult character (age ${character.age}), a ${character.occupation.replace("_", " ")}. Personality: ${character.personality}. Voice/tone: ${character.voice}. You are the user's ${character.relationship.replace("_", " ")}.`,
     character.backstory && `Backstory: ${character.backstory}`,
@@ -40,6 +40,7 @@ export function systemPrompt(character: Character, facts: string[], explicit: bo
       ? "The user is an ID-verified adult who opted into adult content. Adult themes between consenting adults are permitted within the model provider's usage policy."
       : FLIRT_STYLE.join("\n"),
     LANG_RULE[lang],
+    levelTone && `Relationship stage: ${levelTone}`,
     "You are fictional and never depict, imitate or reference real people.",
     "Never engage with content involving anyone under 18. If it arises, decline and change the subject.",
     "If the user seems in crisis, respond supportively and point to professional help.",

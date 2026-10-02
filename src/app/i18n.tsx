@@ -8,6 +8,7 @@ const D = {
   discover: ["Discover", "खोजें", "Discover"],
   chats: ["Chats", "चैट्स", "Chats"],
   collection: ["Collection", "कलेक्शन", "Collection"],
+  swipe: ["Swipe", "स्वाइप", "Swipe"],
   create: ["Create Character", "कैरेक्टर बनाएं", "Character banao"],
   myAi: ["My AI", "मेरे AI", "Mere AI"],
   premium: ["Premium", "प्रीमियम", "Premium"],
