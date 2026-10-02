@@ -82,9 +82,9 @@ function Chat() {
     return () => clearTimeout(tm);
   }, [media]);
 
-  async function send() {
-    if (!c || !input.trim() || typing) return;
-    const text = input;
+  async function send(preset?: string) {
+    const text = (preset ?? input).trim();
+    if (!c || !text || typing) return;
     setInput("");
     setLines((l) => [...l, { who: "you", text }]);
     setTyping(true);
@@ -147,6 +147,10 @@ function Chat() {
                 <div style={{ fontWeight: 800 }}>{c.name}</div>
                 <div style={{ fontSize: 12, color: "#2ee67a" }}>● Online{lvl && <span style={{ color: "var(--pink)", marginLeft: 8 }}>{lvl.emoji} {lvl.name}</span>}</div>
               </div>
+              <div className="head-actions">
+                {mediaOn && <button className="hbtn" title="Ask for a photo" onClick={() => void requestMedia("image")}>📸</button>}
+                <button className="hbtn" title="Her profile" onClick={() => setShowProfile(true)}>♡</button>
+              </div>
             </>}
           </div>
           {lvl && lvl.nextAt !== null && (
@@ -155,9 +159,19 @@ function Chat() {
             </div>
           )}
           {levelUp && <div style={{ position: "absolute", left: "50%", top: 90, transform: "translateX(-50%)", zIndex: 5 }} className="pill gold">{levelUp}</div>}
+          {c && <div className="chat-bg" aria-hidden><Portrait c={c} height="100%" round={0} /></div>}
           <div className="msgs">
+            {c && (
+              <div className="chat-intro">
+                <div className="ring"><Portrait c={c} height="100%" round={999} /></div>
+                <b>{c.name.split(" ")[0]}, {c.age}</b>
+                <span className="muted">{c.tagline || "Say hi, she's been waiting…"}</span>
+              </div>
+            )}
             {lines.map((l, i) => (
-              <div key={i} className={`bubble ${l.who}`}>
+              <div key={i} className={`mrow ${l.who}`}>
+              {l.who === "them" && c && <div className="mav"><Portrait c={c} height="100%" round={999} /></div>}
+              <div className={`bubble ${l.who}`}>
                 {l.image && c && (
                   <div style={{ width: 210, aspectRatio: "3/4", borderRadius: 14, overflow: "hidden", marginBottom: 6, position: "relative" }}>
                     {l.image === "clip" && c.clipV ? <ClipVideo src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} className="clip" /> : <Portrait c={c} height="100%" round={0} />}
@@ -176,13 +190,20 @@ function Chat() {
                   <button title={`Play voice (${voice.cost} tokens, replays free)`} onClick={() => void play(l.id!)} style={{ marginLeft: 8, background: "none", border: 0, cursor: "pointer", fontSize: 15 }}>{playing === l.id ? "⏳" : "🔊"}</button>
                 )}
               </div>
+              </div>
             ))}
-            {typing && <div className="typing">{c?.name.split(" ")[0]} is typing…</div>}
+            {typing && c && <div className="mrow them"><div className="mav"><Portrait c={c} height="100%" round={999} /></div><div className="bubble them dots" aria-label={`${c.name.split(" ")[0]} is typing`}><i /><i /><i /></div></div>}
             <div ref={bottom} />
           </div>
+          {!typing && lines.length < 40 && (
+            <div className="quick">
+              {QUICK.map((q) => <button key={q} onClick={() => void send(q)}>{q}</button>)}
+            </div>
+          )}
           <div className="composer">
+            {mediaOn && <button className="cbtn" title="Ask for a photo" aria-label="Ask for a photo" onClick={() => void requestMedia("image")}>📷</button>}
             <input className="field" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void send()} placeholder={c ? `${t("message")} ${c.name.split(" ")[0]}…` : ""} />
-            <button className="btn" onClick={() => void send()} disabled={typing}>{t("send")}</button>
+            <button className="send" aria-label={t("send")} onClick={() => void send()} disabled={typing || !input.trim()}>➤</button>
           </div>
         </section>
 
@@ -231,6 +252,8 @@ function Chat() {
     </main>
   );
 }
+
+const QUICK = ["Hey gorgeous", "What are you wearing?", "Tell me a secret", "Kya kar rahi ho?", "I missed you"];
 
 export default function ChatPage() {
   return <Suspense><Chat /></Suspense>;
