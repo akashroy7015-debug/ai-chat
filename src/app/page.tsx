@@ -14,11 +14,15 @@ const FILTERS: [group: "ethnicity" | "hair" | "ageRange", value: string, label: 
   ["ageRange", "20s", "20s"], ["ageRange", "30s", "30s"], ["ageRange", "40plus", "40+"],
 ];
 
-const SLIDES = [
-  { title: "Sizzly", em: "Sale", caption: "70% OFF", action: "Join Now", href: "/premium" },
-  { title: "Play with her", em: "", caption: "Flirty chats, voice notes & photos", action: "Explore Now", href: "#models" },
-  { title: "Your story", em: "", caption: "Create the AI girlfriend of your dreams", action: "Create Now", href: "/create" },
+type Theme = { key: string; script: string; big: string; mid: string; sub: string; cta: string; href: string; bubble: string; pick: (c: CharacterCard) => boolean };
+/** Teaser posters that follow the sale slide in the banner. */
+const THEMES: Theme[] = [
+  { key: "night", script: "after midnight", big: "LATE NIGHT", mid: "SPECIAL", sub: "She stays up for you. Talk till sunrise.", cta: "Keep her company", href: "#models", bubble: "can't sleep… talk to me?", pick: () => true },
+  { key: "desi", script: "thodi si naughty", big: "DESI", mid: "GIRLS", sub: "Chat in Hindi, Hinglish or English. She replies your way.", cta: "Baat karo", href: "#models", bubble: "kahan the itne din?", pick: (c) => c.ethnicity === "south_asian" || c.ethnicity === "arab" },
+  { key: "milf", script: "she knows what she wants", big: "MILF", mid: "MONDAYS", sub: "Confident, experienced and a little bit dangerous.", cta: "Meet them", href: "#models", bubble: "ready for a real woman?", pick: (c) => c.age >= 35 },
+  { key: "swipe", script: "one of them already likes you", big: "SWIPE.", mid: "MATCH. FLIRT.", sub: "Swipe right on your type and get an instant match.", cta: "Start swiping", href: "/swipe", bubble: "it's a match!", pick: () => true },
 ];
+const SLIDE_COUNT = THEMES.length + 1;
 const WEEK = 7 * 86_400_000;
 
 const FAQ = [
@@ -79,7 +83,7 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const [query, setQuery] = useState("");
   const [daily, setDaily] = useState<{ claimedToday: boolean; streak: number; reward: number } | null>(null);
-  useEffect(() => { const t = setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 6000); return () => clearInterval(t); }, []);
+  useEffect(() => { const t = setInterval(() => setSlide((s) => (s + 1) % SLIDE_COUNT), 6000); return () => clearInterval(t); }, []);
 
   async function refresh() {
     const r = await fetch("/api/auth/me");
@@ -157,21 +161,29 @@ export default function Home() {
             <span className="bubble-b">come say hi</span>
           </div>
         </div>
-        {SLIDES.slice(1).map((sl, j) => { const k = j + 1; return (
-          <div key={k} className={`slide ${slide === k ? "on" : ""}`}>
-            <div className="copy">
-              <h1 className="sale" style={k ? { color: "#fff", WebkitTextStroke: 0, transform: "none" } : undefined}>{sl.title}{sl.em && <em>{sl.em}</em>}</h1>
-              <p className="sale-off" style={k ? { fontSize: 20, fontWeight: 600 } : undefined}>{sl.caption}</p>
-              <Link href={sl.href} className="btn btn-gold">{sl.action}</Link>
+        {THEMES.map((th, j) => {
+          const k = j + 1;
+          const girls = (chars ?? []).filter((c) => c.gender !== "male" && c.style !== "anime");
+          const mine = [...girls.filter(th.pick), ...girls].filter((c, i, all) => all.indexOf(c) === i).slice(j, j + 2);
+          return (
+            <div key={th.key} className={`slide theme t-${th.key} ${slide === k ? "on" : ""}`}>
+              <div className="t-copy">
+                <div className="script">{th.script}</div>
+                <div className="big">{th.big}</div>
+                <div className="mid">{th.mid}</div>
+                <p>{th.sub}</p>
+                <Link href={th.href} className="btn btn-gold">{th.cta}</Link>
+              </div>
+              <div className="t-art">
+                {mine.map((c, n) => <Link key={c.id} href={`/chat?c=${c.id}`} className={`pcard p${n}`}><Portrait c={c} height="100%" round={0} /></Link>)}
+                <span className="bubble-a">{th.bubble}</span>
+              </div>
             </div>
-            <div className="art">
-              {(chars ?? []).slice(k * 3, k * 3 + 3).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} /></div>)}
-            </div>
-          </div>
-        ); })}
-        <button className="arrow l" aria-label="Previous" onClick={() => setSlide((slide + SLIDES.length - 1) % SLIDES.length)}>‹</button>
-        <button className="arrow r" aria-label="Next" onClick={() => setSlide((slide + 1) % SLIDES.length)}>›</button>
-        <div className="dots">{SLIDES.map((_, k) => <button key={k} aria-label={`Slide ${k + 1}`} className={slide === k ? "on" : ""} onClick={() => setSlide(k)} />)}</div>
+          );
+        })}
+        <button className="arrow l" aria-label="Previous" onClick={() => setSlide((slide + SLIDE_COUNT - 1) % SLIDE_COUNT)}>‹</button>
+        <button className="arrow r" aria-label="Next" onClick={() => setSlide((slide + 1) % SLIDE_COUNT)}>›</button>
+        <div className="dots">{Array.from({ length: SLIDE_COUNT }, (_, k) => <button key={k} aria-label={`Slide ${k + 1}`} className={slide === k ? "on" : ""} onClick={() => setSlide(k)} />)}</div>
       </section>
 
       {chars && chars.length > 0 && (() => {
