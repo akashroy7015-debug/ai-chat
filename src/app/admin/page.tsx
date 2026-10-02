@@ -69,7 +69,7 @@ export default function Admin() {
       {tab === "overview" && stats && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
           {Object.entries(stats).map(([k, v]) => (
-            <div key={k} style={card}><div style={{ color: theme.muted, fontSize: 12 }}>{k.replace(/([A-Z0-9]+)/g, " $1")}</div><div style={{ fontSize: 26, fontWeight: 700 }}>{k === "revenueUsd" ? `$${v}` : v}</div></div>
+            <div key={k} style={card}><div style={{ color: theme.muted, fontSize: 12 }}>{k.replace(/([A-Z0-9]+)/g, " $1")}</div><div style={{ fontSize: 26, fontWeight: 700 }}>{k === "revenueInr" ? `₹${v}` : v}</div></div>
           ))}
         </div>
       )}

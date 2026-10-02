@@ -18,6 +18,10 @@ function Chat() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [err, setErr] = useState("");
+  const [wallet, setWallet] = useState<{ premium: boolean; balance: number } | null>(null);
+  const [paywall, setPaywall] = useState(false);
+  const loadWallet = () => fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((b) => b && setWallet({ premium: !!b.premium, balance: b.balance ?? 0 }));
+  useEffect(() => { void loadWallet(); }, []);
   const [showProfile, setShowProfile] = useState(false);
   const [media, setMedia] = useState<Media[]>([]);
   const [scenes, setScenes] = useState<string[]>([]);
@@ -91,6 +95,14 @@ function Chat() {
     const r = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ characterId: c.id, message: text }) });
     const b = await r.json();
     setTyping(false);
+    if (r.status === 402) {
+      setLines((l) => l.slice(0, -1));
+      setInput(text);
+      setPaywall(true);
+      void loadWallet();
+      return;
+    }
+    void loadWallet();
     setLines((l) => [...l, { who: "them", text: b.message ?? b.error, id: b.messageId }]);
     if (b.photo) setTimeout(() => setLines((l) => [...l, { who: "them", text: b.photo.content, id: b.photo.id, image: b.photo.image }]), 1200);
     if (b.level) {
@@ -148,6 +160,7 @@ function Chat() {
                 <div style={{ fontSize: 12, color: "#2ee67a" }}>● Online{lvl && <span style={{ color: "var(--pink)", marginLeft: 8 }}>{lvl.emoji} {lvl.name}</span>}</div>
               </div>
               <div className="head-actions">
+                {wallet && <Link href="/premium" className="credits" title="Your credits">💎 {wallet.balance}</Link>}
                 {mediaOn && <button className="hbtn" title="Ask for a photo" onClick={() => void requestMedia("image")}>📸</button>}
                 <button className="hbtn" title="Her profile" onClick={() => setShowProfile(true)}>♡</button>
               </div>
@@ -198,6 +211,23 @@ function Chat() {
           {!typing && lines.length < 40 && (
             <div className="quick">
               {QUICK.map((q) => <button key={q} onClick={() => void send(q)}>{q}</button>)}
+            </div>
+          )}
+          {paywall && c && (
+            <div className="backdrop" onClick={() => setPaywall(false)}>
+              <div className="modal paywall" onClick={(e) => e.stopPropagation()}>
+                <div className="pw-ring"><Portrait c={c} height="100%" round={999} w={192} /></div>
+                {wallet?.premium ? (<>
+                  <h2>Out of credits</h2>
+                  <p className="muted">{c.name.split(" ")[0]} is still waiting for your reply. Top up to keep chatting: 1 credit per message.</p>
+                  <Link href="/premium#credits" className="btn btn-gold" style={{ width: "100%" }}>Buy credits</Link>
+                </>) : (<>
+                  <h2>Don&apos;t leave her hanging…</h2>
+                  <p className="muted">You&apos;ve used your free messages. Go Premium to keep chatting with {c.name.split(" ")[0]}: 600 credits every month, voice notes, photos and her private gallery.</p>
+                  <Link href="/premium" className="btn btn-gold" style={{ width: "100%" }}>Get Premium · up to 70% off</Link>
+                </>)}
+                <button className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={() => setPaywall(false)}>Maybe later</button>
+              </div>
             </div>
           )}
           <div className="composer">

@@ -61,9 +61,47 @@ export async function completeVerification(userId: string) {
   return user.ageStatus;
 }
 
+/** Age in whole years on `now` for a YYYY-MM-DD birth date, or null if the date is invalid. */
+export function ageFromBirthDate(birthDate: string, now = new Date()): number | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthDate);
+  if (!m) return null;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d || dt > now) return null;
+  let age = now.getUTCFullYear() - y;
+  if (now.getUTCMonth() < mo - 1 || (now.getUTCMonth() === mo - 1 && now.getUTCDate() < d)) age--;
+  return age;
+}
+
+/**
+ * Age gate: the user states their date of birth and confirms they are 18+.
+ * Under-18 dates are refused and recorded so the account cannot simply retry with another date.
+ * Explicit mode still needs a real ID-document check (ageMethod "id_document").
+ */
+export function selfDeclareAge(userId: string, birthDate: string): User {
+  const user = getUser(userId);
+  if (user.ageStatus === "rejected") throw new AccessDenied("age_verification_required", "This account can't be used. Sizzly is for adults 18+ only.");
+  const age = ageFromBirthDate(birthDate);
+  if (age === null || age > 100) throw new AccessDenied("age_verification_required", "Enter a valid date of birth.", 400);
+  if (age < 18) {
+    user.ageStatus = "rejected";
+    saveUser(user);
+    audit({ userId, kind: "age_gate_underage", detail: "" });
+    throw new AccessDenied("age_verification_required", "Sorry, Sizzly is only for adults 18 and over.");
+  }
+  user.birthDate = birthDate;
+  if (user.ageStatus !== "verified") {
+    user.ageStatus = "verified";
+    user.ageMethod = "self_declared";
+  }
+  saveUser(user);
+  audit({ userId, kind: "age_self_declared", detail: String(age) });
+  return user;
+}
+
 export class AccessDenied extends Error {
   constructor(
-    public code: "age_verification_required" | "banned" | "login_required",
+    public code: "age_verification_required" | "banned" | "login_required" | "premium_required" | "payments_unavailable",
     message: string,
     public status = 403,
   ) {

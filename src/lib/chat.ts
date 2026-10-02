@@ -4,7 +4,7 @@ import { detectSelfHarm, moderateText, SELF_HARM_RESPONSE } from "./moderation";
 import { getLLM } from "./llm/provider";
 import { openaiModerate } from "./llm/openai";
 import { credit } from "./tokens/ledger";
-import { applyMonthlyGrant, chatIsFree } from "./premium";
+import { applyMonthlyGrant } from "./premium";
 import { LEVEL_TONE, maybeSurprisePhoto, relationship } from "./engagement";
 import { clipVersion, hasPortrait } from "./portraits";
 import { recall, remember } from "./memory";
@@ -80,8 +80,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
   }
 
   applyMonthlyGrant(userId);
-  const free = chatIsFree(userId);
-  if (!free) spend(userId, COSTS.chat, "chat");
+  spend(userId, COSTS.chat, "chat");
 
   const history = db.messages
     .filter((m) => m.userId === userId && m.characterId === characterId)
@@ -92,7 +91,7 @@ export async function handleChat(userId: string, characterId: string, text: stri
   try {
     reply = await getLLM().reply({ character, history, facts: recall(userId, characterId), userMessage: message, explicit, lang: user.lang ?? "auto", levelTone: LEVEL_TONE[relationship(userId, characterId).level - 1] });
   } catch (e) {
-    if (!free) credit(userId, COSTS.chat, "refund:chat_error");
+    credit(userId, COSTS.chat, "refund:chat_error");
     audit({ userId, kind: "llm_error", detail: e instanceof Error ? e.message.slice(0, 200) : String(e) });
     return { kind: "refused", message: "I lost my train of thought, can you say that again? (No tokens were used.)", category: "error" };
   }
@@ -109,5 +108,5 @@ export async function handleChat(userId: string, characterId: string, text: stri
   const messageId = push({ userId, characterId, role: "assistant", content: reply });
   const surprise = maybeSurprisePhoto(userId, characterId, prevLevel, { portrait: hasPortrait(characterId), clip: !!clipVersion(characterId) });
   const photo = surprise ? { id: push({ userId, characterId, role: "assistant", ...surprise }), ...surprise } : undefined;
-  return { kind: "reply", message: reply, tokensSpent: free ? 0 : COSTS.chat, messageId, level: relationship(userId, characterId), photo };
+  return { kind: "reply", message: reply, tokensSpent: COSTS.chat, messageId, level: relationship(userId, characterId), photo };
 }

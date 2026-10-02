@@ -42,3 +42,22 @@ describe("age gate", () => {
     expect(() => requireVerifiedAdult("u-ban")).toThrow(AccessDenied);
   });
 });
+
+describe("age gate (date of birth)", () => {
+  it("works out age correctly around birthdays", async () => {
+    const { ageFromBirthDate } = await import("./verification");
+    const now = new Date(Date.UTC(2026, 9, 2));
+    expect(ageFromBirthDate("2008-10-02", now)).toBe(18);
+    expect(ageFromBirthDate("2008-10-03", now)).toBe(17);
+    expect(ageFromBirthDate("2008-02-30", now)).toBeNull();
+    expect(ageFromBirthDate("nonsense", now)).toBeNull();
+  });
+  it("lets adults in and locks out under-18s for good", async () => {
+    const { selfDeclareAge } = await import("./verification");
+    const { getUser } = await import("../store");
+    expect(selfDeclareAge("ag1", "1995-05-05").ageStatus).toBe("verified");
+    expect(getUser("ag1").ageMethod).toBe("self_declared");
+    expect(() => selfDeclareAge("ag2", `${new Date().getUTCFullYear() - 15}-01-01`)).toThrow("18");
+    expect(() => selfDeclareAge("ag2", "1990-01-01")).toThrow("adults 18+");
+  });
+});

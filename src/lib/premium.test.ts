@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activatePlan, applyMonthlyGrant, chatIsFree, isPremium, MONTHLY_TOKENS, planDiscountPct } from "./premium";
+import { activatePlan, applyMonthlyGrant, isPremium, MONTHLY_TOKENS, planDiscountPct } from "./premium";
 import { balance } from "./tokens/ledger";
 import { getUser } from "./store";
 
@@ -32,7 +32,6 @@ describe("premium", () => {
     const now = Date.now();
     activatePlan("p3", "monthly", now);
     expect(isPremium(getUser("p3"), now + 31 * DAY)).toBe(false);
-    expect(chatIsFree("p3", now + 31 * DAY)).toBe(false);
-    expect(chatIsFree("p3", now)).toBe(true);
+    expect(isPremium(getUser("p3"), now)).toBe(true);
   });
 });

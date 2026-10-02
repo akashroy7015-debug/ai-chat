@@ -1,26 +1,26 @@
 import { credit } from "./tokens/ledger";
-import { audit, db, getUser, saveUser, type User } from "./store";
+import { audit, getUser, saveUser, type User } from "./store";
 
 const DAY = 86_400_000;
 const MONTH = 30 * DAY;
 
-export const MONTHLY_TOKENS = 1000;
-/** Fair-use cap on free chat messages for Premium users. */
-export const PREMIUM_DAILY_CHAT_CAP = 300;
+/** Credits Premium members get each month (chat 1, voice 5, photo 20). */
+export const MONTHLY_TOKENS = 600;
 
+/** One-time payments in rupees (GST included). Plans never renew automatically. */
 export const PLANS = {
-  monthly: { label: "1 month", months: 1, priceUsd: 19.99 },
-  quarterly: { label: "3 months", months: 3, priceUsd: 41.97 },
-  yearly: { label: "12 months", months: 12, priceUsd: 71.88 },
+  monthly: { label: "1 month", months: 1, priceInr: 499 },
+  quarterly: { label: "3 months", months: 3, priceInr: 1047 },
+  yearly: { label: "12 months", months: 12, priceInr: 1788 },
 } as const;
 export type PlanId = keyof typeof PLANS;
 
 /** Discount vs paying monthly, computed rather than claimed. */
 export function planDiscountPct(plan: PlanId): number {
   const p = PLANS[plan];
-  return Math.round((1 - p.priceUsd / (PLANS.monthly.priceUsd * p.months)) * 100);
+  return Math.round((1 - p.priceInr / (PLANS.monthly.priceInr * p.months)) * 100);
 }
-export const perMonth = (plan: PlanId) => Math.round((PLANS[plan].priceUsd / PLANS[plan].months) * 100) / 100;
+export const perMonth = (plan: PlanId) => Math.round(PLANS[plan].priceInr / PLANS[plan].months);
 
 export function isPremium(u: User, now = Date.now()): boolean {
   return (u.premiumUntil ?? 0) > now;
@@ -47,13 +47,4 @@ export function applyMonthlyGrant(userId: string, now = Date.now()) {
   credit(userId, MONTHLY_TOKENS, "premium_grant:monthly");
   u.premiumLastGrant = now;
   saveUser(u);
-}
-
-/** Premium users chat for free up to the daily cap; after that chat costs tokens like everyone else. */
-export function chatIsFree(userId: string, now = Date.now()): boolean {
-  const u = getUser(userId);
-  if (!isPremium(u, now)) return false;
-  const since = now - DAY;
-  const sent = db.messages.filter((m) => m.userId === userId && m.role === "user" && m.at > since).length;
-  return sent < PREMIUM_DAILY_CHAT_CAP;
 }

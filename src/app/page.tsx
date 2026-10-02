@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BRAND, ClipVideo, Logo, pretty, Portrait, type CharacterCard } from "./ui";
-import { AuthModal } from "./auth-panel";
+import { AgeGateModal, AuthModal } from "./auth-panel";
 import { LangSwitch, useT } from "./i18n";
 
 const CATEGORIES = ["girls", "milf", "anime", "guys"] as const;
@@ -103,18 +103,13 @@ export default function Home() {
     void fetch(`/api/characters/featured?${q}`).then((r) => r.json()).then((b) => setChars(b.characters));
   }, [category, f]);
 
-  async function verify() {
-    await fetch("/api/verify-age", { method: "POST", body: JSON.stringify({}) });
-    // Dev mock: completes instantly. A real provider redirects to its hosted flow, then calls back.
-    await fetch("/api/verify-age", { method: "POST", body: JSON.stringify({ action: "complete" }) });
-    await refresh();
-  }
+  const [ageGate, setAgeGate] = useState<string | null>(null);
 
   const verified = me?.ageStatus === "verified";
   const shown = (chars ?? []).filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
   function open(id: string) {
     if (!me) return setAuth("register");
-    if (!verified) return void verify().then(() => router.push(`/chat?c=${id}`));
+    if (!verified) return setAgeGate(id);
     router.push(`/chat?c=${id}`);
   }
 
@@ -288,6 +283,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      {ageGate && <AgeGateModal onClose={() => setAgeGate(null)} onDone={() => { const id = ageGate; setAgeGate(null); void refresh(); router.push(`/chat?c=${id}`); }} />}
       {auth && <AuthModal mode={auth} onClose={() => setAuth(null)} onDone={() => { setAuth(null); void refresh(); }} />}
     </main>
   );

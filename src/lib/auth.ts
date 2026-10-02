@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { audit, db, getUser, newId, saveUser, type User } from "./store";
+import { selfDeclareAge } from "./age/verification";
 import { grantTrialOnce } from "./tokens/ledger";
 
 export const SESSION_DAYS = 30;
@@ -35,7 +36,8 @@ export function findByEmail(email: string): User | undefined {
   return undefined;
 }
 
-export function register(email: string, password: string, confirmedAdultAndTerms: boolean): User {
+/** Creates the account. With a birth date, the 18+ age gate is applied at once (see selfDeclareAge). */
+export function register(email: string, password: string, confirmedAdultAndTerms: boolean, birthDate?: string): User {
   if (!confirmedAdultAndTerms) throw new AuthError("You must confirm you are 18+ and accept the Terms.");
   const e = normEmail(email);
   if (!EMAIL_RE.test(e) || e.length > 254) throw new AuthError("Enter a valid email.");
@@ -47,6 +49,10 @@ export function register(email: string, password: string, confirmedAdultAndTerms
   u.acceptedTermsAt = Date.now();
   saveUser(u);
   audit({ userId: u.id, kind: "registered", detail: "" });
+  if (birthDate !== undefined) {
+    selfDeclareAge(u.id, birthDate);
+    grantTrialOnce(u.id);
+  }
   return u;
 }
 

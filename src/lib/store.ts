@@ -20,7 +20,9 @@ export interface User {
   ageStatus: AgeStatus;
   ageVerificationRef?: string;
   /** How age was proven. Only "id_document" unlocks explicit mode. */
-  ageMethod?: "id_document";
+  ageMethod?: "id_document" | "self_declared";
+  /** Date of birth given at signup (YYYY-MM-DD). */
+  birthDate?: string;
   explicitOptIn: boolean;
   /** ISO country from the verified ID document. */
   idCountry?: string;

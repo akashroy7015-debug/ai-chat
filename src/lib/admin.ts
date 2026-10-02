@@ -21,7 +21,7 @@ const DAY = 86_400_000;
 export function stats(now = Date.now()) {
   const users = [...db.users.values()].filter((u) => u.email);
   const paid = [...db.orders.values()].filter((o) => o.paid);
-  const revenueUsd = paid.reduce((s, o) => s + (o.pkg.startsWith("sub:") ? (PLANS[o.pkg.slice(4) as PlanId]?.priceUsd ?? 0) : (PACKAGES[o.pkg as PackageId]?.priceUsd ?? 0)), 0);
+  const revenueInr = paid.reduce((s, o) => s + (o.pkg.startsWith("sub:") ? (PLANS[o.pkg.slice(4) as PlanId]?.priceInr ?? 0) : (PACKAGES[o.pkg as PackageId]?.priceInr ?? 0)), 0);
   return {
     users: users.length,
     premium: users.filter((u) => isPremium(u, now)).length,
@@ -31,7 +31,7 @@ export function stats(now = Date.now()) {
     messages24h: db.messages.filter((m) => m.at > now - DAY && m.role === "user").length,
     activeUsers24h: new Set(db.messages.filter((m) => m.at > now - DAY).map((m) => m.userId)).size,
     paidOrders: paid.length,
-    revenueUsd: Math.round(revenueUsd * 100) / 100,
+    revenueInr,
     blocked24h: db.audit.filter((a) => a.at > now - DAY && /blocked/.test(a.kind)).length,
     openReports: [...mediaJobs.values()].filter((j) => j.hidden && !j.reviewed).length,
   };
