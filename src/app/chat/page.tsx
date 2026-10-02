@@ -225,6 +225,12 @@ function Chat() {
             {typing && c && <div className="mrow them"><div className="mav"><Portrait c={c} height="100%" round={999} /></div><div className="bubble them dots" aria-label={`${c.name.split(" ")[0]} is typing`}><i /><i /><i /></div></div>}
             <div ref={bottom} />
           </div>
+          {wallet && !wallet.premium && wallet.balance > 0 && wallet.balance <= 3 && c && (
+            <div className="low-credits">
+              <span>⏳ <b>{wallet.balance} free {wallet.balance === 1 ? "message" : "messages"} left</b> with {c.name.split(" ")[0]}</span>
+              <Link href="/premium" className="btn btn-gold btn-sm">Go Premium</Link>
+            </div>
+          )}
           {!typing && lines.length < 40 && (
             <div className="quick">
               {QUICK.map((q) => <button key={q} onClick={() => void send(q)}>{q}</button>)}
