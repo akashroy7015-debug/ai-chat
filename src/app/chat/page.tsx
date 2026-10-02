@@ -211,6 +211,7 @@ function Chat() {
           {c && <>
             <button className="btn btn-ghost btn-sm" style={{ marginBottom: 10 }} onClick={() => setShowProfile(false)}>✕</button>
             <div style={{ borderRadius: 16, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}><Portrait c={c} height="100%" round={0} /></div>
+            <PrivateGallery c={c} />
             <h2 style={{ margin: "14px 0 2px" }}>{c.name}, {c.age}</h2>
             <p style={{ margin: "0 0 12px", color: "#d9d9e3" }}>{c.tagline}</p>
             {pushState === "off" && <button className="btn btn-sm" style={{ width: "100%", margin: "4px 0 12px" }} onClick={() => void enablePush()}>🔔 Get notified when {c.name.split(" ")[0]} texts</button>}
@@ -250,6 +251,45 @@ function Chat() {
         </aside>
       </div>
     </main>
+  );
+}
+
+type GalItem = { id: string; kind: "image" | "video"; url?: string };
+
+/** Her extra photos and videos: open for Premium, blurred and locked for everyone else. */
+function PrivateGallery({ c }: { c: CharacterCard }) {
+  const [g, setG] = useState<{ unlocked: boolean; items: GalItem[] } | null>(null);
+  const [view, setView] = useState<GalItem | null>(null);
+  useEffect(() => { void fetch(`/api/gallery?c=${c.id}`).then((r) => r.json()).then(setG); }, [c.id]);
+  if (!g?.items.length) return null;
+  const photos = g.items.filter((i) => i.kind === "image").length;
+  const videos = g.items.length - photos;
+  return (
+    <div className="pgal">
+      <div className="pgal-head"><b>{g.unlocked ? "Her private gallery" : "🔒 Her private gallery"}</b><span className="muted">{photos} photos · {videos} videos</span></div>
+      <div className="pgal-grid">
+        {g.items.map((i) => g.unlocked && i.url ? (
+          <button key={i.id} className="pgal-tile" onClick={() => setView(i)} aria-label={`Open ${i.kind}`}>
+            {i.kind === "video" ? <video src={i.url} muted playsInline preload="metadata" /> : <img src={i.url} alt={`${c.name} (AI-generated)`} loading="lazy" />}
+            {i.kind === "video" && <span className="pgal-play">▶</span>}
+          </button>
+        ) : (
+          <Link key={i.id} href="/premium" className="pgal-tile locked" aria-label="Unlock with Premium">
+            <div className="blur"><Portrait c={c} height="100%" round={0} /></div>
+            <span className="pgal-lock">🔒<small>{i.kind === "video" ? "Video" : "Photo"}</small></span>
+          </Link>
+        ))}
+      </div>
+      {!g.unlocked && <Link href="/premium" className="btn btn-gold" style={{ width: "100%", marginTop: 10 }}>Unlock all with Premium</Link>}
+      {view?.url && (
+        <div className="backdrop" onClick={() => setView(null)}>
+          <div className="pgal-view" onClick={(e) => e.stopPropagation()}>
+            {view.kind === "video" ? <video src={view.url} controls autoPlay playsInline /> : <img src={view.url} alt={`${c.name} (AI-generated)`} />}
+            <button className="hbtn" aria-label="Close" onClick={() => setView(null)}>✕</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

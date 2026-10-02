@@ -34,6 +34,7 @@ export default function Models() {
   const [err, setErr] = useState("");
   const [form, setForm] = useState<Form | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [galV, setGalV] = useState(0);
   const [busy, setBusy] = useState<string | null>(null);
   const [pending, setPending] = useState<{ id: string; name: string; at: number }[]>([]);
   const loadPending = async () => { const r = await fetch("/api/admin/pending"); if (r.ok) setPending((await r.json()).pending); };
@@ -102,6 +103,20 @@ export default function Models() {
     setBusy(null);
     if (!r.ok) alert((await r.json()).error);
     await load();
+  }
+
+  async function uploadGallery(id: string, files: FileList | null) {
+    if (!files?.length) return;
+    if (!confirm(`Confirm: these ${files.length} file(s) show a FICTIONAL ADULT (AI-generated), not a real person, no nudity, and you have the right to use them.`)) return;
+    setBusy(id);
+    const fd = new FormData();
+    fd.append("id", id);
+    for (const f of Array.from(files)) fd.append("file", f);
+    const r = await fetch("/api/admin/gallery", { method: "POST", body: fd });
+    const b = await r.json();
+    setBusy(null);
+    if (b.errors?.length) alert(b.errors.join("\n"));
+    setGalV((v) => v + 1);
   }
 
   async function post(id: string, name: string) {
@@ -175,6 +190,7 @@ export default function Models() {
               <b>{m.name}</b> <span style={{ color: theme.muted }}>{m.age}</span> {m.hidden && <span style={{ color: "#ff8a8a", fontSize: 12 }}>HIDDEN</span>}
               <div style={{ fontSize: 12, color: theme.muted }}>{pretty(m.ethnicity)} · {pretty(m.bodyShape)} · {pretty(m.outfit)}</div>
             </div>
+            <GalleryAdmin id={m.id} v={galV} />
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
               <button style={small} onClick={() => { setEditId(m.id); setForm(toForm(m)); window.scrollTo(0, 0); }}>Edit</button>
               <button style={{ ...small, background: "#c94a6e" }} disabled={busy === m.id} onClick={() => void picture(m.id)}>{busy === m.id ? "Creating…" : m.portraitV ? "New picture" : "Picture"}</button>
@@ -186,6 +202,10 @@ export default function Models() {
                 🎬 Video
                 <input type="file" accept="video/mp4,video/webm" hidden onChange={(e) => void uploadVideo(m.id, e.target.files?.[0])} />
               </label>
+              <label style={{ ...small, background: "#b8860b", display: "inline-block", cursor: "pointer" }}>
+                🔒 Premium
+                <input type="file" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" hidden onChange={(e) => { void uploadGallery(m.id, e.target.files); e.target.value = ""; }} />
+              </label>
               {m.clipV && <button style={{ ...small, background: "#333" }} onClick={() => void uploadVideo(m.id, undefined, true)}>✕ Video</button>}
               <button style={{ ...small, background: "#333" }} onClick={() => void post(m.id, m.name)}>Post</button>
               <button style={{ ...small, background: m.hidden ? "#2a7" : "#a33" }} onClick={async () => { await act({ action: m.hidden ? "show" : "hide", id: m.id }); void load(); }}>{m.hidden ? "Show" : "Hide"}</button>
@@ -194,5 +214,30 @@ export default function Models() {
         ))}
       </div>
     </main>
+  );
+}
+
+/** Thumbnails of a model's Premium gallery, each removable. */
+function GalleryAdmin({ id, v }: { id: string; v: number }) {
+  const [items, setItems] = useState<{ id: string; kind: string; url?: string }[]>([]);
+  const [n, setN] = useState(0);
+  useEffect(() => { void fetch(`/api/gallery?c=${id}`).then((r) => r.json()).then((b) => setItems(b.items)); }, [id, v, n]);
+  if (!items.length) return null;
+  async function remove(item: string) {
+    if (!confirm("Remove this file from her Premium gallery?")) return;
+    const fd = new FormData();
+    fd.append("remove", item);
+    await fetch("/api/admin/gallery", { method: "POST", body: fd });
+    setN((k) => k + 1);
+  }
+  return (
+    <div style={{ display: "flex", gap: 4, flexWrap: "wrap", margin: "0 0 6px" }} title="Premium gallery">
+      {items.map((i) => (
+        <div key={i.id} style={{ position: "relative", width: 40, height: 52, borderRadius: 6, overflow: "hidden", background: "#222" }}>
+          {i.kind === "video" ? <video src={i.url} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <img src={i.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+          <button aria-label="Remove" onClick={() => void remove(i.id)} style={{ position: "absolute", top: 0, right: 0, border: 0, background: "rgba(0,0,0,.7)", color: "#fff", fontSize: 10, cursor: "pointer", padding: "1px 4px" }}>✕</button>
+        </div>
+      ))}
+    </div>
   );
 }
