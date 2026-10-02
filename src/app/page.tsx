@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BRAND, pretty, Portrait, type CharacterCard } from "./ui";
+import { BRAND, ClipVideo, pretty, Portrait, type CharacterCard } from "./ui";
 import { AuthModal } from "./auth-panel";
 import { LangSwitch, useT } from "./i18n";
 
@@ -116,7 +116,7 @@ export default function Home() {
         {shown.map((c, i) => (
           <div key={c.id} className="card" onClick={() => open(c.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && open(c.id)}>
             <div className="img"><Portrait c={c} height="100%" round={0} /></div>
-            {c.clipV && <video className="clip" src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} autoPlay muted loop playsInline preload="metadata" />}
+            {c.clipV && <ClipVideo className="clip" src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} />}
             <div className="shade" />
             {Date.now() - (c.createdAt ?? 0) < WEEK ? <span className="new">✦ NEW</span> : i < 3 && <span className="badge">🔥 HOT</span>}
             <span className="online" title="Online" />

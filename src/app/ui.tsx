@@ -1,5 +1,5 @@
 "use client";
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Avatar, type AvatarChar } from "./avatar";
 
 export interface CharacterCard {
@@ -53,3 +53,21 @@ export function Portrait({ c, height = 220, round = 12 }: { c: AvatarChar & { po
 export const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "AI Chat";
 
 export const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+
+/** Looping, silent card video. Sets `muted` as a real attribute and calls play(), which iPhone Safari needs to autoplay. */
+export function ClipVideo({ src, className }: { src: string; className?: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.setAttribute("playsinline", "");
+    const tryPlay = () => void v.play().catch(() => {});
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay);
+    return () => v.removeEventListener("loadeddata", tryPlay);
+  }, [src]);
+  return <video ref={ref} className={className} src={src} autoPlay muted loop playsInline preload="auto" />;
+}
