@@ -101,6 +101,8 @@ export type Character = CharacterInput & {
   featured?: boolean;
   /** Featured characters can be hidden from the catalog by an admin. */
   hidden?: boolean;
+  /** Version of the extra-models.json entry last applied. */
+  rev?: number;
 };
 
 export const SYSTEM_OWNER = "system";

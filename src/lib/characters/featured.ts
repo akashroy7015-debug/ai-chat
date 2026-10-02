@@ -38,9 +38,12 @@ export function ensureFeatured() {
     const data = CharacterInput.parse(s);
     db.characters.set(id, { ...data, id, ownerId: SYSTEM_OWNER, createdAt: 0, featured: true });
   });
-  for (const { id, ...rest } of EXTRA as Array<{ id: string } & Record<string, unknown>>) {
-    if (db.characters.has(id)) continue;
-    db.characters.set(id, { ...CharacterInput.parse(rest), id, ownerId: SYSTEM_OWNER, createdAt: Date.now(), featured: true });
+  // Entries add new models, or (with a higher "rev") update an existing one, e.g. to match a new photo.
+  for (const { id, rev = 0, ...rest } of EXTRA as Array<{ id: string; rev?: number } & Record<string, unknown>>) {
+    const old = db.characters.get(id);
+    if (old && (old.rev ?? 0) >= rev) continue;
+    const base = old ?? { id, ownerId: SYSTEM_OWNER, createdAt: Date.now(), featured: true };
+    db.characters.set(id, { ...base, ...CharacterInput.parse(rest), rev });
   }
   seeded = true;
 }

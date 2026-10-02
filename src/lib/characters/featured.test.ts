@@ -48,3 +48,12 @@ describe("extra models", () => {
     expect(listFeatured({ category: "girls" }).some((c) => c.id === "featured-isabela" && c.age >= 18)).toBe(true);
   });
 });
+
+describe("extra-models updates", () => {
+  it("applies a higher rev to an existing model once", () => {
+    const aria = listFeatured().find((c) => c.id === "featured-1")!;
+    expect(aria.hair).toBe("blonde");
+    expect(aria.outfit).toBe("bralette_top");
+    expect(aria.rev).toBe(1);
+  });
+});
