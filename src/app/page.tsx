@@ -29,6 +29,29 @@ const FAQ = [
   ["Does it speak Hindi?", "Yes. Write in English, Hindi or Hinglish and your companion replies in the same language."],
 ];
 
+/** Real countdown to midnight India time (the daily deal resets each day). */
+function Countdown() {
+  const [left, setLeft] = useState<number | null>(null);
+  useEffect(() => {
+    const tick = () => {
+      const ist = Date.now() + 5.5 * 3_600_000;
+      setLeft(86_400_000 - (ist % 86_400_000));
+    };
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, []);
+  if (left === null) return null;
+  const s = Math.floor(left / 1000);
+  const parts = [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map((n) => String(n).padStart(2, "0"));
+  return (
+    <div className="countdown" aria-label="Deal ends in">
+      <span className="lbl">Ends in</span>
+      {parts.map((p, i) => <span key={i} style={{ display: "contents" }}>{i > 0 && <b>:</b>}<span className="box">{p}</span></span>)}
+    </div>
+  );
+}
+
 type Me = { email?: string; premium?: boolean; admin?: boolean; ageStatus?: string; balance?: number } | null | undefined;
 
 export default function Home() {
@@ -95,7 +118,32 @@ export default function Home() {
       </header>
 
       <section className="banner" aria-label="Offers">
-        {SLIDES.map((sl, k) => (
+        <div className={`slide promo ${slide === 0 ? "on" : ""}`}>
+          <div className="promo-copy">
+            <div className="script">Hot deal, just for you</div>
+            <div className="big">SIZZLY</div>
+            <div className="mid">SALE</div>
+            <div className="row">
+              <div className="sticker"><b>70%</b><span>OFF</span></div>
+              <div className="perks">
+                <div>Unlimited flirty chats, voice notes &amp; surprise photos</div>
+                <Countdown />
+              </div>
+            </div>
+            <Link href="/premium" className="btn btn-gold promo-cta">Grab the deal →</Link>
+          </div>
+          <div className="promo-art">
+            {(chars ?? []).slice(0, 3).map((c, k) => (
+              <Link key={c.id} href={`/chat?c=${c.id}`} className={`pcard p${k}`}>
+                <Portrait c={c} height="100%" round={0} />
+                {k === 1 && <span className="online-tag">She&apos;s online</span>}
+              </Link>
+            ))}
+            <span className="bubble-a">miss me yet?</span>
+            <span className="bubble-b">come say hi</span>
+          </div>
+        </div>
+        {SLIDES.slice(1).map((sl, j) => { const k = j + 1; return (
           <div key={k} className={`slide ${slide === k ? "on" : ""}`}>
             <div className="copy">
               <h1 className="sale" style={k ? { color: "#fff", WebkitTextStroke: 0, transform: "none" } : undefined}>{sl.title}{sl.em && <em>{sl.em}</em>}</h1>
@@ -106,7 +154,7 @@ export default function Home() {
               {(chars ?? []).slice(k * 3, k * 3 + 3).map((c) => <div key={c.id}><Portrait c={c} height="100%" round={0} /></div>)}
             </div>
           </div>
-        ))}
+        ); })}
         <button className="arrow l" aria-label="Previous" onClick={() => setSlide((slide + SLIDES.length - 1) % SLIDES.length)}>‹</button>
         <button className="arrow r" aria-label="Next" onClick={() => setSlide((slide + 1) % SLIDES.length)}>›</button>
         <div className="dots">{SLIDES.map((_, k) => <button key={k} aria-label={`Slide ${k + 1}`} className={slide === k ? "on" : ""} onClick={() => setSlide(k)} />)}</div>

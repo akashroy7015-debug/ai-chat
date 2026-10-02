@@ -148,3 +148,51 @@ button { font: inherit; }
 }
 
 .card .clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+
+/* Playful promo slide */
+.banner .slide.promo { display: block; background: #160d14; }
+.banner .slide.promo::before { content: ""; position: absolute; left: -120px; top: -160px; width: 620px; height: 620px; border-radius: 50%; background: #3a1328; }
+.promo-copy { position: absolute; z-index: 2; left: 48px; top: 26px; display: flex; flex-direction: column; align-items: flex-start; max-width: 560px; }
+.promo-copy .script { font-family: 'Pacifico', cursive; font-size: 26px; color: #ff8fb1; transform: rotate(-4deg); margin-left: 4px; }
+.promo-copy .big { font-family: 'Bowlby One', sans-serif; font-size: 68px; line-height: .95; color: var(--gold); transform: rotate(-3deg); text-shadow: 4px 5px 0 #b3261e, 8px 10px 0 #4a0f24; }
+.promo-copy .mid { font-family: 'Bowlby One', sans-serif; font-size: 44px; line-height: 1; margin-left: 24px; transform: rotate(-3deg); text-shadow: 3px 4px 0 var(--pink); }
+.promo-copy .row { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.sticker { width: 104px; height: 104px; flex: none; border-radius: 50%; background: var(--pink); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(-10deg); box-shadow: 0 0 0 6px #160d14, 0 0 0 10px var(--gold); animation: wobble 3s ease-in-out infinite; }
+.sticker b { font-family: 'Bowlby One', sans-serif; font-size: 38px; line-height: 1; font-weight: 400; }
+.sticker span { font-weight: 900; font-size: 15px; letter-spacing: 2px; }
+@keyframes wobble { 0%,100% { transform: rotate(-10deg) scale(1); } 50% { transform: rotate(-4deg) scale(1.06); } }
+.perks { display: flex; flex-direction: column; gap: 8px; font-weight: 800; font-size: 17px; line-height: 1.25; }
+.countdown { display: flex; gap: 6px; align-items: center; }
+.countdown .lbl { font-size: 12px; font-weight: 700; color: #ffd3df; }
+.countdown .box { background: #2b1424; border: 1px solid #5a2a44; border-radius: 9px; padding: 4px 8px; font-weight: 900; font-variant-numeric: tabular-nums; }
+.promo-cta { margin-top: 14px; font-size: 18px; padding: 14px 30px; box-shadow: 0 5px 0 #b8860b, 0 12px 26px rgba(243,200,75,.3); }
+.promo-art { position: absolute; right: 40px; top: 20px; bottom: 0; display: flex; align-items: flex-start; }
+.pcard { position: relative; display: block; width: 170px; height: 250px; border-radius: 20px; overflow: hidden; border: 4px solid #fff7fa; box-shadow: 0 18px 40px rgba(0,0,0,.5); transition: transform .2s; }
+.pcard.p0 { margin-top: 34px; transform: rotate(-8deg); }
+.pcard.p1 { width: 184px; height: 272px; margin-left: -26px; z-index: 2; border-color: var(--gold); transform: rotate(3deg); }
+.pcard.p2 { margin-left: -26px; margin-top: 48px; transform: rotate(10deg); }
+.pcard:hover { transform: rotate(0) scale(1.05); z-index: 3; }
+.online-tag { position: absolute; top: 10px; left: 50%; transform: translateX(-50%) rotate(-4deg); background: var(--pink); color: #fff; font-weight: 900; font-size: 12px; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.bubble-a, .bubble-b { position: absolute; z-index: 4; font-weight: 900; font-size: 14px; padding: 9px 13px; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+.bubble-a { left: -40px; top: 8px; background: #fff7fa; color: #2a0f22; border-radius: 16px 16px 16px 4px; transform: rotate(-6deg); }
+.bubble-b { right: -14px; bottom: 26px; background: var(--pink); color: #fff; border-radius: 16px 16px 4px 16px; transform: rotate(5deg); }
+@media (max-width: 1100px) { .promo-art { right: 10px; } .pcard { width: 140px; height: 210px; } .pcard.p1 { width: 152px; height: 228px; } }
+.banner:has(.promo) { height: 380px; }
+@media (max-width: 760px) {
+  .banner:has(.promo) { height: auto; }
+  .banner .slide.promo { position: relative; display: flex; flex-direction: column; align-items: center; padding: 18px 12px 22px; text-align: center; }
+  .banner .slide.promo::before { left: -90px; top: -90px; width: 340px; height: 340px; }
+  .promo-copy { display: contents; }
+  .promo-copy .script { order: 1; position: relative; font-size: 20px; }
+  .promo-copy .big { order: 2; position: relative; font-size: 52px; }
+  .promo-copy .mid { order: 3; position: relative; font-size: 32px; margin-left: 0; }
+  .promo-art { order: 4; position: relative; inset: auto; margin: 18px 0 8px; justify-content: center; }
+  .promo-copy .row { order: 5; position: relative; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .promo-cta { order: 6; position: relative; margin-top: 12px; }
+  .sticker { position: absolute; right: 2px; top: -150px; width: 80px; height: 80px; z-index: 5; }
+  .sticker b { font-size: 26px; } .sticker span { font-size: 12px; }
+  .perks { align-items: center; font-size: 14px; }
+  .pcard { width: 108px; height: 158px; border-width: 3px; } .pcard.p1 { width: 118px; height: 172px; } .pcard.p0 { margin-top: 14px; } .pcard.p2 { margin-top: 20px; }
+  .bubble-a { left: -4px; top: -14px; font-size: 12px; } .bubble-b { display: none; }
+  .banner .arrow { top: 120px; }
+}
