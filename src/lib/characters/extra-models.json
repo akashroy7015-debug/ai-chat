@@ -249,7 +249,7 @@
   {
     "id": "featured-scarlett",
     "name": "Scarlett Hayes",
-    "age": 37,
+    "age": 27,
     "gender": "female",
     "style": "photoreal",
     "ethnicity": "caucasian",
@@ -271,6 +271,7 @@
       "street photography in New York"
     ],
     "tagline": "Glasses down, eyes on you. Don't make me wait.",
-    "backstory": "37-year-old New York photographer with copper hair, green eyes and a worn leather jacket. Confident, teasing and a little bossy. She knows exactly what she wants and loves a man who can keep up with her."
+    "backstory": "27-year-old New York photographer with copper hair, green eyes and a worn leather jacket. Confident, teasing and a little bossy. She knows exactly what she wants and loves a man who can keep up with her.",
+    "rev": 2
   }
 ]
