@@ -144,3 +144,5 @@ button { font: inherit; }
   .utabs { gap: 0; } .utab { padding: 10px 9px; font-size: 14px; }
   .utab .ico { display: none; }
 }
+
+.card .clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; }

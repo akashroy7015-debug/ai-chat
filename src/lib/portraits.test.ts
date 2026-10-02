@@ -118,3 +118,16 @@ describe("manual review queue", () => {
     delete process.env.IMAGE_PROVIDER; delete process.env.IMAGE_ENDPOINT; delete process.env.SAFETY_SCANNER;
   });
 });
+
+describe("model video clips", () => {
+  it("accepts MP4/WebM by signature, rejects others, can remove", async () => {
+    const { uploadClip, readClip, removeClip } = await import("./portraits");
+    const c = { ...base, id: "clip1", ownerId: "system", createdAt: 0 };
+    const mp4 = Buffer.concat([Buffer.from([0, 0, 0, 0x18]), Buffer.from("ftypmp42"), Buffer.alloc(32)]);
+    uploadClip("admin", c, mp4);
+    expect(readClip("clip1")?.type).toBe("video/mp4");
+    expect(() => uploadClip("admin", c, Buffer.from("not a video at all"))).toThrow("MP4 or WebM");
+    removeClip("clip1");
+    expect(readClip("clip1")).toBeNull();
+  });
+});

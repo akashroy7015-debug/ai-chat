@@ -5,7 +5,7 @@ import { btn, field, pretty, Portrait, theme } from "../../ui";
 import { OPTIONS, type OptionKey } from "../../character-options";
 
 type Model = Record<OptionKey, string> & {
-  id: string; name: string; age: number; tagline: string; backstory: string; hobbies: string[]; hidden?: boolean; portraitV?: number;
+  id: string; name: string; age: number; tagline: string; backstory: string; hobbies: string[]; hidden?: boolean; portraitV?: number; clipV?: number;
 };
 
 const BLANK = {
@@ -91,6 +91,19 @@ export default function Models() {
     await load();
   }
 
+  async function uploadVideo(id: string, file: File | undefined, remove = false) {
+    if (!remove && !file) return;
+    if (!remove && !confirm("Confirm: this video shows a FICTIONAL ADULT (AI-generated), not a real person, no nudity, and you have the right to use it.")) return;
+    setBusy(id);
+    const fd = new FormData();
+    fd.append("id", id);
+    if (remove) fd.append("remove", "1"); else fd.append("file", file!);
+    const r = await fetch("/api/admin/characters/clip", { method: "POST", body: fd });
+    setBusy(null);
+    if (!r.ok) alert((await r.json()).error);
+    await load();
+  }
+
   async function post(id: string, name: string) {
     const text = prompt(`New Discover post from ${name}:`);
     if (!text) return;
@@ -169,6 +182,11 @@ export default function Models() {
                 ⬆ Upload
                 <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => void upload(m.id, e.target.files?.[0])} />
               </label>
+              <label style={{ ...small, background: "#0a7", display: "inline-block", cursor: "pointer" }}>
+                🎬 Video
+                <input type="file" accept="video/mp4,video/webm" hidden onChange={(e) => void uploadVideo(m.id, e.target.files?.[0])} />
+              </label>
+              {m.clipV && <button style={{ ...small, background: "#333" }} onClick={() => void uploadVideo(m.id, undefined, true)}>✕ Video</button>}
               <button style={{ ...small, background: "#333" }} onClick={() => void post(m.id, m.name)}>Post</button>
               <button style={{ ...small, background: m.hidden ? "#2a7" : "#a33" }} onClick={async () => { await act({ action: m.hidden ? "show" : "hide", id: m.id }); void load(); }}>{m.hidden ? "Show" : "Hide"}</button>
             </div>

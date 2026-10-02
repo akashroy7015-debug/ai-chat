@@ -14,6 +14,8 @@ export interface CharacterCard {
   personality: string;
   tagline: string;
   createdAt?: number;
+  /** Set when the model has a looping video clip. */
+  clipV?: number;
   bodyShape?: string;
   outfit?: string;
   featured?: boolean;

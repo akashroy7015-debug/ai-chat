@@ -1,13 +1,13 @@
 import { requireAdmin } from "@/lib/admin";
 import { allFeatured, createFeatured, setFeaturedHidden, updateFeatured } from "@/lib/characters/featured";
-import { generatePortrait, portraitVersion } from "@/lib/portraits";
+import { clipVersion, generatePortrait, portraitVersion } from "@/lib/portraits";
 import { audit, db } from "@/lib/store";
 import { authed, body, json } from "@/lib/http";
 import { ZodError } from "zod";
 
 export const GET = authed(async (_req, userId) => {
   requireAdmin(userId);
-  return json({ characters: allFeatured().map((c) => ({ ...c, portraitV: portraitVersion(c.id) })) });
+  return json({ characters: allFeatured().map((c) => ({ ...c, portraitV: portraitVersion(c.id), clipV: clipVersion(c.id) })) });
 });
 
 type Body = { action: "create" | "update" | "hide" | "show" | "portrait"; id: string; character: unknown };

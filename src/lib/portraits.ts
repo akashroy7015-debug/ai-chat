@@ -160,6 +160,41 @@ export async function generatePortrait(c: Character, fetchImpl: Fetch = fetch, s
   return savePortrait(c, Buffer.from(b64, "base64"), gpt ? "webp" : "png");
 }
 
+// Short looping video clips (admin-uploaded) shown on model cards.
+const clips: PMap<{ file: string; at: number }> = ((globalThis as unknown as { __clips?: PMap<{ file: string; at: number }> }).__clips ??= new PMap(db.sql, "clips"));
+export const clipVersion = (id: string) => clips.get(id)?.at;
+
+/** MP4 or WebM up to 20 MB, checked by file signature. */
+export function uploadClip(adminId: string, c: Character, data: Buffer): string {
+  if (data.length > 20 * 1024 * 1024) throw new Error("Video must be under 20 MB");
+  const ext = data.subarray(4, 8).toString() === "ftyp" ? "mp4"
+    : data.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3])) ? "webm" : null;
+  if (!ext) throw new Error("Upload an MP4 or WebM video");
+  const file = `clip-${c.id}-${Date.now()}.${ext}`;
+  fs.mkdirSync(portraitDir(), { recursive: true });
+  fs.writeFileSync(path.join(portraitDir(), file), data);
+  const old = clips.get(c.id);
+  clips.set(c.id, { file, at: Date.now() });
+  if (old) fs.rm(path.join(portraitDir(), old.file), { force: true }, () => {});
+  audit({ userId: adminId, kind: "clip_uploaded", detail: c.id });
+  return file;
+}
+
+export function readClip(id: string): { path: string; type: string; size: number } | null {
+  const p = clips.get(id);
+  if (!p) return null;
+  const f = path.join(portraitDir(), path.basename(p.file));
+  if (!fs.existsSync(f)) return null;
+  return { path: f, type: f.endsWith(".webm") ? "video/webm" : "video/mp4", size: fs.statSync(f).size };
+}
+
+export function removeClip(id: string) {
+  const p = clips.get(id);
+  if (!p) return;
+  clips.delete(id);
+  fs.rm(path.join(portraitDir(), path.basename(p.file)), { force: true }, () => {});
+}
+
 /** Admin upload of a picture made elsewhere. Only PNG/JPEG/WebP up to 5 MB, checked by file signature. */
 export function uploadPortrait(adminId: string, c: Character, data: Buffer): string {
   if (data.length > 5 * 1024 * 1024) throw new Error("Picture must be under 5 MB");
