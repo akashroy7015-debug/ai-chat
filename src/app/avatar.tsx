@@ -19,7 +19,7 @@ const HAIR: Record<string, string> = {
 const EYES: Record<string, string> = { brown: "#5b3a1e", blue: "#3b7bd4", green: "#3f9a58", hazel: "#8a6a2c", gray: "#7c8794" };
 const OUTFIT: Record<string, string> = {
   short_dress: "#c2185b", bodycon_dress: "#1a1a1a", cocktail_dress: "#7b1fa2", evening_gown: "#a31515",
-  crop_top_skirt: "#ec407a", bikini: "#1f9e8f", lingerie: "#6a1b4d", office_wear: "#37474f", casual: "#5c6bc0", gym_wear: "#222", bralette_top: "#b0306a", night_dress: "#8e5a9a",
+  crop_top_skirt: "#ec407a", bikini: "#1f9e8f", lingerie: "#6a1b4d", office_wear: "#37474f", casual: "#5c6bc0", gym_wear: "#222", bralette_top: "#b0306a", night_dress: "#8e5a9a", oversized_shirt: "#f2f2f2",
 };
 
 function hash(s: string) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }

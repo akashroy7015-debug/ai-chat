@@ -27,10 +27,11 @@ const OUTFIT: Record<string, string> = {
   bikini: "stylish bikini",
   bralette_top: "lace bralette with high-waisted shorts",
   night_dress: "short satin night dress",
+  oversized_shirt: "oversized white men's button-up shirt worn as a dress",
   short_dress: "short mini dress",
 };
 /** Outfits shot as a lingerie/swimwear catalogue: revealing but never nude. */
-const INTIMATE = new Set(["lingerie", "bikini", "bralette_top", "night_dress"]);
+const INTIMATE = new Set(["lingerie", "bikini", "bralette_top", "night_dress", "oversized_shirt"]);
 
 /** Describes the figure in fashion-shoot terms (no body-part wording the image provider may reject). */
 const FIGURE_EXTRA = (c: Character) => {
