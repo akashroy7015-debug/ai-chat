@@ -6,40 +6,34 @@ export const metadata = { title: "Refund & Cancellation Policy" };
 export default function Refund() {
   return (
     <LegalPage title="Refund & Cancellation Policy">
-      <p>We want you to be happy with Sizzly. This policy explains how cancellations and refunds work for Premium membership and gems.</p>
+      <p>This policy explains how Premium membership, gems, cancellations and refunds work on Sizzly. Please read it before you buy.</p>
 
-      <h2>1. Cancelling Premium</h2>
+      <h2>1. No automatic renewal</h2>
+      <p>Premium plans are one-time payments for a fixed period (1, 3 or 12 months). <b>They do not renew automatically</b> and we never charge you again without your action. When your plan ends, your account simply returns to the free plan. You can buy Premium again any time.</p>
+
+      <h2>2. Cancelling</h2>
       <ul>
-        <li>You can cancel your Premium membership at any time by emailing {SUPPORT_EMAIL} from the email on your account.</li>
-        <li>When you cancel, any automatic renewal stops. You keep Premium until the end of the period you already paid for; we do not charge you again.</li>
-        <li>Cancelling does not delete your account or your chats.</li>
+        <li>You can cancel your membership at any time by emailing {SUPPORT_EMAIL} from the email on your account.</li>
+        <li>After cancelling you keep Premium until the end of the period you paid for.</li>
+        <li>Cancelling does not delete your account or chats. To delete your account, ask us by email.</li>
       </ul>
 
-      <h2>2. Refunds for Premium</h2>
+      <h2>3. No refunds</h2>
+      <p>Because Premium and gems give you instant access to digital features, <b>all purchases are final and non-refundable</b>, including for unused days of a plan or unused gems, except in the cases listed in section 4.</p>
+
+      <h2>4. When we do refund or fix a payment</h2>
       <ul>
-        <li><b>First purchase:</b> if you are not satisfied, you can ask for a full refund within <b>48 hours</b> of your first Premium payment, as long as you have used fewer than 20 messages or features since paying.</li>
-        <li><b>Automatic renewals:</b> if your plan renewed and you forgot to cancel, write to us within <b>48 hours</b> of the renewal charge and we will refund it if Premium has not been used since the renewal.</li>
-        <li>Partial refunds for unused days of a period are not provided, except where required by law.</li>
+        <li><b>Duplicate or wrong charge:</b> if you were charged twice or the wrong amount, we refund the extra amount in full.</li>
+        <li><b>Paid but not received:</b> if your payment went through but you did not get Premium or gems, we either add them to your account or refund you.</li>
+        <li><b>Failed media:</b> gems spent on a photo, video or voice note that fails to generate or is blocked by our safety systems are returned to your gem balance automatically.</li>
+        <li>Where a refund is required by applicable law.</li>
       </ul>
 
-      <h2>3. Gems</h2>
-      <ul>
-        <li>Gem purchases are refundable within <b>48 hours</b> if none of the purchased gems have been spent.</li>
-        <li>Gems spent on a photo, video or voice note that fails to generate or is blocked by our safety systems are returned to your balance automatically.</li>
-        <li>Gems have no cash value and cannot be exchanged for money.</li>
-      </ul>
+      <h2>5. Gems</h2>
+      <p>Gems are a virtual in-app currency. They have no cash value, cannot be exchanged for money and cannot be transferred to another account.</p>
 
-      <h2>4. Payment problems</h2>
-      <p>If you were charged twice, charged the wrong amount, or paid but did not receive Premium or gems, email us with your payment reference. We will fix it or refund the extra charge in full.</p>
-
-      <h2>5. When refunds are not given</h2>
-      <p>Refunds are not given for accounts suspended for breaking our <a href="/terms">Terms</a>, or after the time limits above, except where the law requires.</p>
-
-      <h2>6. How to request a refund</h2>
-      <p>Email <b>{SUPPORT_EMAIL}</b> from the email on your account with the subject &quot;Refund&quot;, the date of payment and the payment reference. We reply within 2 working days.</p>
-
-      <h2>7. How refunds are paid</h2>
-      <p>Approved refunds go back to the original payment method (card, UPI, net banking or wallet). They are processed within <b>5–7 working days</b>; your bank may take a few more days to show the credit.</p>
+      <h2>6. Payment issues</h2>
+      <p>Email <b>{SUPPORT_EMAIL}</b> with the subject &quot;Payment issue&quot;, the date of payment and the payment reference. We reply within 2 working days. Approved refunds go back to the original payment method (card, UPI, net banking or wallet) within <b>5–7 working days</b>; your bank may take a few more days to show the credit.</p>
     </LegalPage>
   );
 }
