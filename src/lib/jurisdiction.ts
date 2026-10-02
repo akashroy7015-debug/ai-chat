@@ -32,9 +32,10 @@ export function countryFromHeaders(h: Headers): string | undefined {
 }
 
 /** Grievance Officer contact required for intermediaries under India's IT Rules 2021. */
+const real = (v?: string) => (v && !/your|xxxx|example/i.test(v) ? v.trim() : "");
 export const GRIEVANCE_OFFICER = {
-  name: process.env.GRIEVANCE_OFFICER_NAME ?? "Support Team",
-  email: process.env.GRIEVANCE_OFFICER_EMAIL ?? "rizzlabsupport@gmail.com",
+  name: real(process.env.GRIEVANCE_OFFICER_NAME) || "Support Team",
+  email: real(process.env.SUPPORT_EMAIL) || real(process.env.GRIEVANCE_OFFICER_EMAIL) || "rizzlabsupport@gmail.com",
   /** IT Rules 2021: acknowledge in 24h, resolve in 15 days; non-consensual intimate imagery removed within 24h. */
   ackHours: 24,
   resolveDays: 15,
