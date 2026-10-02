@@ -6,9 +6,9 @@ import { activatePlan, isPremium, PLANS, type PlanId } from "./premium";
 
 /** Pay-as-you-go credit packs (rupees, GST included). Only Premium members can buy them. */
 export const PACKAGES = {
-  starter: { tokens: 300, priceInr: 149, label: "300 credits" },
-  popular: { tokens: 1000, priceInr: 449, label: "1,000 credits" },
-  premium: { tokens: 2500, priceInr: 999, label: "2,500 credits" },
+  starter: { tokens: 300, priceInr: 299, label: "300 credits" },
+  popular: { tokens: 1000, priceInr: 799, label: "1,000 credits" },
+  premium: { tokens: 2500, priceInr: 1699, label: "2,500 credits" },
 } as const;
 export type PackageId = keyof typeof PACKAGES;
 

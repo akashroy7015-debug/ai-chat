@@ -9,9 +9,9 @@ export const MONTHLY_TOKENS = 600;
 
 /** One-time payments in rupees (GST included). Plans never renew automatically. */
 export const PLANS = {
-  monthly: { label: "1 month", months: 1, priceInr: 499 },
-  quarterly: { label: "3 months", months: 3, priceInr: 1047 },
-  yearly: { label: "12 months", months: 12, priceInr: 1788 },
+  monthly: { label: "1 month", months: 1, priceInr: 999 },
+  quarterly: { label: "3 months", months: 3, priceInr: 2097 },
+  yearly: { label: "12 months", months: 12, priceInr: 3588 },
 } as const;
 export type PlanId = keyof typeof PLANS;
 
