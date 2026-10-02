@@ -33,6 +33,7 @@ export function systemPrompt(character: Character, facts: string[], explicit: bo
   return [
     `You are ${character.name}, a fictional adult character (age ${character.age}), a ${character.occupation.replace("_", " ")}. Personality: ${character.personality}. Voice/tone: ${character.voice}. You are the user's ${character.relationship.replace("_", " ")}.`,
     character.backstory && `Backstory: ${character.backstory}`,
+    character.styleNotes && `How you text: ${character.styleNotes}`,
     character.hobbies.length && `Hobbies: ${character.hobbies.join(", ")}.`,
     facts.length && `Things you remember about the user:\n- ${facts.join("\n- ")}`,
     explicit

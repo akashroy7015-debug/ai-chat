@@ -27,6 +27,11 @@ function Chat() {
   const [voice, setVoice] = useState<{ enabled: boolean; cost: number }>({ enabled: false, cost: 5 });
   const [playing, setPlaying] = useState<string | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
+  const [votes, setVotes] = useState<Record<string, number>>({});
+  async function rate(id: string, v: 1 | -1) {
+    const r = await fetch("/api/feedback", { method: "POST", body: JSON.stringify({ messageId: id, vote: v }) });
+    if (r.ok) { const b = await r.json(); setVotes((x) => ({ ...x, [id]: b.vote })); }
+  }
 
   useEffect(() => { void fetch("/api/voice").then((r) => (r.ok ? r.json() : null)).then((b) => b && setVoice(b)); }, []);
   useEffect(() => { void fetch("/api/conversations").then((r) => (r.ok ? r.json() : null)).then((b) => b && setConvs(b.conversations)); }, [cid, lines.length]);
@@ -123,6 +128,14 @@ function Chat() {
             {lines.map((l, i) => (
               <div key={i} className={`bubble ${l.who}`}>
                 {l.text}
+                {l.who === "them" && l.id && (
+                  <span style={{ marginLeft: 8, whiteSpace: "nowrap" }}>
+                    {([1, -1] as const).map((v) => (
+                      <button key={v} title={v === 1 ? "Good reply" : "Bad reply"} onClick={() => void rate(l.id!, v)}
+                        style={{ background: "none", border: 0, cursor: "pointer", fontSize: 13, opacity: votes[l.id!] === v ? 1 : 0.35 }}>{v === 1 ? "👍" : "👎"}</button>
+                    ))}
+                  </span>
+                )}
                 {voice.enabled && l.who === "them" && l.id && (
                   <button title={`Play voice (${voice.cost} tokens, replays free)`} onClick={() => void play(l.id!)} style={{ marginLeft: 8, background: "none", border: 0, cursor: "pointer", fontSize: 15 }}>{playing === l.id ? "⏳" : "🔊"}</button>
                 )}

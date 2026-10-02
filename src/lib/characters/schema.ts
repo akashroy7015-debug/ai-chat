@@ -91,6 +91,8 @@ export const CharacterInput = z.object({
   hobbies: z.array(safeText(30)).max(6).default([]),
   tagline: safeText(80).default(""),
   backstory: safeText(500).default(""),
+  /** How this character texts (tuned over time from user feedback). */
+  styleNotes: safeText(600).default(""),
 });
 
 export type CharacterInput = z.infer<typeof CharacterInput>;
