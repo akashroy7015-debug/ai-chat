@@ -333,3 +333,10 @@ button { font: inherit; }
 .pp-msg { margin-top: 14px; padding: 10px 14px; border-radius: 12px; background: var(--panel2); display: inline-block; }
 @media (max-width: 760px) { .pp-how { grid-template-columns: 1fr; } }
 .pp-cred { font-weight: 800; color: var(--gold); font-size: 14px; margin: 2px 0 4px; }
+
+/* Locked photo teaser in chat */
+.locked-pic { position: relative; display: block; width: 210px; aspect-ratio: 3/4; border-radius: 14px; overflow: hidden; margin-bottom: 6px; border: 0; padding: 0; cursor: pointer; background: var(--panel2); }
+.locked-pic .blur { position: absolute; inset: 0; filter: blur(16px) saturate(1.3); transform: scale(1.25); }
+.lp-lock { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 30px; color: #fff; background: rgba(14,11,14,.3); }
+.lp-lock b { font-size: 13px; background: var(--gold); color: #2a1600; padding: 6px 12px; border-radius: 999px; }
+.locked-pic:hover .lp-lock b { transform: scale(1.05); }

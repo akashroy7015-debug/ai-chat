@@ -5,7 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { ClipVideo, pretty, Portrait, type CharacterCard } from "../ui";
 import { useT } from "../i18n";
 
-interface Line { who: "you" | "them"; text: string; id?: string; image?: "portrait" | "clip" }
+interface Line { who: "you" | "them"; text: string; id?: string; image?: "portrait" | "clip" | "locked" }
+
+/** What she says with the locked photo when the free messages run out. */
+const LOCKED_TEASE = ["I took this for you… 🔒", "ek photo bheji hai, sirf tumhare liye… 🔒", "don't go yet, I have something to show you 🔒", "you'll want to see this one… 🔒"];
 interface Media { id: string; kind: string; scene: string; status: string; url?: string }
 interface Conv { character: { id: string; name: string; age: number; hair: string; style: string }; last: { role: string; content: string } }
 
@@ -98,8 +101,16 @@ function Chat() {
     if (r.status === 402) {
       setLines((l) => l.slice(0, -1));
       setInput(text);
-      setPaywall(true);
       void loadWallet();
+      // Free users get a locked photo from her first; tapping it opens the paywall.
+      if (!wallet?.premium && !lines.some((l) => l.image === "locked")) {
+        setTyping(true);
+        setTimeout(() => {
+          setTyping(false);
+          setLines((l) => [...l, { who: "them", text: LOCKED_TEASE[Math.floor(Math.random() * LOCKED_TEASE.length)], image: "locked" }]);
+          setTimeout(() => setPaywall(true), 2500);
+        }, 1400);
+      } else setPaywall(true);
       return;
     }
     void loadWallet();
@@ -185,7 +196,13 @@ function Chat() {
               <div key={i} className={`mrow ${l.who}`}>
               {l.who === "them" && c && <div className="mav"><Portrait c={c} height="100%" round={999} /></div>}
               <div className={`bubble ${l.who}`}>
-                {l.image && c && (
+                {l.image === "locked" && c && (
+                  <button className="locked-pic" onClick={() => setPaywall(true)} aria-label="Unlock her photo">
+                    <div className="blur"><Portrait c={c} height="100%" round={0} w={192} /></div>
+                    <span className="lp-lock">🔒<b>Tap to unlock</b></span>
+                  </button>
+                )}
+                {l.image && l.image !== "locked" && c && (
                   <div style={{ width: 210, aspectRatio: "3/4", borderRadius: 14, overflow: "hidden", marginBottom: 6, position: "relative" }}>
                     {l.image === "clip" && c.clipV ? <ClipVideo src={`/api/portraits/${c.id}/clip?v=${c.clipV}`} className="clip" /> : <Portrait c={c} height="100%" round={0} />}
                   </div>
