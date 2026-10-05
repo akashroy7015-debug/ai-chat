@@ -23,7 +23,7 @@ export function Nav() {
   return (
     <>
     <nav className="side">
-      <Link href="/" className="brand" aria-label="Sizzly home"><Logo size={28} /></Link>
+      <Link href="/" className="brand" aria-label="FlirtIQ home"><Logo size={28} /></Link>
       {LINKS.map(([href, icon, label]) => (
         <Link key={href} href={href} className={`${path === href ? "on" : ""} ${href === "/premium" ? "premium" : ""} ${href === "/swipe" ? "hero-btn" : ""} ${["/discover", "/my-ai", "/premium"].includes(href) ? "drawer-only" : ""}`}>
           <span>{icon}</span> <span className="lbl">{t(label)}</span>

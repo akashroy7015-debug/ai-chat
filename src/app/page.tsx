@@ -134,7 +134,7 @@ export default function Home() {
         <div className={`slide promo ${slide === 0 ? "on" : ""}`}>
           <div className="promo-copy">
             <div className="script">Hot deal, just for you</div>
-            <div className="big">SIZZLY</div>
+            <div className="big">FLIRTIQ</div>
             <div className="mid">SALE</div>
             <div className="row">
               <div className="sticker"><b>70%</b><span>OFF</span></div>

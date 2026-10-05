@@ -4,9 +4,10 @@ import { LangProvider } from "./i18n";
 import "./globals.css";
 
 export const metadata = {
-  title: { default: "Sizzly · Your flirty AI girlfriend", template: "%s · Sizzly" },
-  description: "Things are heating up. Chat, flirt and connect with AI companions who remember you. English, Hindi & Hinglish. 18+ only.",
-  openGraph: { title: "Sizzly · Your flirty AI girlfriend", description: "Things are heating up. 18+ AI companions.", siteName: "Sizzly", type: "website" },
+  metadataBase: new URL("https://flirtiq.online"),
+  title: { default: "FlirtIQ · AI companion & virtual dating", template: "%s · FlirtIQ" },
+  description: "Chat, flirt and connect with AI companions who remember you. English, Hindi & Hinglish. 18+ only.",
+  openGraph: { title: "FlirtIQ · AI companion & virtual dating", description: "Chat with AI companions who remember you. 18+.", siteName: "FlirtIQ", type: "website", url: "https://flirtiq.online" },
 };
 export const viewport = { width: "device-width", initialScale: 1 };
 

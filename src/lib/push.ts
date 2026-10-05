@@ -47,7 +47,7 @@ export async function notifyInactive(now = Date.now(), send = webpush.sendNotifi
     const first = c.name.split(" ")[0];
     const body = `${first} ${LINES[Math.floor(now / HOUR + userId.length) % LINES.length]}`;
     try {
-      await send(s.sub, JSON.stringify({ title: "Sizzly", body, url: `/chat?c=${c.id}`, icon: `/api/portraits/${c.id}` }));
+      await send(s.sub, JSON.stringify({ title: "FlirtIQ", body, url: `/chat?c=${c.id}`, icon: `/api/portraits/${c.id}` }));
       subs.set(userId, { ...s, lastPushAt: now });
       sent++;
     } catch (e) {

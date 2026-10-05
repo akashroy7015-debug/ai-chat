@@ -72,7 +72,7 @@ export function AgeGateModal({ onDone, onClose }: { onDone: () => void; onClose:
     <div className="backdrop" onClick={onClose}>
       <form className="modal" onClick={(e) => e.stopPropagation()} onSubmit={submit} style={{ display: "grid", gap: 12 }}>
         <h2 style={{ margin: 0 }}>Quick age check</h2>
-        <p className="muted" style={{ margin: 0, fontSize: 14 }}>Sizzly is for adults only. Enter your date of birth to continue.</p>
+        <p className="muted" style={{ margin: 0, fontSize: 14 }}>FlirtIQ is for adults only. Enter your date of birth to continue.</p>
         <BirthDateField value={birthDate} onChange={setBirthDate} />
         <label style={{ fontSize: 13, display: "flex", gap: 8, alignItems: "flex-start", color: "#c9c9d6" }}>
           <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} style={{ marginTop: 3 }} />

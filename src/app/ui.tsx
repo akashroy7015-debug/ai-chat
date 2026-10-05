@@ -51,7 +51,7 @@ export function Portrait({ c, height = 220, round = 12, w }: { c: AvatarChar & {
 }
 
 /** Site name; set NEXT_PUBLIC_BRAND at build time to rename. */
-export const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "Sizzly";
+export const BRAND = process.env.NEXT_PUBLIC_BRAND ?? "FlirtIQ";
 
 export const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 
@@ -73,18 +73,19 @@ export function ClipVideo({ src, className }: { src: string; className?: string 
   return <video ref={ref} className={className} src={src} autoPlay muted loop playsInline preload="auto" />;
 }
 
-/** Sizzly wordmark: flame + lowercase heavy type, "ly" in a hot pink→orange gradient. */
+/** FlirtIQ wordmark: spark-heart + lowercase heavy type, "iq" in a hot pink→orange gradient. */
 export function Logo({ size = 26 }: { size?: number }) {
   const gid = `flame${useId().replace(/:/g, "")}`;
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: size * 0.18, fontWeight: 900, fontSize: size, letterSpacing: "-0.04em", lineHeight: 1 }}>
       <svg width={size * 0.95} height={size * 1.15} viewBox="0 0 24 30" aria-hidden="true">
         <defs><linearGradient id={gid} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#ff2d78" /><stop offset=".6" stopColor="#ff5a3c" /><stop offset="1" stopColor="#ffb347" /></linearGradient></defs>
-        <path d="M12 1c1 5 7 8 7 15a7 7 0 0 1-14 0c0-4 2-6 4-8 0 3 1 5 3 5-2-4-1-8 0-12z" fill={`url(#${gid})`} />
-        <path d="M12 16c.5 2.5 3 3.5 3 6.5a3 3 0 0 1-6 0c0-2 1.5-3 3-6.5z" fill="#fff" opacity=".9" />
+        <path d="M12 28.5 10.3 27C4.2 21.5 0 17.8 0 13.3 0 9.7 2.8 7 6.4 7c2 0 4 .9 5.6 2.4C13.6 7.9 15.6 7 17.6 7 21.2 7 24 9.7 24 13.3c0 4.5-4.2 8.2-10.3 13.7z" fill={`url(#${gid})`} />
+        <path d="M19.5 0l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" fill="#ffd36b" />
+        <path d="M8.5 12.5c-1.6 0-2.8 1.2-2.8 2.8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".85" />
       </svg>
-      <span style={{ color: "#fff" }}>sizz</span>
-      <span style={{ marginLeft: "-0.18em", background: "linear-gradient(90deg,#ff2d78,#ff5a3c 60%,#ffb347)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>ly</span>
+      <span style={{ color: "#fff" }}>flirt</span>
+      <span style={{ marginLeft: "-0.14em", background: "linear-gradient(90deg,#ff2d78,#ff5a3c 60%,#ffb347)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>iq</span>
     </span>
   );
 }

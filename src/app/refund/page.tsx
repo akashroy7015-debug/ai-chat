@@ -6,7 +6,7 @@ export const metadata = { title: "Refund & Cancellation Policy" };
 export default function Refund() {
   return (
     <LegalPage title="Refund & Cancellation Policy">
-      <p>This policy explains how Premium membership, gems, cancellations and refunds work on Sizzly. Please read it before you buy.</p>
+      <p>This policy explains how Premium membership, gems, cancellations and refunds work on FlirtIQ. Please read it before you buy.</p>
 
       <h2>1. No automatic renewal</h2>
       <p>Premium plans are one-time payments for a fixed period (1, 3 or 12 months). <b>They do not renew automatically</b> and we never charge you again without your action. When your plan ends, your account simply returns to the free plan. You can buy Premium again any time.</p>

@@ -80,14 +80,14 @@ export function ageFromBirthDate(birthDate: string, now = new Date()): number | 
  */
 export function selfDeclareAge(userId: string, birthDate: string): User {
   const user = getUser(userId);
-  if (user.ageStatus === "rejected") throw new AccessDenied("age_verification_required", "This account can't be used. Sizzly is for adults 18+ only.");
+  if (user.ageStatus === "rejected") throw new AccessDenied("age_verification_required", "This account can't be used. FlirtIQ is for adults 18+ only.");
   const age = ageFromBirthDate(birthDate);
   if (age === null || age > 100) throw new AccessDenied("age_verification_required", "Enter a valid date of birth.", 400);
   if (age < 18) {
     user.ageStatus = "rejected";
     saveUser(user);
     audit({ userId, kind: "age_gate_underage", detail: "" });
-    throw new AccessDenied("age_verification_required", "Sorry, Sizzly is only for adults 18 and over.");
+    throw new AccessDenied("age_verification_required", "Sorry, FlirtIQ is only for adults 18 and over.");
   }
   user.birthDate = birthDate;
   if (user.ageStatus !== "verified") {
