@@ -29,7 +29,10 @@ export default function Premium() {
     setPacks(Object.entries(cb.packages as Record<string, Omit<Pack, "id">>).map(([id, p]) => ({ id, ...p })));
     setMe(r.ok ? await r.json() : null);
   }
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    if (new URLSearchParams(window.location.search).get("paid")) setMsg("Thanks! Your payment is being confirmed. Premium or credits switch on automatically within a few minutes.");
+  }, []);
 
   async function pay(url: string, payload: object, ok: string) {
     setMsg(""); setBusy(JSON.stringify(payload));
@@ -91,7 +94,8 @@ export default function Premium() {
         ))}
       </div>
       {msg && <p className="pp-msg">{msg}</p>}
-      <p className="muted" style={{ fontSize: 12, marginTop: 18 }}>Prices include GST. Plans are one-time payments and do not renew automatically. All purchases are final; see our <Link href="/refund">Refund &amp; Cancellation Policy</Link>. Discounts are compared with paying monthly. 18+ only.</p>
+      <p className="muted" style={{ fontSize: 13, marginTop: 14 }}>💳 Secure checkout by NOWPayments: pay with USDT, BTC, ETH and 100+ cryptocurrencies. Prices are converted to USD at checkout.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Prices include GST. Plans are one-time payments and do not renew automatically. All purchases are final; see our <Link href="/refund">Refund &amp; Cancellation Policy</Link>. Discounts are compared with paying monthly. 18+ only.</p>
     </main>
   );
 }

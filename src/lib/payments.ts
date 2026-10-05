@@ -1,5 +1,6 @@
 import { AccessDenied, requireVerifiedAdult } from "./age/verification";
 import { isAdmin } from "./admin";
+import { nowPayments } from "./nowpayments";
 import { credit } from "./tokens/ledger";
 import { audit, db, getUser, newId } from "./store";
 import { activatePlan, isPremium, PLANS, type PlanId } from "./premium";
@@ -30,6 +31,7 @@ export function getPayments(): PaymentProvider {
     if (process.env.NODE_ENV === "production" && !process.env.PAYMENT_PROVIDER) throw new Error("PAYMENT_PROVIDER must be configured in production");
     return mockPayments;
   }
+  if (p === "nowpayments") return nowPayments();
   throw new Error(`Unknown PAYMENT_PROVIDER: ${p}`);
 }
 
