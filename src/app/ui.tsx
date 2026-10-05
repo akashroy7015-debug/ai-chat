@@ -73,19 +73,19 @@ export function ClipVideo({ src, className }: { src: string; className?: string 
   return <video ref={ref} className={className} src={src} autoPlay muted loop playsInline preload="auto" />;
 }
 
-/** FlirtIQ logo: heart-shaped chat bubble with typing dots and a spark, then "flirt" + gradient "iq". */
+/** FlirtIQ wordmark: heavy lowercase "flirtiq" where a pink heart replaces the dot of the last "i". */
 export function Logo({ size = 26 }: { size?: number }) {
-  const gid = `fq${useId().replace(/:/g, "")}`;
+  const heart = size * 0.36;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: size * 0.22, fontWeight: 900, fontSize: size, letterSpacing: "-0.05em", lineHeight: 1 }}>
-      <svg width={size * 1.15} height={size * 1.1} viewBox="0 0 48 46" aria-hidden="true">
-        <defs><linearGradient id={gid} x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#ff2d78" /><stop offset=".6" stopColor="#ff5a3c" /><stop offset="1" stopColor="#ffb347" /></linearGradient></defs>
-        <path d="M24 40 21.6 37.8C12.6 29.8 6.5 24.4 6.5 17.8 6.5 12.4 10.7 8.2 16.1 8.2c3 0 5.9 1.4 7.9 3.6 2-2.2 4.9-3.6 7.9-3.6 5.4 0 9.6 4.2 9.6 9.6 0 6.6-6.1 12-15.1 20l-2.4 2.2z" fill={`url(#${gid})`} />
-        <path d="M10 33 4 44l11-5" fill={`url(#${gid})`} />
-        <circle cx="17.5" cy="20" r="2.4" fill="#fff" /><circle cx="24" cy="20" r="2.4" fill="#fff" /><circle cx="30.5" cy="20" r="2.4" fill="#fff" />
-        <path d="M40 2l1.2 3.3 3.3 1.2-3.3 1.2L40 11l-1.2-3.3-3.3-1.2 3.3-1.2z" fill="#ffd36b" />
-      </svg>
-      <span><span style={{ color: "#fff" }}>flirt</span><span style={{ color: "#ff4d6a" }}>iq</span></span>
+    <span aria-label="FlirtIQ" style={{ display: "inline-flex", alignItems: "baseline", fontWeight: 900, fontSize: size, letterSpacing: "-0.05em", lineHeight: 1, color: "#fff", paddingTop: size * 0.12 }}>
+      <span aria-hidden="true">flirt</span>
+      <span aria-hidden="true" style={{ position: "relative", display: "inline-block" }}>
+        ı
+        <svg width={heart} height={heart * 0.92} viewBox="0 0 24 22" style={{ position: "absolute", left: "50%", top: -heart * 0.38, transform: "translateX(-50%) rotate(-8deg)" }}>
+          <path d="M12 21.6 10.3 20C4.2 14.5 0 10.8 0 6.3 0 2.7 2.8 0 6.4 0c2 0 4 .9 5.6 2.4C13.6.9 15.6 0 17.6 0 21.2 0 24 2.7 24 6.3c0 4.5-4.2 8.2-10.3 13.7z" fill="#ff4d6a" />
+        </svg>
+      </span>
+      <span aria-hidden="true">q</span>
     </span>
   );
 }
