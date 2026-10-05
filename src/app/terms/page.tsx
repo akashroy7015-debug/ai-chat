@@ -6,7 +6,7 @@ export const metadata = { title: "Terms & Conditions" };
 export default function Terms() {
   return (
     <LegalPage title="Terms & Conditions">
-      <p>These Terms govern your use of FlirtIQ (the &quot;Service&quot;), an AI companion and virtual dating app operated by {OPERATOR}, {BUSINESS_ADDRESS} (&quot;we&quot;, &quot;us&quot;). By creating an account or making a purchase you agree to these Terms, our <a href="/privacy">Privacy Policy</a> and our <a href="/refund">Refund &amp; Cancellation Policy</a>.</p>
+      <p>These Terms govern your use of FlirtIQ (the &quot;Service&quot;), an AI companion chat app operated by {OPERATOR}, {BUSINESS_ADDRESS} (&quot;we&quot;, &quot;us&quot;). By creating an account or making a purchase you agree to these Terms, our <a href="/privacy">Privacy Policy</a> and our <a href="/refund">Refund &amp; Cancellation Policy</a>.</p>
 
       <h2>1. Eligibility</h2>
       <p>The Service is only for adults aged 18 or over. You must complete age verification before chatting. Accounts that belong to anyone under 18 are closed immediately.</p>
