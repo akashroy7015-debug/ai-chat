@@ -73,19 +73,19 @@ export function ClipVideo({ src, className }: { src: string; className?: string 
   return <video ref={ref} className={className} src={src} autoPlay muted loop playsInline preload="auto" />;
 }
 
-/** FlirtIQ wordmark: spark-heart + lowercase heavy type, "iq" in a hot pink→orange gradient. */
+/** FlirtIQ logo: heart-shaped chat bubble with typing dots and a spark, then "flirt" + gradient "iq". */
 export function Logo({ size = 26 }: { size?: number }) {
-  const gid = `flame${useId().replace(/:/g, "")}`;
+  const gid = `fq${useId().replace(/:/g, "")}`;
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: size * 0.18, fontWeight: 900, fontSize: size, letterSpacing: "-0.04em", lineHeight: 1 }}>
-      <svg width={size * 0.95} height={size * 1.15} viewBox="0 0 24 30" aria-hidden="true">
-        <defs><linearGradient id={gid} x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#ff2d78" /><stop offset=".6" stopColor="#ff5a3c" /><stop offset="1" stopColor="#ffb347" /></linearGradient></defs>
-        <path d="M12 28.5 10.3 27C4.2 21.5 0 17.8 0 13.3 0 9.7 2.8 7 6.4 7c2 0 4 .9 5.6 2.4C13.6 7.9 15.6 7 17.6 7 21.2 7 24 9.7 24 13.3c0 4.5-4.2 8.2-10.3 13.7z" fill={`url(#${gid})`} />
-        <path d="M19.5 0l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" fill="#ffd36b" />
-        <path d="M8.5 12.5c-1.6 0-2.8 1.2-2.8 2.8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" fill="none" opacity=".85" />
+    <span style={{ display: "inline-flex", alignItems: "center", gap: size * 0.22, fontWeight: 900, fontSize: size, letterSpacing: "-0.05em", lineHeight: 1 }}>
+      <svg width={size * 1.15} height={size * 1.1} viewBox="0 0 48 46" aria-hidden="true">
+        <defs><linearGradient id={gid} x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="#ff2d78" /><stop offset=".6" stopColor="#ff5a3c" /><stop offset="1" stopColor="#ffb347" /></linearGradient></defs>
+        <path d="M24 40 21.6 37.8C12.6 29.8 6.5 24.4 6.5 17.8 6.5 12.4 10.7 8.2 16.1 8.2c3 0 5.9 1.4 7.9 3.6 2-2.2 4.9-3.6 7.9-3.6 5.4 0 9.6 4.2 9.6 9.6 0 6.6-6.1 12-15.1 20l-2.4 2.2z" fill={`url(#${gid})`} />
+        <path d="M10 33 4 44l11-5" fill={`url(#${gid})`} />
+        <circle cx="17.5" cy="20" r="2.4" fill="#fff" /><circle cx="24" cy="20" r="2.4" fill="#fff" /><circle cx="30.5" cy="20" r="2.4" fill="#fff" />
+        <path d="M40 2l1.2 3.3 3.3 1.2-3.3 1.2L40 11l-1.2-3.3-3.3-1.2 3.3-1.2z" fill="#ffd36b" />
       </svg>
-      <span style={{ color: "#fff" }}>flirt</span>
-      <span style={{ marginLeft: "-0.14em", background: "linear-gradient(90deg,#ff2d78,#ff5a3c 60%,#ffb347)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>iq</span>
+      <span><span style={{ color: "#fff" }}>flirt</span><span style={{ color: "#ff4d6a" }}>iq</span></span>
     </span>
   );
 }
