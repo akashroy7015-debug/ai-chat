@@ -28,7 +28,7 @@ const WEEK = 7 * 86_400_000;
 const FAQ = [
   ["What is this?", "A place to chat with AI companions who remember you, flirt back, send voice messages and keep the conversation going. Every character is a fictional adult created by AI."],
   ["Is it private?", "Your chats are private to your account. We never sell your data, and you can ask us to delete everything at any time."],
-  ["Why do I need to verify my age?", "Our companions are for adults only. A quick ID check keeps the platform 18+ and safe for everyone."],
+  ["Why do I need to verify my age?", "Our companions are for adults only. We ask for your date of birth at signup to keep the platform 18+ and safe for everyone."],
   ["Can I create my own character?", "Yes. Pick her looks, body type, outfit, personality and voice, and she's ready to chat in seconds."],
   ["Does it speak Hindi?", "Yes. Write in English, Hindi or Hinglish and your companion replies in the same language."],
 ];
@@ -139,7 +139,7 @@ export default function Home() {
             <div className="row">
               <div className="sticker"><b>70%</b><span>OFF</span></div>
               <div className="perks">
-                <div>Unlimited flirty chats, voice notes &amp; surprise photos</div>
+                <div>Monthly chat credits, voice notes &amp; surprise photos</div>
                 <Countdown />
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function Home() {
           <div>
             <div className="script">just for you…</div>
             <h2 style={{ margin: "2px 0 8px" }}>She saves her best photos for Premium</h2>
-            <p className="muted" style={{ margin: "0 0 14px" }}>Unlimited chats, voice notes and surprise photos. 70% off today.</p>
+            <p className="muted" style={{ margin: "0 0 14px" }}>Monthly chat credits, voice notes and exclusive photos. Up to 70% off today.</p>
             <Link href="/premium" className="btn btn-gold">Unlock Premium →</Link>
           </div>
         </section>

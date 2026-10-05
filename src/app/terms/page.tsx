@@ -33,7 +33,7 @@ export default function Terms() {
 
       <h2>5. Premium membership and gems</h2>
       <ul>
-        <li>Premium is a subscription that unlocks extra features (such as unlimited chats, voice notes and exclusive galleries) for the period you buy. Prices are shown in the app before you pay and include applicable taxes unless stated otherwise.</li>
+        <li>Premium is a one-time purchase that gives you a monthly allowance of credits and unlocks extra features (such as voice notes and exclusive galleries) for the period you buy. Prices are shown in the app before you pay and include applicable taxes unless stated otherwise.</li>
         <li>Gems are a virtual in-app currency used to unlock features like photos and voice notes. Gems have no cash value, cannot be exchanged for money, and cannot be transferred.</li>
         <li>Payments are processed securely by our payment partner. We do not store your card or UPI details.</li>
         <li>Premium plans do not renew automatically. All purchases are final and non-refundable except as set out in our <a href="/refund">Refund &amp; Cancellation Policy</a>.</li>
