@@ -108,7 +108,7 @@ export default function Home() {
   const verified = me?.ageStatus === "verified";
   const shown = (chars ?? []).filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
   function open(id: string) {
-    if (!me) return setAuth("register");
+    if (!me) return router.push(`/chat?c=${id}`); // guests get a free preview, then sign up
     if (!verified) return setAgeGate(id);
     router.push(`/chat?c=${id}`);
   }
