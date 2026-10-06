@@ -2,7 +2,7 @@ import { credit } from "./tokens/ledger";
 import { audit, getUser, saveUser, type User } from "./store";
 
 const DAY = 86_400_000;
-const MONTH = 30 * DAY;
+export const MONTH = 30 * DAY;
 
 /**
  * One-time payments in rupees (GST included). Plans never renew automatically.

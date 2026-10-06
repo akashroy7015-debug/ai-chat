@@ -51,6 +51,8 @@ export interface Order {
   userId: string;
   pkg: string;
   paid: boolean;
+  createdAt?: number;
+  paidAt?: number;
 }
 
 export interface LedgerEntry {

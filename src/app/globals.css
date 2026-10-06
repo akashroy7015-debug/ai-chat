@@ -341,3 +341,17 @@ button { font: inherit; }
 .lp-lock b { font-size: 13px; background: var(--gold); color: #2a1600; padding: 6px 12px; border-radius: 999px; }
 .locked-pic:hover .lp-lock b { transform: scale(1.05); }
 .low-credits { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 12px 6px; padding: 8px 10px 8px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(243,200,75,.16), rgba(232,93,128,.16)); border: 1px solid #5a4a2a; font-size: 13px; animation: pop .3s ease-out; }
+
+/* Account page */
+.acc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px; }
+.acc-card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.acc-card.gold { border-color: #6a5420; background: linear-gradient(135deg, rgba(243,200,75,.12), var(--panel)); }
+.acc-k { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.acc-v { font-size: 28px; font-weight: 900; margin: 2px 0 4px; }
+.acc-bar { width: 100%; height: 6px; border-radius: 99px; background: var(--panel2); margin-top: 8px; overflow: hidden; }
+.acc-bar i { display: block; height: 100%; background: var(--gold); }
+.acc-table { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.acc-row { display: grid; grid-template-columns: minmax(0, 2fr) 90px 80px 110px; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line); font-size: 14px; align-items: center; }
+.acc-row:last-child { border-bottom: 0; }
+.acc-row .ok { color: #6ee7a8; font-weight: 800; } .acc-row .wait { color: var(--gold); font-weight: 800; }
+@media (max-width: 560px) { .acc-row { grid-template-columns: minmax(0, 1fr) auto; } .acc-row > span:nth-child(4) { grid-column: 1 / -1; font-size: 12px; } }

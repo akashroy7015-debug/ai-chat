@@ -12,6 +12,7 @@ const D = {
   create: ["Create Character", "कैरेक्टर बनाएं", "Character banao"],
   myAi: ["My AI", "मेरे AI", "Mere AI"],
   premium: ["Premium", "प्रीमियम", "Premium"],
+  account: ["My account", "मेरा अकाउंट", "My account"],
   tagline: ["18+ only. Every character is a fictional adult and not based on a real person.", "सिर्फ 18+ के लिए। हर कैरेक्टर एक काल्पनिक वयस्क है, किसी असली इंसान पर आधारित नहीं।", "Sirf 18+ ke liye. Har character ek fictional adult hai, kisi real insaan pe based nahi."],
   explore: ["Explore featured characters", "फ़ीचर्ड कैरेक्टर देखें", "Featured characters dekho"],
   girls: ["Girls", "लड़कियाँ", "Girls"],

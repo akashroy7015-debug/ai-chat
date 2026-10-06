@@ -13,6 +13,7 @@ const LINKS = [
   ["/create", "➕", "create"],
   ["/my-ai", "💖", "myAi"],
   ["/premium", "👑", "premium"],
+  ["/account", "👤", "account"],
 ] as const satisfies readonly (readonly [string, string, Key])[];
 
 export function Nav() {
@@ -25,7 +26,7 @@ export function Nav() {
     <nav className="side">
       <Link href="/" className="brand" aria-label="FlirtIQ home"><Logo size={28} /></Link>
       {LINKS.map(([href, icon, label]) => (
-        <Link key={href} href={href} className={`${path === href ? "on" : ""} ${href === "/premium" ? "premium" : ""} ${href === "/swipe" ? "hero-btn" : ""} ${["/discover", "/my-ai", "/premium"].includes(href) ? "drawer-only" : ""}`}>
+        <Link key={href} href={href} className={`${path === href ? "on" : ""} ${href === "/premium" ? "premium" : ""} ${href === "/swipe" ? "hero-btn" : ""} ${["/discover", "/my-ai", "/premium", "/account"].includes(href) ? "drawer-only" : ""}`}>
           <span>{icon}</span> <span className="lbl">{t(label)}</span>
           {href === "/premium" && <b className="badge">-70%</b>}
         </Link>

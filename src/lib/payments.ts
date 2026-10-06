@@ -57,7 +57,7 @@ export async function startCheckout(userId: string, pkg: PackageId) {
   if (!isPremium(getUser(userId))) throw new AccessDenied("premium_required", "Credit packs are for Premium members. Get Premium first.");
   requirePaymentsLive(userId);
   const orderId = newId();
-  db.orders.set(orderId, { id: orderId, userId, pkg, paid: false });
+  db.orders.set(orderId, { id: orderId, userId, pkg, paid: false, createdAt: Date.now() });
   audit({ userId, kind: "checkout_started", detail: `${pkg} ${orderId}` });
   return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountInr: p.priceInr, description: p.label })) };
 }
@@ -69,7 +69,7 @@ export async function startSubscription(userId: string, plan: PlanId) {
   if (!p) throw new Error("Unknown plan");
   requirePaymentsLive(userId);
   const orderId = newId();
-  db.orders.set(orderId, { id: orderId, userId, pkg: `sub:${plan}`, paid: false });
+  db.orders.set(orderId, { id: orderId, userId, pkg: `sub:${plan}`, paid: false, createdAt: Date.now() });
   audit({ userId, kind: "checkout_started", detail: `sub:${plan} ${orderId}` });
   return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountInr: p.priceInr, description: `Premium ${p.label}` })) };
 }
@@ -80,8 +80,19 @@ export function fulfilOrder(orderId: string) {
   if (!o) throw new Error("Unknown order");
   if (o.paid) return;
   o.paid = true;
+  o.paidAt = Date.now();
   db.orders.save(orderId);
   if (o.pkg.startsWith("sub:")) activatePlan(o.userId, o.pkg.slice(4) as PlanId);
   else credit(o.userId, PACKAGES[o.pkg as PackageId].tokens, `purchase:${orderId}`);
   audit({ userId: o.userId, kind: "order_paid", detail: orderId });
+}
+
+/** Human label and price of an order, for receipts and the account page. */
+export function orderInfo(pkg: string): { label: string; priceInr: number } {
+  if (pkg.startsWith("sub:")) {
+    const p = PLANS[pkg.slice(4) as PlanId];
+    return { label: `Premium · ${p?.label ?? pkg.slice(4)}`, priceInr: p?.priceInr ?? 0 };
+  }
+  const p = PACKAGES[pkg as PackageId];
+  return { label: p ? `${p.label} top-up` : pkg, priceInr: p?.priceInr ?? 0 };
 }

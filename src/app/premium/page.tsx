@@ -49,7 +49,7 @@ export default function Premium() {
   return (
     <main style={{ maxWidth: 880 }}>
       <h1 style={{ marginBottom: 4 }}>{t("goPremium")} <span className="pill gold" style={{ fontSize: 16, verticalAlign: "middle" }}>up to 70% off</span></h1>
-      {premium && <p style={{ color: "#6ee7a8", margin: "4px 0" }}>You&apos;re Premium until {new Date(me!.premiumUntil!).toLocaleDateString("en-IN")} · 💎 {me?.balance ?? 0} credits left</p>}
+      {premium && <p style={{ color: "#6ee7a8", margin: "4px 0" }}>You&apos;re Premium until {new Date(me!.premiumUntil!).toLocaleDateString("en-IN")} · 💎 {me?.balance ?? 0} credits left · <Link href="/account">My account</Link></p>}
       {me && !premium && <p className="muted" style={{ margin: "4px 0" }}>💎 {me.balance ?? 0} free credits left</p>}
 
       <section className="pp-how">
