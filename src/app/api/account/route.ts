@@ -3,6 +3,7 @@ import { orderInfo } from "@/lib/payments";
 import { balance } from "@/lib/tokens/ledger";
 import { db, getUser } from "@/lib/store";
 import { authed, json } from "@/lib/http";
+import { referralStats } from "@/lib/referral";
 
 const DAY = 86_400_000;
 
@@ -34,5 +35,6 @@ export const GET = authed(async (_req, userId) => {
     balance: balance(userId),
     orders,
     credits,
+    referral: referralStats(userId),
   });
 });

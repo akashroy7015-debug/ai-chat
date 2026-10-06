@@ -2,7 +2,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ClipVideo, pretty, Portrait, type CharacterCard } from "../ui";
+import { ClipVideo, pretty, Portrait, ShareButtons, type CharacterCard } from "../ui";
 import { useT } from "../i18n";
 
 interface Line { who: "you" | "them"; text: string; id?: string; image?: "portrait" | "clip" | "locked" }
@@ -21,9 +21,9 @@ function Chat() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [err, setErr] = useState("");
-  const [wallet, setWallet] = useState<{ premium: boolean; balance: number } | null>(null);
+  const [wallet, setWallet] = useState<{ premium: boolean; balance: number; ref?: string } | null>(null);
   const [paywall, setPaywall] = useState(false);
-  const loadWallet = () => fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((b) => b && setWallet({ premium: !!b.premium, balance: b.balance ?? 0 }));
+  const loadWallet = () => fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((b) => b && setWallet({ premium: !!b.premium, balance: b.balance ?? 0, ref: b.referralCode }));
   useEffect(() => { void loadWallet(); }, []);
   const [showProfile, setShowProfile] = useState(false);
   const [media, setMedia] = useState<Media[]>([]);
@@ -265,6 +265,11 @@ function Chat() {
             <button className="btn btn-ghost btn-sm" style={{ marginBottom: 10 }} onClick={() => setShowProfile(false)}>✕</button>
             <div style={{ borderRadius: 16, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}><Portrait c={c} height="100%" round={0} /></div>
             <PrivateGallery c={c} />
+            <div className="share-her">
+              <b>Share {c.name.split(" ")[0]} with a friend</b>
+              <span className="muted">You both get free credits when they join.</span>
+              <ShareButtons url={`https://flirtiq.online/chat?c=${c.id}${wallet?.ref ? `&ref=${wallet.ref}` : ""}`} text={`Meet ${c.name.split(" ")[0]} on FlirtIQ 😏 she flirts back in Hinglish:`} />
+            </div>
             <h2 style={{ margin: "14px 0 2px" }}>{c.name}, {c.age}</h2>
             <p style={{ margin: "0 0 12px", color: "#d9d9e3" }}>{c.tagline}</p>
             {pushState === "off" && <button className="btn btn-sm" style={{ width: "100%", margin: "4px 0 12px" }} onClick={() => void enablePush()}>🔔 Get notified when {c.name.split(" ")[0]} texts</button>}

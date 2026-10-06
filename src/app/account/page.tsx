@@ -1,16 +1,34 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ShareButtons } from "../ui";
 
 interface Account {
   email?: string; premium: boolean; plan: string | null; monthlyCredits: number | null; premiumUntil: number | null; daysLeft: number;
   nextCreditsAt: number | null; balance: number;
   orders: { id: string; label: string; priceInr: number; status: "paid" | "pending"; at: number | null }[];
   credits: { amount: number; reason: string; at: number }[];
+  referral: { code: string; invited: number; earned: number; bonus: number };
 }
 
 const date = (t: number | null) => (t ? new Date(t).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—");
-const REASON: Record<string, string> = { premium_grant: "Monthly Premium credits", purchase: "Credit top-up", free_trial: "Free welcome messages", daily: "Daily reward", admin_grant: "Bonus from FlirtIQ", refund: "Refund" };
+const REASON: Record<string, string> = { premium_grant: "Monthly Premium credits", purchase: "Credit top-up", free_trial: "Free welcome messages", daily: "Daily reward", admin_grant: "Bonus from FlirtIQ", refund: "Refund", referral: "Friend joined with your invite", referral_welcome: "Invite welcome bonus" };
+
+/** The user's invite link with copy and share buttons. */
+function InviteLink({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = `https://flirtiq.online/?ref=${code}`;
+  const text = "I'm chatting with AI girls who flirt back in Hinglish 😏 Get free messages with my link:";
+  return (
+    <div style={{ display: "grid", gap: 8, width: "100%" }}>
+      <div className="invite-url"><code>{url}</code>
+        <button className="btn btn-sm" onClick={() => { void navigator.clipboard?.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); }}>{copied ? "Copied ✓" : "Copy"}</button>
+      </div>
+      <ShareButtons url={url} text={text} />
+    </div>
+  );
+}
+
 
 export default function AccountPage() {
   const [a, setA] = useState<Account | null | undefined>(undefined);
@@ -53,6 +71,13 @@ export default function AccountPage() {
           <Link href={a.premium ? "/premium#credits" : "/premium"} className="btn" style={{ marginTop: 10 }}>{a.premium ? "Top up credits" : "Get more credits"}</Link>
         </section>
       </div>
+
+      <section className="acc-card invite">
+        <div className="acc-k">Invite friends · get free credits</div>
+        <div style={{ fontWeight: 800, fontSize: 17 }}>You both get 💎 {a.referral.bonus} credits when a friend signs up with your link.</div>
+        <InviteLink code={a.referral.code} />
+        <div className="muted" style={{ fontSize: 13 }}>{a.referral.invited} friends joined · 💎 {a.referral.earned} credits earned</div>
+      </section>
 
       {pending && <p className="pp-msg">⏳ A payment is being confirmed. This page updates automatically.</p>}
 

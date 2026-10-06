@@ -37,6 +37,32 @@ export function stats(now = Date.now()) {
   };
 }
 
+/** Signups per day (last 14 days), top sources and invite results, for the admin Growth panel. */
+export function growth(now = Date.now()) {
+  const users = [...db.users.values()].filter((u) => u.email);
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const start = new Date(now - (13 - i) * DAY); start.setHours(0, 0, 0, 0);
+    const s = start.getTime();
+    const day = users.filter((u) => (u.createdAt ?? 0) >= s && (u.createdAt ?? 0) < s + DAY);
+    const paidUsers = new Set([...db.orders.values()].filter((o) => o.paid && (o.paidAt ?? 0) >= s && (o.paidAt ?? 0) < s + DAY).map((o) => o.userId));
+    return { date: start.toISOString().slice(5, 10), signups: day.length, buyers: paidUsers.size };
+  });
+  const since = now - 30 * DAY;
+  const bySource = new Map<string, { signups: number; paying: number }>();
+  for (const u of users.filter((x) => (x.createdAt ?? 0) > since)) {
+    const k = u.signupSource ?? "unknown";
+    const row = bySource.get(k) ?? { signups: 0, paying: 0 };
+    row.signups++;
+    if ([...db.orders.values()].some((o) => o.userId === u.id && o.paid)) row.paying++;
+    bySource.set(k, row);
+  }
+  return {
+    days,
+    sources: [...bySource.entries()].map(([source, r]) => ({ source, ...r })).sort((a, b) => b.signups - a.signups).slice(0, 10),
+    invitesRewarded30d: db.ledger.filter((e) => e.reason === "referral" && e.at > since).length,
+  };
+}
+
 export function listUsers(query = "", limit = 50) {
   const q = query.trim().toLowerCase();
   return [...db.users.values()]

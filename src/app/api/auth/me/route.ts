@@ -5,6 +5,7 @@ import { balance } from "@/lib/tokens/ledger";
 import { getUser } from "@/lib/store";
 import { applyMonthlyGrant, isPremium } from "@/lib/premium";
 import { isAdmin } from "@/lib/admin";
+import { referralCode } from "@/lib/referral";
 
 /** Everything the UI needs about the current user in one call. */
 export const GET = authed(async (_req, userId) => {
@@ -23,5 +24,6 @@ export const GET = authed(async (_req, userId) => {
     lang: u.lang ?? "auto",
     premiumUntil: u.premiumUntil,
     admin: isAdmin(userId),
+    referralCode: referralCode(userId),
   });
 });

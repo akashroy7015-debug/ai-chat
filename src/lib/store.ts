@@ -38,6 +38,12 @@ export interface User {
   premiumPlan?: string;
   premiumLastGrant?: number;
   createdAt?: number;
+  /** Invite code others can sign up with. */
+  referralCode?: string;
+  /** User id of whoever invited this user. */
+  referredBy?: string;
+  /** Where the user came from (utm_source, ?ref, or referring site). */
+  signupSource?: string;
 }
 
 export interface Session {

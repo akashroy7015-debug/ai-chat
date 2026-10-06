@@ -355,3 +355,12 @@ button { font: inherit; }
 .acc-row:last-child { border-bottom: 0; }
 .acc-row .ok { color: #6ee7a8; font-weight: 800; } .acc-row .wait { color: var(--gold); font-weight: 800; }
 @media (max-width: 560px) { .acc-row { grid-template-columns: minmax(0, 1fr) auto; } .acc-row > span:nth-child(4) { grid-column: 1 / -1; font-size: 12px; } }
+
+/* Invite + share */
+.acc-card.invite { margin-top: 14px; border-color: #5a2a44; background: linear-gradient(135deg, rgba(232,93,128,.12), var(--panel)); }
+.invite-url { display: flex; gap: 8px; align-items: center; background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 12px; }
+.invite-url code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.share-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.share { padding: 9px 14px; border-radius: 999px; font-weight: 800; font-size: 13px; color: #fff; }
+.share.wa { background: #1f9d55; } .share.tg { background: #2a8bd6; } .share.x { background: #222; border: 1px solid #444; }
+.share-her { display: grid; gap: 6px; margin: 12px 0; padding: 12px; border-radius: 14px; background: var(--panel2); border: 1px solid var(--line); font-size: 14px; } .share-her .muted { font-size: 12px; }

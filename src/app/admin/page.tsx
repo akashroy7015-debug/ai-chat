@@ -11,9 +11,12 @@ const card = { background: theme.card, borderRadius: 12, padding: 12 } as const;
 const small = { ...btn, padding: "4px 10px", fontSize: 12 } as const;
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "");
 
+interface Growth { days: { date: string; signups: number; buyers: number }[]; sources: { source: string; signups: number; paying: number }[]; invitesRewarded30d: number }
+
 export default function Admin() {
   const [tab, setTab] = useState<"overview" | "users" | "reports" | "log">("overview");
   const [stats, setStats] = useState<Stats | null>(null);
+  const [gr, setGr] = useState<Growth | null>(null);
   const [users, setUsers] = useState<U[]>([]);
   const [q, setQ] = useState("");
   const [reports, setReports] = useState<R[]>([]);
@@ -35,6 +38,7 @@ export default function Admin() {
   }
   const load = async () => {
     const s = await get<Stats>("/api/admin/stats"); if (s) setStats(s);
+    const gg = await get<Growth>("/api/admin/stats?growth=1"); if (gg) setGr(gg);
     const u = await get<{ users: U[] }>(`/api/admin/users?q=${encodeURIComponent(q)}`); if (u) setUsers(u.users);
     const r = await get<{ reports: R[] }>("/api/admin/reports"); if (r) setReports(r.reports);
     const l = await get<{ audit: A[] }>("/api/admin/audit"); if (l) setLog(l.audit);
@@ -70,6 +74,30 @@ export default function Admin() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
           {Object.entries(stats).map(([k, v]) => (
             <div key={k} style={card}><div style={{ color: theme.muted, fontSize: 12 }}>{k.replace(/([A-Z0-9]+)/g, " $1")}</div><div style={{ fontSize: 26, fontWeight: 700 }}>{k === "revenueInr" ? `₹${v}` : v}</div></div>
+          ))}
+        </div>
+      )}
+
+      {tab === "overview" && gr && (
+        <div style={{ ...card, marginTop: 12 }}>
+          <b>Growth · last 14 days</b> <span style={{ color: theme.muted, fontSize: 13 }}>· {gr.invitesRewarded30d} friend invites rewarded (30 days)</span>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 110, margin: "12px 0 4px" }}>
+            {gr.days.map((d) => {
+              const max = Math.max(1, ...gr.days.map((x) => x.signups));
+              return (
+                <div key={d.date} title={`${d.date}: ${d.signups} signups, ${d.buyers} buyers`} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                  <span style={{ fontSize: 10, color: theme.muted }}>{d.signups || ""}</span>
+                  <div style={{ width: "100%", height: Math.max(2, (d.signups / max) * 80), background: theme.accent, borderRadius: 4 }} />
+                  <span style={{ fontSize: 9, color: theme.muted }}>{d.date.slice(3)}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: 13, color: theme.muted, margin: "10px 0 4px" }}>Where signups came from (30 days)</div>
+          {gr.sources.length === 0 ? <div style={{ fontSize: 13 }}>No signups yet.</div> : gr.sources.map((s) => (
+            <div key={s.source} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, padding: "4px 0", borderBottom: `1px solid ${theme.line}` }}>
+              <span>{s.source}</span><span>{s.signups} signups · {s.paying} paying</span>
+            </div>
           ))}
         </div>
       )}

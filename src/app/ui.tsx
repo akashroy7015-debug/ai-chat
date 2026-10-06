@@ -89,3 +89,15 @@ export function Logo({ size = 26 }: { size?: number }) {
     </span>
   );
 }
+
+/** WhatsApp / Telegram / X share links. */
+export function ShareButtons({ url, text }: { url: string; text: string }) {
+  const enc = encodeURIComponent;
+  return (
+    <div className="share-row">
+      <a className="share wa" href={`https://wa.me/?text=${enc(`${text} ${url}`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
+      <a className="share tg" href={`https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`} target="_blank" rel="noreferrer">Telegram</a>
+      <a className="share x" href={`https://x.com/intent/post?text=${enc(text)}&url=${enc(url)}`} target="_blank" rel="noreferrer">X</a>
+    </div>
+  );
+}

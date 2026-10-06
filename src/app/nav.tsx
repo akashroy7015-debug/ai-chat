@@ -21,6 +21,18 @@ export function Nav() {
   const { t } = useT();
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    // Remember who invited the visitor and where they came from, for signup attribution (30 days).
+    const q = new URLSearchParams(window.location.search);
+    const set = (k: string, v: string) => { document.cookie = `${k}=${encodeURIComponent(v)}; Max-Age=${30 * 86400}; Path=/; SameSite=Lax`; };
+    const ref = q.get("ref");
+    if (ref && /^[a-z0-9]{4,12}$/i.test(ref)) set("fq_ref", ref.toLowerCase());
+    if (!document.cookie.includes("fq_src=")) {
+      const host = document.referrer ? new URL(document.referrer).hostname.replace(/^www\./, "") : "";
+      const src = q.get("utm_source") || (host && host !== location.hostname ? host : "");
+      if (src) set("fq_src", src);
+    }
+  }, []);
   return (
     <>
     <nav className="side">
