@@ -364,3 +364,14 @@ button { font: inherit; }
 .share { padding: 9px 14px; border-radius: 999px; font-weight: 800; font-size: 13px; color: #fff; }
 .share.wa { background: #1f9d55; } .share.tg { background: #2a8bd6; } .share.x { background: #222; border: 1px solid #444; }
 .share-her { display: grid; gap: 6px; margin: 12px 0; padding: 12px; border-radius: 14px; background: var(--panel2); border: 1px solid var(--line); font-size: 14px; } .share-her .muted { font-size: 12px; }
+
+/* Public SEO pages */
+.girl-hero { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 28px; align-items: start; }
+.girl-hero img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; border-radius: 20px; }
+.girl-facts { padding-left: 18px; line-height: 1.9; margin: 12px 0 18px; }
+.girl-more { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.girl-more.big { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.girl-more a { display: flex; flex-direction: column; gap: 4px; color: var(--text); font-weight: 800; }
+.girl-more img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; border-radius: 14px; background: var(--panel2); }
+.girl-more small { font-weight: 600; font-size: 12px; }
+@media (max-width: 760px) { .girl-hero { grid-template-columns: 1fr; } }
