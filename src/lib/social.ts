@@ -87,3 +87,12 @@ export async function maybePostDaily(now = Date.now(), fetchImpl: typeof fetch =
   audit({ userId: "system", kind: "social_post", detail: `${p.model.id} telegram=${result.telegram} x=${result.x}` });
   return result;
 }
+
+/** Admin test: post today's model right now to every configured network. */
+export async function postNow(fetchImpl: typeof fetch = fetch) {
+  const p = dailyPost();
+  if (!p) return { error: "No models with photos yet" };
+  const result = { telegram: await telegram(p, fetchImpl).catch((e) => `error ${e}`), x: await x(p, fetchImpl).catch((e) => `error ${e}`) };
+  audit({ userId: "system", kind: "social_post_test", detail: `${p.model.id} telegram=${result.telegram} x=${result.x}` });
+  return { model: p.name, ...result };
+}

@@ -78,6 +78,13 @@ export default function Admin() {
         </div>
       )}
 
+      {tab === "overview" && (
+        <div style={{ ...card, marginTop: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <b>Social auto-post</b>
+          <span style={{ color: theme.muted, fontSize: 13 }}>Posts one model daily after 8 pm IST to Telegram and X.</span>
+          <button style={small} onClick={async () => { const r = await fetch("/api/admin/social", { method: "POST" }); const b = await r.json(); alert(b.error ?? `Posted ${b.model}\nTelegram: ${b.telegram}\nX: ${b.x}`); }}>Post now (test)</button>
+        </div>
+      )}
       {tab === "overview" && gr && (
         <div style={{ ...card, marginTop: 12 }}>
           <b>Growth · last 14 days</b> <span style={{ color: theme.muted, fontSize: 13 }}>· {gr.invitesRewarded30d} friend invites rewarded (30 days)</span>
