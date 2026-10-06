@@ -19,7 +19,7 @@ describe("NOWPayments", () => {
   it("creates an invoice priced in USD and returns its page", async () => {
     process.env.NOWPAYMENTS_API_KEY = "k";
     const f = vi.fn(async () => new Response(JSON.stringify({ invoice_url: "https://nowpayments.io/payment/?iid=1" }), { status: 200 }));
-    const r = await nowPayments(f as unknown as typeof fetch).createCheckout({ orderId: "o1", userId: "u", amountInr: 999, description: "Premium" });
+    const r = await nowPayments(f as unknown as typeof fetch).createCheckout({ orderId: "o1", userId: "u", amount: 999, currency: "inr", description: "Premium" });
     expect(r.checkoutUrl).toContain("nowpayments.io");
     const sent = JSON.parse((f.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
     expect(sent).toMatchObject({ price_currency: "usd", order_id: "o1", price_amount: toUsd(999) });

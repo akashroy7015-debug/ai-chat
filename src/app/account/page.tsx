@@ -6,7 +6,7 @@ import { ShareButtons } from "../ui";
 interface Account {
   email?: string; premium: boolean; plan: string | null; monthlyCredits: number | null; premiumUntil: number | null; daysLeft: number;
   nextCreditsAt: number | null; balance: number;
-  orders: { id: string; label: string; priceInr: number; status: "paid" | "pending"; at: number | null }[];
+  orders: { id: string; label: string; price: number; currency: "inr" | "usd"; status: "paid" | "pending"; at: number | null }[];
   credits: { amount: number; reason: string; at: number }[];
   referral: { code: string; invited: number; earned: number; bonus: number };
 }
@@ -87,7 +87,7 @@ export default function AccountPage() {
           {a.orders.map((o) => (
             <div key={o.id} className="acc-row">
               <span>{o.label}</span>
-              <span>₹{o.priceInr.toLocaleString("en-IN")}</span>
+              <span>{o.currency === "usd" ? `$${o.price}` : `₹${o.price.toLocaleString("en-IN")}`}</span>
               <span className={o.status === "paid" ? "ok" : "wait"}>{o.status === "paid" ? "✓ Paid" : "Pending"}</span>
               <span className="muted">{date(o.at)}</span>
             </div>

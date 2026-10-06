@@ -2,8 +2,8 @@ import { AccessDenied } from "./age/verification";
 import { balance, credit } from "./tokens/ledger";
 import { mediaJobs } from "./media/jobs";
 import { audit, db, getUser, saveUser } from "./store";
-import { PACKAGES, type PackageId } from "./payments";
-import { PLANS, type PlanId, isPremium } from "./premium";
+import { orderInfo } from "./payments";
+import { isPremium } from "./premium";
 
 /** Admins are listed by email in ADMIN_EMAILS (comma separated). */
 export function isAdmin(userId: string): boolean {
@@ -21,7 +21,9 @@ const DAY = 86_400_000;
 export function stats(now = Date.now()) {
   const users = [...db.users.values()].filter((u) => u.email);
   const paid = [...db.orders.values()].filter((o) => o.paid);
-  const revenueInr = paid.reduce((s, o) => s + (o.pkg.startsWith("sub:") ? (PLANS[o.pkg.slice(4) as PlanId]?.priceInr ?? 0) : (PACKAGES[o.pkg as PackageId]?.priceInr ?? 0)), 0);
+  const revenue = (cur: "inr" | "usd") => paid.filter((o) => (o.currency ?? "inr") === cur).reduce((s, o) => s + orderInfo(o.pkg, cur).price, 0);
+  const revenueInr = revenue("inr");
+  const revenueUsd = Math.round(revenue("usd") * 100) / 100;
   return {
     users: users.length,
     premium: users.filter((u) => isPremium(u, now)).length,
@@ -32,6 +34,7 @@ export function stats(now = Date.now()) {
     activeUsers24h: new Set(db.messages.filter((m) => m.at > now - DAY).map((m) => m.userId)).size,
     paidOrders: paid.length,
     revenueInr,
+    revenueUsd,
     blocked24h: db.audit.filter((a) => a.at > now - DAY && /blocked/.test(a.kind)).length,
     openReports: [...mediaJobs.values()].filter((j) => j.hidden && !j.reviewed).length,
   };

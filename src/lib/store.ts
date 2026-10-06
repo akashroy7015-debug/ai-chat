@@ -57,6 +57,8 @@ export interface Order {
   userId: string;
   pkg: string;
   paid: boolean;
+  /** "inr" (India) or "usd" (rest of the world); old orders have none and were INR. */
+  currency?: "inr" | "usd";
   createdAt?: number;
   paidAt?: number;
 }

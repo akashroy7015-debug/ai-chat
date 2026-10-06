@@ -11,14 +11,14 @@ export const toUsd = (inr: number) => Math.max(1, Math.round((inr / inrPerUsd())
 
 export function nowPayments(fetchImpl: typeof fetch = fetch): PaymentProvider {
   return {
-    async createCheckout({ orderId, amountInr, description }) {
+    async createCheckout({ orderId, amount, currency, description }) {
       const key = process.env.NOWPAYMENTS_API_KEY;
       if (!key) throw new Error("NOWPAYMENTS_API_KEY is not set");
       const r = await fetchImpl(`${API}/invoice`, {
         method: "POST",
         headers: { "x-api-key": key, "content-type": "application/json" },
         body: JSON.stringify({
-          price_amount: toUsd(amountInr),
+          price_amount: currency === "usd" ? amount : toUsd(amount),
           price_currency: "usd",
           order_id: orderId,
           order_description: `FlirtIQ ${description}`,

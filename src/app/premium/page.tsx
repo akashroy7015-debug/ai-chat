@@ -3,11 +3,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useT } from "../i18n";
 
-interface Plan { id: string; label: string; months: number; priceInr: number; perMonth: number; discountPct: number; credits: number }
-interface Pack { id: string; tokens: number; priceInr: number; label: string }
+interface Plan { id: string; label: string; months: number; priceInr: number; priceUsd: number; perMonth: number; perMonthUsd: number; discountPct: number; credits: number }
+interface Pack { id: string; tokens: number; priceInr: number; priceUsd: number; label: string }
 type Me = { premium?: boolean; premiumUntil?: number; balance?: number } | null;
 
 const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+const usd = (n: number) => `$${n.toFixed(2)}`;
+/** Visitors in India pay in rupees, everyone else in US dollars. */
+const inIndia = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Kolkata" || Intl.DateTimeFormat().resolvedOptions().timeZone === "Asia/Calcutta"; } catch { return false; } };
 
 export default function Premium() {
   const { t } = useT();
@@ -20,6 +23,9 @@ export default function Premium() {
   const [me, setMe] = useState<Me | undefined>(undefined);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState("");
+  const [cur, setCur] = useState<"inr" | "usd">("inr");
+  useEffect(() => setCur(inIndia() ? "inr" : "usd"), []);
+  const money = (inrV: number, usdV: number) => (cur === "usd" ? usd(usdV) : inr(inrV));
 
   async function load() {
     const [s, c, r] = await Promise.all([fetch("/api/subscribe"), fetch("/api/checkout"), fetch("/api/auth/me")]);
@@ -65,9 +71,9 @@ export default function Premium() {
             {p.discountPct > 0 && <span className="pp-off">-{p.discountPct}%</span>}
             {p.id === "yearly" && <span className="pp-best">Best value</span>}
             <div className="pp-label">{p.label}</div>
-            <div className="pp-price">{inr(p.perMonth)}<small>/month</small></div>
+            <div className="pp-price">{money(p.perMonth, p.perMonthUsd)}<small>/month</small></div>
             <div className="pp-cred">💎 {p.credits} credits / month</div>
-            <div className="muted" style={{ fontSize: 13 }}>{inr(p.priceInr)} one-time · no auto-renewal</div>
+            <div className="muted" style={{ fontSize: 13 }}>{money(p.priceInr, p.priceUsd)} one-time · no auto-renewal</div>
           </button>
         ))}
       </div>
@@ -79,7 +85,7 @@ export default function Premium() {
         <li>👑 Premium badge · cancel any time</li>
       </ul>
       {me === null ? <Link href="/" className="btn btn-gold" style={{ fontSize: 18, padding: "14px 28px" }}>Sign up free first</Link>
-        : <button className="btn btn-gold" style={{ fontSize: 18, padding: "14px 28px" }} disabled={!!busy || me === undefined} onClick={() => void pay("/api/subscribe", { plan: sel }, "Welcome to Premium! 🎉")}>{premium ? "Extend Premium" : t("getPremium")}</button>}
+        : <button className="btn btn-gold" style={{ fontSize: 18, padding: "14px 28px" }} disabled={!!busy || me === undefined} onClick={() => void pay("/api/subscribe", { plan: sel, currency: cur }, "Welcome to Premium! 🎉")}>{premium ? "Extend Premium" : t("getPremium")}</button>}
 
       <h2 id="credits" style={{ margin: "34px 0 6px" }}>Top up credits <span className="muted" style={{ fontSize: 14, fontWeight: 600 }}>· pay as you go</span></h2>
       <p className="muted" style={{ margin: "0 0 12px", fontSize: 14 }}>{premium ? "Credits never expire while you have an account." : "Credit packs are available to Premium members."}</p>
@@ -89,13 +95,13 @@ export default function Premium() {
             {p.id === "popular" && <span className="pp-best">Most popular</span>}
             <div className="pp-price">💎 {p.tokens.toLocaleString("en-IN")}</div>
             <div className="muted" style={{ fontSize: 13 }}>≈ {Math.floor(p.tokens / costs.chat).toLocaleString("en-IN")} messages</div>
-            <button className="btn" style={{ width: "100%", marginTop: 10 }} disabled={!premium || !!busy} onClick={() => void pay("/api/checkout", { pkg: p.id }, `Added ${p.tokens} credits 💎`)}>{inr(p.priceInr)}</button>
+            <button className="btn" style={{ width: "100%", marginTop: 10 }} disabled={!premium || !!busy} onClick={() => void pay("/api/checkout", { pkg: p.id, currency: cur }, `Added ${p.tokens} credits 💎`)}>{money(p.priceInr, p.priceUsd)}</button>
           </div>
         ))}
       </div>
       {msg && <p className="pp-msg">{msg}</p>}
       <p className="muted" style={{ fontSize: 13, marginTop: 14 }}>💳 Secure checkout by NOWPayments: pay with USDT, BTC, ETH and 100+ cryptocurrencies. Prices are converted to USD at checkout.</p>
-      <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Prices include GST. Plans are one-time payments and do not renew automatically. All purchases are final; see our <Link href="/refund">Refund &amp; Cancellation Policy</Link>. Discounts are compared with paying monthly. 18+ only.</p>
+      <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>{cur === "inr" ? "Prices include GST." : "Prices in US dollars."} <button className="linkish" onClick={() => setCur(cur === "inr" ? "usd" : "inr")}>{cur === "inr" ? "Show prices in $" : "Show prices in ₹"}</button> Plans are one-time payments and do not renew automatically. All purchases are final; see our <Link href="/refund">Refund &amp; Cancellation Policy</Link>. Discounts are compared with paying monthly. 18+ only.</p>
     </main>
   );
 }

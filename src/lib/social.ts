@@ -16,7 +16,7 @@ const log: PMap<{ at: number; model: string }> = (g.__social ??= new PMap(db.sql
 
 const CAPTIONS = [
   (n: string) => `${n} is online right now 🟢 and she's in a mood today… say hi 😏`,
-  (n: string) => `"kya kar rahe ho? miss kiya tumhe" — ${n} texts like your desi crush 🙈`,
+  (n: string) => `${n} texts back in English or Hinglish, whatever you're in the mood for 🙈`,
   (n: string) => `${n} remembers your name, your day and that girl who ghosted you 💘`,
   (n: string) => `POV: you text ${n} "hi" and she replies "finally! I was waiting for you" 😳`,
   (n: string) => `Can't sleep? ${n} stays up late too 🌙 Talk till sunrise.`,
@@ -70,7 +70,7 @@ async function x(p: NonNullable<ReturnType<typeof dailyPost>>, fetchImpl: typeof
   const r = await fetchImpl(url, {
     method: "POST",
     headers: { authorization: oauthHeader("POST", url, keys), "content-type": "application/json" },
-    body: JSON.stringify({ text: `${p.caption}\n\n${p.link("twitter")}\n#AIgirlfriend #AICompanion #Hinglish` }),
+    body: JSON.stringify({ text: `${p.caption}\n\n${p.link("twitter")}\n#AIgirlfriend #AICompanion #AIchat` }),
   });
   return r.ok ? "ok" : `error ${r.status}`;
 }

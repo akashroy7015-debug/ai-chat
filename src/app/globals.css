@@ -375,3 +375,4 @@ button { font: inherit; }
 .girl-more img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: top; border-radius: 14px; background: var(--panel2); }
 .girl-more small { font-weight: 600; font-size: 12px; }
 @media (max-width: 760px) { .girl-hero { grid-template-columns: 1fr; } }
+.linkish { background: none; border: 0; padding: 0; color: var(--pink); cursor: pointer; font: inherit; text-decoration: underline; }

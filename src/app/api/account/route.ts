@@ -18,7 +18,7 @@ export const GET = authed(async (_req, userId) => {
     .filter((o) => o.userId === userId && (o.paid || now - (o.createdAt ?? 0) < 7 * DAY))
     .sort((a, b) => (b.paidAt ?? b.createdAt ?? 0) - (a.paidAt ?? a.createdAt ?? 0))
     .slice(0, 20)
-    .map((o) => ({ id: o.id.slice(0, 8), ...orderInfo(o.pkg), status: o.paid ? "paid" : "pending", at: o.paidAt ?? o.createdAt ?? null }));
+    .map((o) => ({ id: o.id.slice(0, 8), ...orderInfo(o.pkg, o.currency ?? "inr"), status: o.paid ? "paid" : "pending", at: o.paidAt ?? o.createdAt ?? null }));
   const credits = db.ledger
     .filter((e) => e.userId === userId && e.delta > 0)
     .slice(-10)

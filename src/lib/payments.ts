@@ -5,17 +5,18 @@ import { credit } from "./tokens/ledger";
 import { audit, db, getUser, newId } from "./store";
 import { activatePlan, isPremium, PLANS, type PlanId } from "./premium";
 
-/** Pay-as-you-go credit packs (rupees, GST included). Only Premium members can buy them. */
+/** Pay-as-you-go credit packs (rupees for India, dollars elsewhere). Only Premium members can buy them. */
+export type Currency = "inr" | "usd";
 export const PACKAGES = {
-  starter: { tokens: 300, priceInr: 299, label: "300 credits" },
-  popular: { tokens: 1000, priceInr: 799, label: "1,000 credits" },
-  premium: { tokens: 2500, priceInr: 1699, label: "2,500 credits" },
+  starter: { tokens: 300, priceInr: 299, priceUsd: 3.99, label: "300 credits" },
+  popular: { tokens: 1000, priceInr: 799, priceUsd: 9.99, label: "1,000 credits" },
+  premium: { tokens: 2500, priceInr: 1699, priceUsd: 19.99, label: "2,500 credits" },
 } as const;
 export type PackageId = keyof typeof PACKAGES;
 
 /** Implement with a processor that accepts adult merchants (not Stripe/PayPal). */
 export interface PaymentProvider {
-  createCheckout(args: { orderId: string; userId: string; amountInr: number; description: string }): Promise<{ checkoutUrl: string }>;
+  createCheckout(args: { orderId: string; userId: string; amount: number; currency: Currency; description: string }): Promise<{ checkoutUrl: string }>;
 }
 
 
@@ -50,28 +51,28 @@ function requirePaymentsLive(userId: string) {
 }
 
 /** Credit packs: ID-verified adults with an active Premium membership. */
-export async function startCheckout(userId: string, pkg: PackageId) {
+export async function startCheckout(userId: string, pkg: PackageId, currency: Currency = "inr") {
   requireVerifiedAdult(userId);
   const p = PACKAGES[pkg];
   if (!p) throw new Error("Unknown package");
   if (!isPremium(getUser(userId))) throw new AccessDenied("premium_required", "Credit packs are for Premium members. Get Premium first.");
   requirePaymentsLive(userId);
   const orderId = newId();
-  db.orders.set(orderId, { id: orderId, userId, pkg, paid: false, createdAt: Date.now() });
+  db.orders.set(orderId, { id: orderId, userId, pkg, paid: false, currency, createdAt: Date.now() });
   audit({ userId, kind: "checkout_started", detail: `${pkg} ${orderId}` });
-  return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountInr: p.priceInr, description: p.label })) };
+  return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amount: currency === "usd" ? p.priceUsd : p.priceInr, currency, description: p.label })) };
 }
 
 /** Premium purchase (one-time, no auto-renewal). Only age-verified adults. */
-export async function startSubscription(userId: string, plan: PlanId) {
+export async function startSubscription(userId: string, plan: PlanId, currency: Currency = "inr") {
   requireVerifiedAdult(userId);
   const p = PLANS[plan];
   if (!p) throw new Error("Unknown plan");
   requirePaymentsLive(userId);
   const orderId = newId();
-  db.orders.set(orderId, { id: orderId, userId, pkg: `sub:${plan}`, paid: false, createdAt: Date.now() });
+  db.orders.set(orderId, { id: orderId, userId, pkg: `sub:${plan}`, paid: false, currency, createdAt: Date.now() });
   audit({ userId, kind: "checkout_started", detail: `sub:${plan} ${orderId}` });
-  return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amountInr: p.priceInr, description: `Premium ${p.label}` })) };
+  return { orderId, ...(await getPayments().createCheckout({ orderId, userId, amount: currency === "usd" ? p.priceUsd : p.priceInr, currency, description: `Premium ${p.label}` })) };
 }
 
 /** Called from the processor's signed webhook. Idempotent. */
@@ -88,11 +89,11 @@ export function fulfilOrder(orderId: string) {
 }
 
 /** Human label and price of an order, for receipts and the account page. */
-export function orderInfo(pkg: string): { label: string; priceInr: number } {
+export function orderInfo(pkg: string, currency: Currency = "inr"): { label: string; price: number; currency: Currency } {
   if (pkg.startsWith("sub:")) {
     const p = PLANS[pkg.slice(4) as PlanId];
-    return { label: `Premium · ${p?.label ?? pkg.slice(4)}`, priceInr: p?.priceInr ?? 0 };
+    return { label: `Premium · ${p?.label ?? pkg.slice(4)}`, price: (currency === "usd" ? p?.priceUsd : p?.priceInr) ?? 0, currency };
   }
   const p = PACKAGES[pkg as PackageId];
-  return { label: p ? `${p.label} top-up` : pkg, priceInr: p?.priceInr ?? 0 };
+  return { label: p ? `${p.label} top-up` : pkg, price: (currency === "usd" ? p?.priceUsd : p?.priceInr) ?? 0, currency };
 }
