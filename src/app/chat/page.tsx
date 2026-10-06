@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ClipVideo, pretty, Portrait, ShareButtons, type CharacterCard } from "../ui";
 import { useT } from "../i18n";
-import { AuthPanel } from "../auth-panel";
 
 interface Line { who: "you" | "them"; text: string; id?: string; image?: "portrait" | "clip" | "locked" }
 
@@ -24,9 +23,6 @@ function Chat() {
   const [err, setErr] = useState("");
   const [wallet, setWallet] = useState<{ premium: boolean; balance: number; ref?: string } | null>(null);
   const [paywall, setPaywall] = useState(false);
-  // Guest preview: visitors without an account get a few free messages before signing up.
-  const [guest, setGuest] = useState<{ left: number; adult: boolean } | null>(null);
-  const [signup, setSignup] = useState(false);
   const loadWallet = () => fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then((b) => b && setWallet({ premium: !!b.premium, balance: b.balance ?? 0, ref: b.referralCode }));
   useEffect(() => { void loadWallet(); }, []);
   const [showProfile, setShowProfile] = useState(false);
@@ -71,20 +67,7 @@ function Chat() {
   useEffect(() => {
     if (!cid) return;
     setLines([]); setC(null); setErr("");
-    void fetch(`/api/characters/${cid}`).then(async (r) => {
-      const b = await r.json();
-      if (r.ok) return setC(b.character);
-      if (r.status === 401) {
-        const gr = await fetch(`/api/chat/guest?c=${cid}`);
-        const gb = await gr.json();
-        if (!gr.ok) return setErr(gb.error);
-        let adult = false;
-        try { adult = localStorage.getItem("fq_adult") === "1"; } catch {}
-        setGuest({ left: gb.left, adult });
-        return setC(gb.character);
-      }
-      setErr(b.error);
-    });
+    void fetch(`/api/characters/${cid}`).then(async (r) => { const b = await r.json(); if (r.ok) setC(b.character); else setErr(b.error); });
     void fetch(`/api/chat?characterId=${cid}`).then(async (r) => {
       if (!r.ok) return;
       const b = await r.json();
@@ -109,22 +92,6 @@ function Chat() {
   async function send(preset?: string) {
     const text = (preset ?? input).trim();
     if (!c || !text || typing) return;
-    if (guest) {
-      if (!guest.adult) return;
-      if (guest.left <= 0) return setSignup(true);
-      setInput("");
-      const history = lines.filter((l) => !l.image).map((l) => ({ role: l.who === "you" ? "user" : "assistant", content: l.text }));
-      setLines((l) => [...l, { who: "you", text }]);
-      setTyping(true);
-      const gr = await fetch("/api/chat/guest", { method: "POST", body: JSON.stringify({ characterId: c.id, message: text, history, adult: true }) });
-      const gb = await gr.json();
-      setTyping(false);
-      if (gr.status === 402) { setLines((l) => l.slice(0, -1)); setInput(text); setGuest({ ...guest, left: 0 }); return setSignup(true); }
-      setLines((l) => [...l, { who: "them", text: gb.message ?? gb.error }]);
-      setGuest({ ...guest, left: gb.left ?? 0 });
-      if ((gb.left ?? 0) <= 0) setTimeout(() => setSignup(true), 2500);
-      return;
-    }
     setInput("");
     setLines((l) => [...l, { who: "you", text }]);
     setTyping(true);
@@ -283,26 +250,6 @@ function Chat() {
                   <Link href="/premium" className="btn btn-gold" style={{ width: "100%" }}>Get Premium · up to 70% off</Link>
                 </>)}
                 <button className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }} onClick={() => setPaywall(false)}>Maybe later</button>
-              </div>
-            </div>
-          )}
-          {guest && !guest.adult && c && (
-            <div className="backdrop">
-              <div className="modal paywall">
-                <div className="pw-ring"><Portrait c={c} height="100%" round={999} w={192} /></div>
-                <h2>Chat with {c.name.split(" ")[0]} free</h2>
-                <p className="muted">FlirtIQ is for adults only. Try {guest.left} free messages, no signup needed.</p>
-                <button className="btn btn-gold" style={{ width: "100%" }} onClick={() => { try { localStorage.setItem("fq_adult", "1"); } catch {} setGuest({ ...guest, adult: true }); }}>I&apos;m 18 or older</button>
-                <Link href="/" className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }}>Leave</Link>
-              </div>
-            </div>
-          )}
-          {guest && guest.adult && guest.left > 0 && <div className="low-credits"><span>👋 <b>{guest.left} free {guest.left === 1 ? "message" : "messages"}</b> before you sign up</span><button className="btn btn-gold btn-sm" onClick={() => setSignup(true)}>Sign up free</button></div>}
-          {signup && (
-            <div className="backdrop" onClick={() => setSignup(false)}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <p className="muted" style={{ margin: "0 0 10px", fontSize: 14 }}>{c ? `${c.name.split(" ")[0]} wants to keep talking 😏` : ""} Create a free account to continue and get <b>10 more free messages</b>.</p>
-                <AuthPanel onDone={() => window.location.reload()} />
               </div>
             </div>
           )}
