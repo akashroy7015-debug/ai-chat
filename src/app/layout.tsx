@@ -5,6 +5,7 @@ import "./globals.css";
 
 export const metadata = {
   metadataBase: new URL("https://flirtiq.online"),
+  verification: { google: process.env.GOOGLE_SITE_VERIFICATION, other: process.env.BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION } : undefined },
   title: { default: "FlirtIQ · AI companion chat", template: "%s · FlirtIQ" },
   description: "Chat, flirt and connect with AI companions who remember you. English, Hindi & Hinglish. 18+ only.",
   openGraph: { title: "FlirtIQ · AI companion chat", description: "Chat with AI companions who remember you. 18+.", siteName: "FlirtIQ", type: "website", url: "https://flirtiq.online" },
