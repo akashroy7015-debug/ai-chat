@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listFeatured } from "@/lib/characters/featured";
-import { pretty } from "../../ui";
+const pretty = (s?: string) => (s ?? "").replace(/_/g, " ");
 
 export const dynamic = "force-dynamic";
 
