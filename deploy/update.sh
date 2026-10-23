@@ -28,7 +28,8 @@ if [ ! -d node_modules ] || ! as_app git diff --quiet "$OLD" "$NEW" -- package-l
     status false "${NEW:0:7}" "npm ci failed: $(tail -3 /var/log/ai-chat-build.log)"; exit 0
   fi
 fi
-rm -rf .next-build
+# Stale route types in the live build dir break type-checking after a route is removed.
+rm -rf .next-build .next/types
 if as_app env NEXT_DIST_DIR=.next-build npm run build > /var/log/ai-chat-build.log 2>&1; then
   rm -rf .next-old; [ -d .next ] && mv .next .next-old
   mv .next-build .next && systemctl restart ai-chat && rm -rf .next-old
