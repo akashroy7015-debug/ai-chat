@@ -1,12 +1,13 @@
 # Daily maintenance agent playbook
 
-You maintain the live AI companion site at http://45.77.43.106 (repo branch
+You maintain the live AI companion site at https://flirtiq.online (server 45.77.43.106; plain-IP HTTP now
+redirects to HTTPS on the IP, which has no certificate, so always use the domain) (repo branch
 `claude/replika-marketing-copy-tr8zp6`). Pushing to that branch deploys automatically within ~5 minutes.
 
 ## Every run
-1. **Health:** `curl -s http://45.77.43.106/api/health`. `lastUpdate.ok` must be true and `commit` must match
+1. **Health:** `curl -s https://flirtiq.online/api/health`. `lastUpdate.ok` must be true and `commit` must match
    the branch head. If an update failed, read `lastUpdate.message`, fix the cause, push.
-2. **Report:** `curl -s -H "Authorization: Bearer $OPS_TOKEN" http://45.77.43.106/api/ops/report`
+2. **Report:** `curl -s -H "Authorization: Bearer $OPS_TOKEN" https://flirtiq.online/api/ops/report`
    (skip if OPS_TOKEN is unset). Look at `errors24h`, `errorSamples`, `feedback7d`.
 3. **Smoke test the live site:** home page and `/api/characters/featured?category=girls` return 200 and list models.
 4. **Fix bugs** found above or in tests: reproduce locally, fix, `npx tsc --noEmit && npx vitest run && npm run build`,
