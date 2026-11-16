@@ -8,6 +8,8 @@ export default function Blog() {
     <main style={{ maxWidth: 760, lineHeight: 1.7 }}>
       <h1>FlirtIQ blog</h1>
       <ul style={{ display: "grid", gap: 18, paddingLeft: 18 }}>
+        <li><Link href="/blog/candy-ai-alternative"><b>Candy AI alternative with Hinglish and real memory</b></Link><br /><span className="muted">Looking for a Candy AI alternative? What to compare in AI companion apps, and how FlirtIQ handles memory, languages, pricing and privacy.</span></li>
+        <li><Link href="/blog/ai-girlfriend-roleplay-ideas"><b>AI girlfriend roleplay ideas: 12 fun scenarios to try</b></Link><br /><span className="muted">Fresh, non-explicit roleplay ideas for chatting with an AI companion, from first dates to road trips, plus tips to keep the story going.</span></li>
         <li><Link href="/blog/ai-companion-app-with-voice"><b>AI companion app with voice notes: hear her talk back</b></Link><br /><span className="muted">How voice notes make an AI companion feel more real, how they work on FlirtIQ, and tips for getting the most out of them.</span></li>
         <li><Link href="/blog/virtual-girlfriend-app"><b>Virtual girlfriend app: how it works and what to expect</b></Link><br /><span className="muted">A clear guide to virtual girlfriend apps: how the AI works, what a good one feels like, and how to start with FlirtIQ.</span></li>
         <li><Link href="/blog/ai-girlfriend-free"><b>AI girlfriend free: what you really get without paying</b></Link><br /><span className="muted">What free AI girlfriend apps actually include, where the limits are, and how to try FlirtIQ free before deciding whether to upgrade.</span></li>
